@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterOutlet],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
