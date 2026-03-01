@@ -1,0 +1,611 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from './services/api.service';
+import { RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterOutlet],
+  templateUrl: './app.html',
+  styleUrls: ['./app.css']
+})
+export class AppComponent {
+
+
+  ///NAV STATE
+
+  toastMessage: string = '';
+  toastType: 'success' | 'error' | '' = '';
+  adminUsers: any[] = [];
+  adminBookings: any[] = [];
+  currentPage: "" |'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'= 'login';
+  currentUserRole: string | null = null;
+  currentUserId: number | null = null;
+  takenTimes: string[] = [];
+  trainerBookings: any[] = [];
+  selectedTrainerId: number | null = null;
+  editingId: number | null = null;
+  editDate = '';
+  editTime = '';
+  auditLogs: any[] = [];
+  bookingEmail: string = '';
+  bookingSuccess: boolean = false;
+  bookings: any[] = [];
+
+  constructor(
+    private api: ApiService,
+    private router: Router) {}
+
+  //NAP KIVÁLASZTÁSA
+  selectDay(day: number) {
+
+  const m = String(this.currentMonth + 1).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
+
+  this.selectedDate = `${this.currentYear}-${m}-${d}`;
+
+  if (this.selectedTrainerId) {
+    this.loadTrainerBookings(this.selectedTrainerId);
+  }
+  }
+
+  showPage(page: typeof this.currentPage) {
+  this.currentPage = page;
+
+  if (page === 'trainers') {
+    this.loadTrainers();
+  }
+  }
+  ///LOGOUT
+  logout() {
+  this.currentUserRole = null;
+  this.currentUserId = null;
+  this.profile = { name:'', email:'', password:'', avatar:'' };
+  this.trainerBookings = [];
+  this.bookings = [];
+  this.adminUsers = [];
+  this.adminBookings = [];
+  this.showPage('login');
+  }
+  ///LOGOUT MEGERŐSÍTÉS
+  logoutConfirm(){
+  if(confirm("Biztos ki szeretnél jelentkezni?")){
+    this.logout();
+  }
+  }
+  ///PASSWORD INPUT VISIBLE
+  showPassword = false;
+  
+  ///PROFIL BETOLTESE + MENTÉS
+  loadProfile(){
+  if(!this.currentUserId) return;
+
+
+  this.api.getProfile(this.currentUserId)
+    .subscribe(p => {
+    this.profile = p;
+    this.profile.password = '';
+    });
+  }
+
+  
+  ///STÁTUSZ OSZTÁLY
+  statusClass(s: string) {
+    return {
+      pending: 'bg-yellow-500 text-white px-2 py-1 rounded',
+      approved: 'bg-green-600 text-white px-2 py-1 rounded',
+      rejected: 'bg-red-600 text-white px-2 py-1 rounded',
+      cancelled: 'bg-gray-500 text-white px-2 py-1 rounded'
+    }[s];
+  }
+  
+  //PROFIL MENTÉSE
+  saveProfile() {
+  ///EMAIL VALIDÁCIÓ
+  if (!this.isValidEmail(this.profile.email)) {
+  this.showToast('Hibás email formátum', 'error');
+  return;
+  }
+
+  if (!confirm('Biztosan módosítod az adatokat?')) return;
+
+  this.api.updateProfile(this.currentUserId!, this.profile)
+    .subscribe({
+
+      next: () => {
+        this.showToast('Profil frissítve');
+      },
+
+      error: () => {
+        this.showToast('Mentés hiba', 'error');
+      }
+
+    });
+
+  }
+
+  showToast(msg: string, type: 'success' | 'error' = 'success') {
+  this.toastMessage = msg;
+  this.toastType = type;
+
+  setTimeout(() => {
+    this.toastMessage = '';
+    this.toastType = '';
+  }, 3000);
+  }
+
+
+  // =====================
+  // AUTH — BACKEND
+  // =====================
+
+  loginUser(email: string, password: string) {
+
+  this.api.login(email, password)
+    .subscribe({
+
+      next: (user: any) => {
+
+        this.currentUserRole = user.role;
+        this.currentUserId = user.id;
+
+        this.showToast('Sikeres bejelentkezés');
+
+        // USER
+        if (user.role === 'user') {
+          this.loadMyBookings();
+          this.showPage('trainers');
+        }
+
+        // ADMIN
+        else if (user.role === 'admin') {
+          this.loadAdminData();
+          this.showPage('admin');
+        }
+
+        // TRAINER
+        else if (user.role === 'trainer') {
+          this.loadTrainerBookingsView();
+          this.showPage('trainer');
+        }
+
+      },
+
+      error: () => {
+        this.showToast('Hibás belépés', 'error');
+      }
+
+    });
+  }
+    
+// USER REGISZTARACIO
+  registerLoading = false;
+  registerUser(name: string, email: string, password: string) {
+
+    if (this.registerLoading) return;
+  this.registerLoading = true;
+  
+  if (!name || !email || !password) {
+    alert("Minden mező kötelező");
+    return;
+  }
+
+  if (!this.isValidEmail(email)) {
+    alert("Hibás email formátum");
+    return;
+  }
+
+  if (password.length < 8) {
+    alert("A jelszó túl rövid");
+    return;
+  }
+
+  this.api.register(name, email, password)
+    .subscribe({
+      next: () => {
+        this.registerLoading = false;
+        this.showToast('Sikeres regisztráció');
+        this.showPage('login');
+      },
+      error: () => {
+        this.registerLoading = false;
+        this.showToast('Regisztráció sikertelen', 'error');
+      }
+    });
+    }
+
+    startEdit(b:any) {
+  this.editingId = b.id;
+  this.editDate = b.date;
+  this.editTime = b.time;
+}
+
+saveEdit(id: number) {
+
+  if (!this.editDate || !this.editTime) {
+    this.showToast('Hiányzó adat','error');
+    return;
+  }
+
+  this.api.updateBooking(id, this.editDate, this.editTime)
+    .subscribe({
+      next: () => {
+        this.showToast('Időpont módosítva');
+        this.editingId = null;
+        this.loadTrainerBookingsView();
+      },
+      error: () => this.showToast('Hiba','error')
+    });}
+
+  cancelEdit() {
+    this.editingId = null;}
+      
+    
+///EDZŐK
+  trainers = [
+    {
+      id: 1,
+      name: 'John Doe',
+      specialty: 'Strength Training',
+      image: 'https://i.pravatar.cc/150?img=12'
+    },
+    {
+      id: 2,
+      name: 'Jane Smith',
+      specialty: 'Yoga',
+      image: 'https://i.pravatar.cc/150?img=32'
+    }
+  ];
+
+  
+
+  selectTrainer(id: number) {
+
+  this.selectedTrainerId = id;
+  this.selectedDate = null;
+  this.selectedTime = null;
+  this.takenTimes = [];
+
+  const schedule = this.trainerSchedules[id] || this.trainerSchedules[1];
+
+  if (!schedule) return;
+
+  this.availableTimes = {
+    morning: schedule.morning,
+    afternoon: schedule.afternoon,
+    evening: schedule.evening
+  };
+
+  this.showPage('booking');
+  }
+
+  ///NAPTÁR
+  selectedDate: string | null = null;
+  selectedTime: string | null = null;
+
+  currentYear = new Date().getFullYear();
+  currentMonth = new Date().getMonth();
+
+  monthNames = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ];
+
+  calendarDays: (number | null)[] = [];
+
+  ngOnInit() {
+  this.generateCalendar();
+  this.loadTrainers();
+  }
+
+  generateCalendar() {
+    this.calendarDays = [];
+
+    const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
+    const daysInMonth = new Date(
+      this.currentYear,
+      this.currentMonth + 1,
+      0
+    ).getDate();
+
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+    for (let i = 0; i < offset; i++) {
+      this.calendarDays.push(null);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      this.calendarDays.push(day);
+    }
+  }
+  
+
+
+  
+  // EDZŐ IDŐPONTOK
+
+  trainerSchedules: any = {
+    1: {
+      morning: ['08:00', '09:00', '10:00', '11:00',],
+      afternoon: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00',],
+      evening: ['18:00', '19:00', '20:00',]
+    },
+    2: {
+      morning: ['08:00', '09:00', '10:00', '11:00'],
+      afternoon: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
+      evening: ['18:00', '19:00', '20:00']
+    }
+  };
+
+  availableTimes = {
+    morning: [] as string[],
+    afternoon: [] as string[],
+    evening: [] as string[]
+  };
+
+  selectDateInput(event: any) {
+    this.selectedDate = event.target.value;
+    this.selectedTime = null;
+  }
+
+  selectTime(time: string) {
+    this.selectedTime = time;
+  }
+
+
+
+  // =====================
+  // BOOKINGS (FRONTEND MOCK — NEXT STEP BACKEND)
+  // =====================
+
+    
+bookingLoading = false;
+
+  bookAppointment() {
+  if (!this.selectedDate || !this.selectedTime) {
+    this.showToast('Válassz dátumot és időt','error');
+    return;
+  }
+
+  if (!this.bookingEmail || !this.isValidEmail(this.bookingEmail)) {
+  this.showToast('Hibás email formátum','error');
+  return;
+  }
+  
+  if (this.bookingLoading) return;
+  this.bookingLoading = true;
+
+
+this.api.createBooking({
+  userId: this.currentUserId!,
+  trainerId: this.selectedTrainerId!,
+  date: this.selectedDate!,
+  time: this.selectedTime!,
+  email: this.bookingEmail
+})
+.subscribe({
+  next: () => {
+    console.log('navigalokteszt');
+    this.router.navigate(['/booking-success']);
+    this.selectedTime = '';
+    this.selectedDate = '';
+  },
+  error: () => this.showToast('Foglalás sikertelen','error')
+});
+  }
+
+  loadMyBookings() {
+  if (!this.currentUserId) return;
+
+  this.api.getMyBookings(this.currentUserId)
+    .subscribe((rows: any) => {
+      this.bookings = rows.map((r: any) => ({
+        id: r.id,
+        trainer: r.trainerName,
+        date: r.date,
+        time: r.time,
+        status: r.status
+      }));
+    });
+  }
+
+  cancelBookingBackend(id: number) {
+
+  if (!confirm('Biztos törlöd?')) return;
+
+  this.api.deleteBooking(id)
+    .subscribe({
+
+      next: () => {
+        this.showToast('Foglalás törölve');
+        this.loadMyBookings();
+      },
+
+      error: () => {
+        this.showToast('Törlés hiba', 'error');
+      }
+
+    });
+
+  }
+  
+
+  //ADMIN ADATOK BETOLTESE
+  
+  loadAdminData() {
+    this.api.getUsers().subscribe(u => this.adminUsers = u);
+    this.api.getAllBookings().subscribe((b: any[]) => this.adminBookings = b);
+    this.api.getAuditLog().subscribe(l => this.auditLogs = l);
+  }
+
+  ///PROFILKÉP FELTÖLTÉSE
+  onAvatarSelected(event: any) {
+  const file = event.target.files[0];
+  if (!file || !this.currentUserId) return;
+
+  this.api.uploadAvatar(this.currentUserId, file)
+    .subscribe({
+      next: r => {
+        this.profile.avatar = r.path;
+        this.showToast('Profilkép frissítve');
+      },
+      error: () => this.showToast('Upload hiba','error')
+    });
+
+  }
+
+  //ADMIN FOGLALAS TÖRLÉSE
+  adminDeleteBooking(id: number) {
+  this.api.adminDeleteBooking(id)
+    .subscribe(() => this.loadAdminData());
+  }
+ //ADMIN USER TORLESE
+  adminDeleteUser(id: number) {
+
+  if (!confirm("Biztosan törlöd a felhasználót?")) return;
+
+  this.api.deleteUser(id).subscribe({
+    next: () => {
+      this.showToast('Felhasználó törölve');
+      this.loadAdminData();
+    },
+    error: () => {
+      this.showToast('Törlés hiba', 'error');
+    }
+  });
+  }
+
+  profile = {
+  name: '',
+  email: '',
+  password: '',
+  avatar: ''
+  };
+
+
+
+  //FOGLALT NAPOK LETILTASA
+  
+  loadTrainerBookings(trainerId: number) {
+    this.api.getTrainerBookings(trainerId)
+      .subscribe((rows: any[]) => {
+
+        this.takenTimes = rows
+        .filter(b => b.date === this.selectedDate && b.status !== 'cancelled')
+          .map(b => b.time);
+        console.log("FOGLALT IDŐK:", this.takenTimes);
+        });
+  }
+
+  
+  ///ADMIN ROLE CHANGE
+  changeUserRole(userId: number, role: string) {
+
+  this.api.updateUserRole(userId, role)
+    .subscribe({
+
+      next: () => {
+        this.showToast('Szerepkör frissítve');
+        this.loadAdminData();
+      },
+
+      error: () => {
+        this.showToast('Mentési hiba', 'error');
+      }
+
+    });
+  }
+
+  //ADMIN FOGALÁS FRISSÍTÉS
+  adminUpdateBooking(id: number, date: string, time: string) {
+
+  this.api.updateBooking(id, date, time)
+    .subscribe({
+
+      next: () => {
+        this.showToast('Foglalás frissítve');
+        this.loadAdminData();
+      },
+
+      error: () => {
+        this.showToast('Update hiba', 'error');
+      }
+
+    });
+
+  }
+
+  //TRAINER BOOKING VIEW
+  loadTrainerBookingsView() {
+
+  if (!this.currentUserId) return;
+
+  this.api.getTrainerBookings(this.currentUserId)
+    .subscribe((b: any[]) => this.trainerBookings = b);
+  }
+
+  //TRAINER BOOKING VIEW STATUS CHANGE
+  trainerSetStatus(id: number, status: string) {
+
+  this.api.setBookingStatus(id, status)
+    .subscribe({
+
+      next: () => {
+        this.showToast('Státusz módosítva');
+        this.loadTrainerBookingsView();
+      },
+
+      error: () => {
+        this.showToast('Hiba', 'error');
+      }
+
+    });
+
+  }
+  
+  ///LOGIN UTANI OLDAL IRANYITAS
+  goMyBookings() {
+  if (this.currentUserRole === 'trainer') {
+    this.loadTrainerBookingsView();
+    this.currentPage = 'trainer';
+  } else if (this.currentUserRole === 'user') {
+    this.loadMyBookings();
+    this.currentPage = 'bookings';
+  }}
+
+  loadTrainers() {
+  this.api.getTrainers().subscribe((list: any[]) => {
+    this.trainers = list.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      image: 'assets/default-trainer.png',
+      specialty: 'Trainer'
+    }));
+  });
+  }
+
+
+  onDateSelected() {
+  if (this.selectedTrainerId !== null) {
+    this.loadTrainerBookings(this.selectedTrainerId);
+  }
+  }
+ //STÁTUSZ SZÖVEG
+  statusLabel(s: string) {
+  return {
+    pending: 'Folyamatban',
+    approved: 'Elfogadva',
+    rejected: 'Elutasítva',
+    cancelled: 'Törölve'
+  }[s] || s;
+  }
+
+  //EMAIL VALIDÁCIÓ
+  isValidEmail(email: string): boolean {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+  }
+}
