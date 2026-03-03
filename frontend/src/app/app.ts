@@ -16,9 +16,6 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 })
 export class AppComponent {
 
-
-  ///NAV STATE
-
   toastMessage: string = '';
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
@@ -36,6 +33,13 @@ export class AppComponent {
   bookingEmail: string = '';
   bookingSuccess: boolean = false;
   bookings: any[] = [];
+  weekOffset = 0;
+  weekDays: Date[] = [];
+  timeSlots: string[] = [];
+  currentWeekStart!: Date;
+  selectedBooking: any = null;
+  showBookingModal = false;
+
 
   constructor(
     private api: ApiService,
@@ -72,6 +76,7 @@ export class AppComponent {
   this.adminBookings = [];
   this.showPage('login');
   }
+  
   ///LOGOUT MEGERŐSÍTÉS
   logoutConfirm(){
   if(confirm("Biztos ki szeretnél jelentkezni?")){
@@ -92,6 +97,8 @@ export class AppComponent {
     this.profile.password = '';
     });
   }
+
+  
 
   
   ///STÁTUSZ OSZTÁLY
@@ -170,6 +177,8 @@ export class AppComponent {
 
         // TRAINER
         else if (user.role === 'trainer') {
+          this.generateWeek();
+          this.generateTimeSlots();
           this.loadTrainerBookingsView();
           this.showPage('trainer');
         }
@@ -301,6 +310,8 @@ saveEdit(id: number) {
   ngOnInit() {
   this.generateCalendar();
   this.loadTrainers();
+  this.generateTimeSlots();
+  this.generateWeek();
   }
 
   generateCalendar() {
@@ -323,9 +334,132 @@ saveEdit(id: number) {
       this.calendarDays.push(day);
     }
   }
+
+
+  ///acccept/reject pop up gomb
+  updateBookingStatus(status: 'approved' | 'rejected') {
+  if (!this.selectedBooking) return;
+
+  this.selectedBooking.status = status;
+
+  // 🔥 BACKEND CALL HELYE (később bekötjük)
+  // this.api.updateBookingStatus(...)
+
+  this.closeBookingModal();
+  }
+  
+  ///IDŐPONTOK GENERÁLÁSA
+  generateTimeSlots() {
+  this.timeSlots = [];
+
+  for (let h = 7; h <= 20; h++) {
+    const start = String(h).padStart(2,'0') + ':00';
+    const end = String(h+1).padStart(2,'0') + ':00';
+    this.timeSlots.push(`${start}-${end}`);
+  }
+  }
+
+  ///HETI NAPTÁR GENERÁLÁSA
+  generateWeek() {
+    const today = new Date(); 
+    const monday = new Date(today);
+
+    monday.setDate(today.getDate() - today.getDay() + 1 + this.weekOffset * 7);
+
+    this.weekDays = [];
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      this.weekDays.push(d);
+    }
+  }
+
   
 
+  ///lapozás a hetek között
+  nextWeek() {
+  this.weekOffset++;
+  this.generateWeek();
+  this.loadTrainerBookingsView(); 
+}
 
+prevWeek() {
+  this.weekOffset--;
+  this.generateWeek();
+  this.loadTrainerBookingsView();
+}
+  ///booking keresése
+  getBookingFor(day: Date, slot: string) {
+  const dateStr = day.toISOString().slice(0,10);
+  const startTime = slot.split('-')[0];
+
+  return this.trainerBookings.find(b =>
+    b.date === dateStr && b.time === startTime
+  );
+  }
+
+  ///cellák szín beállítása
+  getBookingColor(b: any): string {
+  if (!b?.status) return 'bg-gray-700';
+
+  const s = String(b.status).toLowerCase().trim();
+
+  const map: Record<string, string> = {
+    pending: 'bg-purple-600',
+    approved: 'bg-green-600',
+    rejected: 'bg-red-600'
+  };
+
+  return map[s] || 'bg-gray-700';
+  }
+
+  
+
+  ///booking nslot generalas
+  getBookingForSlot(day: Date, time: string) {
+  const dateStr = day.toISOString().slice(0,10);
+
+  return this.trainerBookings.find(b =>
+    b.date === dateStr &&
+    b.time === time &&
+    b.trainerId === this.currentUserId
+  );
+  }
+
+  ///kockak szinezese
+  getSlotClass(day: Date, time: string) {
+  const b = this.getBookingForSlot(day, time);
+
+  if (!b) return 'bg-gray-800 hover:bg-gray-700';
+
+  if (b.status === 'pending') return 'bg-purple-600';
+  if (b.status === 'approved') return 'bg-green-600';
+  if (b.status === 'rejected') return 'bg-red-600';
+
+  return '';
+  }
+
+  ///pop up
+  openSlot(day: Date, time: string) {
+  const booking = this.getBookingForSlot(day, time);
+  if (!booking) return;
+
+  this.selectedBooking = booking;
+  }
+
+
+  ///kattintás nyitas
+  openBooking(b: any) {
+  if (!b) return;
+    this.selectedBooking = b;
+    this.showBookingModal = true;
+  }
+  ///kattintas zaras
+  closeBookingModal() {
+    this.showBookingModal = false;
+    this.selectedBooking = null;
+  }
   
   // EDZŐ IDŐPONTOK
 

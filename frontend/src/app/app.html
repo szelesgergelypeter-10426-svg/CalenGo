@@ -1,14 +1,12 @@
-
 <spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>
-
-<nav class="sticky top-0 z-50 border-b border-black bg-gray-900 backdrop-blur">
+<nav class="sticky top-0 z-50 bg-gray-900 border-b border-black backdrop-blur">
   
   <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
     
     <h1 class="text-2xl font-extrabold tracking-wide text-white">
       Calen<span class="text-purple-500">Go</span>
     </h1>
-  
+  <!-- ddd -->
   <!-- TOAST -->
   <div *ngIf="toastMessage"
   class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg top-6 left-1/2"
@@ -127,47 +125,77 @@
 </div>
 
 <!-- TRAINER DASHBOARD -->
-<div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'">
+<div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'"
+     class="p-6 mx-auto max-w-7xl">
+
   <h2 class="mb-6 text-3xl font-bold text-center">
-    Időpontjaim
+    Heti foglalások
   </h2>
 
-  <div *ngFor="let b of trainerBookings" class="p-4 mb-4 bg-gray-800 rounded-xl">
-    <div class="flex justify-between">
-      <div>
-        <p><b>Date:</b> {{ b.date }}</p>
-        <p><b>Time:</b> {{ b.time }}</p>
-        <p><b>User ID:</b> {{ b.userId }}</p>
-      </div>
-      
-      <span [ngClass]="statusClass(b.status)">
-        {{ statusLabel(b.status) }}
-      </span>
-    </div>
+  <!-- WEEK NAV -->
+  <div class="flex justify-between mb-4">
+    <button type="button"
+            (click)="prevWeek()"
+            class="px-4 py-2 bg-gray-700 rounded">
+      ← Előző hét
+    </button>
 
-    
-
-    <div *ngIf="b.status === 'pending'" class="mt-4 space-x-2">
-
-      <button type="button" class="px-4 py-2 bg-green-600 rounded" (click)="trainerSetStatus(b.id, 'approved')">Jóváhagy</button>
-      <button type="button" class="px-4 py-2 bg-red-600 rounded" (click)="trainerSetStatus(b.id, 'rejected')">Elutasít</button>
-      <button type="button" class="px-4 py-2 bg-yellow-600 rounded" (click)="startEdit(b)">Szerkesztés</button>
-
-    </div>
-    
-    <div *ngIf="editingId === b.id" class="mt-4 space-y-2">
-
-      <input type="date" [(ngModel)]="editDate" class="p-2 text-black rounded">
-      <input type="time" [(ngModel)]="editTime" class="p-2 text-black rounded">
-
-      <div class="space-x-2">
-
-      <button type="button" class="px-3 py-1 bg-blue-600 rounded" (click)="saveEdit(b.id)">Mentés</button>
-
-      <button type="button" class="px-3 py-1 bg-gray-600 rounded" (click)="cancelEdit()"> Mégse</button>
+    <button type="button"
+            (click)="nextWeek()"
+            class="px-4 py-2 bg-gray-700 rounded">
+      Következő hét →
+    </button>
   </div>
-</div>
-</div>
+
+  <!-- GRID -->
+  <div class="overflow-auto">
+    <table class="w-full border-collapse">
+
+      <!-- HEADER -->
+      <thead>
+        <tr>
+          <th class="p-2 text-left bg-gray-800">Idő</th>
+
+          <th *ngFor="let d of weekDays"
+              class="p-2 text-center bg-gray-800">
+            {{ d | date:'EEE MM.dd' }}
+          </th>
+        </tr>
+      </thead>
+
+      <!-- BODY -->
+      <tbody>
+        <tr *ngFor="let slot of timeSlots">
+
+          <!-- TIME -->
+          <td class="p-2 font-semibold bg-gray-900">
+            {{ slot }}
+          </td>
+
+          <!-- CELLS -->
+          <td *ngFor="let d of weekDays"
+              class="p-1">
+
+            <div
+              class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer"
+
+              [ngClass]="
+                getBookingFor(d, slot)
+                  ? getBookingColor(getBookingFor(d, slot))
+                  : 'bg-gray-700'
+              "
+
+              (click)="openBooking(getBookingFor(d, slot))"
+            >
+              {{ getBookingFor(d, slot)?.email || '' }}
+            </div>
+
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
 </div>
     
 <!--FIÓKOM PAGE-->
@@ -552,5 +580,50 @@ Fiókom
 
   </div>
 </div>
+</div>
+
+<!--booking pop up ful-->
+<div *ngIf="showBookingModal"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+
+  <div class="w-full max-w-md p-6 bg-gray-900 rounded-xl">
+
+    <h3 class="mb-4 text-xl font-bold">
+      Foglalás részletei
+    </h3>
+
+    <div *ngIf="selectedBooking" class="space-y-2 text-sm">
+
+      <p><b>Név:</b> {{ selectedBooking.name }}</p>
+      <p><b>Email:</b> {{ selectedBooking.email }}</p>
+      <p><b>Dátum:</b> {{ selectedBooking.date | date:'yyyy.MM.dd' }}</p>
+      <p><b>Idő:</b> {{ selectedBooking.time }}</p>
+
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="flex justify-between gap-2 mt-6">
+
+      <button
+        (click)="updateBookingStatus('approved')"
+        class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700">
+        Accept
+      </button>
+
+      <button
+        (click)="updateBookingStatus('rejected')"
+        class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700">
+        Reject
+      </button>
+
+      <button
+        (click)="closeBookingModal()"
+        class="flex-1 py-2 bg-gray-700 rounded hover:bg-gray-600">
+        Bezár
+      </button>
+
+    </div>
+
+  </div>
 </div>
 <router-outlet></router-outlet>

@@ -91,7 +91,7 @@ db.serialize(() => {
     trainerId INTEGER,
     date TEXT,
     time TEXT,
-    status TEXT DEFAULT 'active')
+    status TEXT DEFAULT 'pending')
   `);
 
   db.run(`INSERT OR IGNORE INTO users (id, name, email, password, role)
