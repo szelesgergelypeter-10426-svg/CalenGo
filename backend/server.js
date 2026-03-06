@@ -235,7 +235,7 @@ app.post('/api/book', authLimiter, (req, res) => {
     sendMail(
     email,
     "Foglalás megerősítve",
-    `Sikeres foglalás:\nDátum: ${date}\nIdő: ${time}`
+    `Sikeres foglalás:\nDátum: ${date}\nId ő: ${time}`
     );
     res.json({ success: true });
   });

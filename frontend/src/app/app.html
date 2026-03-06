@@ -1,61 +1,54 @@
 <spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>
-<nav class="sticky top-0 z-50 bg-gray-900 border-b border-black backdrop-blur">
-  
+<nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
+
   <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
-    
-    <h1 class="text-2xl font-extrabold tracking-wide text-white">
-      Calen<span class="text-purple-500">Go</span>
+
+    <h1 class="text-4xl font-extrabold tracking-wide text-white">
+      Calen<span class="text-purple-500 text-4xl">Go</span>
     </h1>
-  <!-- ddd -->
-  <!-- TOAST -->
-  <div *ngIf="toastMessage"
-  class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg top-6 left-1/2"
-  [ngClass]="{
+    <!-- ddd -->
+    <!-- TOAST -->
+    <div *ngIf="toastMessage"
+      class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg top-6 left-1/2" [ngClass]="{
     'bg-green-600': toastType==='success',
     'bg-red-600': toastType==='error'
   }">
 
-  {{ toastMessage }}
+      {{ toastMessage }}
 
-  </div>
+    </div>
 
-  <div class="flex items-center gap-3" *ngIf="currentUserRole">
+    <div class="flex items-center gap-3" *ngIf="currentUserRole">
 
-  <!-- USER -->
-  <button type="button" *ngIf="currentUserRole==='trainer'"
-  (click)="showPage('trainer')"
-  class="navbtn">
-  Időpontjaim
-  </button>
+      <!-- USER -->
+      <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
+        class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        Időpontjaim
+      </button>
 
 
-  <!-- USER + TRAINER -->
-  <button type="button" *ngIf="currentUserRole==='user'"
-    (click)="showPage('bookings')"
-    class="navbtn">
-    Időpontjaim
-  </button>
+      <!-- USER + TRAINER -->
+      <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
+        class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        Időpontjaim
+      </button>
 
-  <!-- ADMIN -->
-  <button type="button" *ngIf="currentUserRole==='admin'"
-    (click)="showPage('admin')"
-    class="navbtn">
-    Userek
-  </button>
+      <!-- ADMIN -->
+      <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
+        class="navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        Userek
+      </button>
 
-  <button type="button"
-  class="navbtn"
-  (click)="loadProfile(); showPage('account')">
-  Fiókom
-  </button>
+      <button type="button" (click)="loadProfile(); showPage('account')"
+        class="navbtn px-4 py-2 bg-gray-600/80 text-white rounded">
+        Fiókom
+      </button>
 
-  <button type="button"
-    (click)="logoutConfirm()"
-    class="px-4 py-2 bg-red-600 rounded">
-    Logout
-  </button>
+      <button type="button" (click)="logoutConfirm()" class="px-4 py-2 bg-red-600 rounded text-white">
+        Logout
+      </button>
 
-</div>
+    </div>
 
   </div>
 </nav>
@@ -64,566 +57,443 @@
 
 
   <!-- LOGIN -->
-  <div *ngIf="currentPage === 'login'"
-     class="flex items-center justify-center">
+  <div *ngIf="currentPage === 'login'" class="flex items-center justify-center text-center">
 
-  <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/80 rounded-2xl">
+    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/80 rounded-2xl">
 
-    <h2 class="mb-6 text-2xl font-bold text-center">
-      Bejelentkezés
+      <h2 class="mb-6 font-bold text-center text-4xl text-white">
+        Bejelentkezés
+      </h2>
+
+      <input #email class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
+
+      <input #password type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
+
+      <button type="button" class="w-full py-3 mb-3 bg-purple-600 rounded hover:bg-purple-500 text-white"
+        (click)="loginUser(email.value, password.value)">
+        Belépés
+      </button>
+
+      <p class="text-sm text-center text-gray-400">
+        Nincsen fiókja?
+        <button type="button" class="text-blue-400 hover:underline" (click)="showPage('register')">
+          Regisztráció
+        </button>
+      </p>
+
+    </div>
+  </div>
+  <!-- REGISTER -->
+  <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto bg-gray-900/60 rounded">
+    <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
+
+    <input #name class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Név">
+    <input #email class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Email">
+    <input #password type="password" class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Jelszó">
+
+
+
+    <button type="button" [disabled]="registerLoading"
+      class="w-full py-2 text-white bg-purple-600 hover:bg-purple-500 rounded"
+      (click)="registerUser(name.value, email.value, password.value)">
+      Fiók létrehozása
+    </button>
+
+    <!--VISSZA A BEJELENTKEZESHEZ-->
+    <button type="button" class="mt-4 text-sm text-blue-400 underline" (click)="currentPage = 'login'">
+      Vissza a bejelentkezéshez
+    </button>
+  </div>
+
+  <!-- TRAINER DASHBOARD -->
+  <div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl">
+
+    <h2 class="mb-6 text-3xl font-bold text-center text-white">
+      Heti foglalások
     </h2>
 
-     <input #email
-      class="w-full p-3 mb-3 text-white bg-gray-800 rounded"
-      placeholder="Email">
-
-    <input #password
-      type="password"
-      class="w-full p-3 mb-3 text-white bg-gray-800 rounded"
-      placeholder="Jelszó">
-
-    <button type="button"
-      class="w-full py-3 mb-3 bg-blue-600 rounded hover:bg-blue-500"
-      (click)="loginUser(email.value, password.value)">
-      Belépés
-    </button>
-
-    <p class="text-sm text-center text-gray-400">
-      Nincsen fiókja?
-      <button type="button"
-        class="text-blue-400 hover:underline"
-        (click)="showPage('register')">
-        Regisztráció
+    <!-- WEEK NAV -->
+    <div class="flex justify-between mb-4 ">
+      <button type="button" (click)="prevWeek()" class="px-4 py-2 bg-gray-700 rounded text-white">
+        ← Előző hét
       </button>
-    </p>
 
-  </div>
-</div>
-  <!-- REGISTER -->
-  <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto bg-gray-800 rounded">
-  <h2 class="mb-4 text-xl text-white">Regisztráció</h2>
+      <button type="button" (click)="nextWeek()" class="px-4 py-2 bg-gray-700 rounded text-white">
+        Következő hét →
+      </button>
+    </div>
 
-  <input #name class="w-full p-2 mb-3 rounded" placeholder="Név">
-  <input #email class="w-full p-2 mb-3 rounded" placeholder="Email">
-  <input #password type="password" class="w-full p-2 mb-3 rounded" placeholder="Jelszó">
+    <!-- GRID -->
+    <div class="overflow-auto">
+      <table class="w-full border-collapse">
 
-  
+        <!-- HEADER -->
+        <thead>
+          <tr>
+            <th class="p-2 bg-gray-800 text-white text-center">Idő</th>
 
-  <button type="button"
-  [disabled]="registerLoading"
-  class="w-full py-2 text-white bg-blue-600 rounded"
-  (click)="registerUser(name.value, email.value, password.value)">
-  Fiók létrehozása
-  </button>
+            <th *ngFor="let d of weekDays" class="p-2 text-center bg-gray-800 text-white">
+              {{ d | date:'EEE MM.dd' }}
+            </th>
+          </tr>
+        </thead>
 
-  <!--VISSZA A BEJELENTKEZESHEZ-->
-  <button type="button"
-  class="mt-4 text-sm text-blue-400 underline"
-  (click)="currentPage = 'login'">
-  Vissza a bejelentkezéshez
-  </button>
-</div>
+        <!-- BODY -->
+        <tbody>
+          <tr *ngFor="let slot of timeSlots">
 
-<!-- TRAINER DASHBOARD -->
-<div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'"
-     class="p-6 mx-auto max-w-7xl">
+            <!-- TIME -->
+            <td class="p-2 font-semibold bg-gray-800 text-white text-center">
+              {{ slot }}
+            </td>
 
-  <h2 class="mb-6 text-3xl font-bold text-center">
-    Heti foglalások
-  </h2>
+            <!-- CELLS -->
+            <td *ngFor="let d of weekDays" class="p-1">
 
-  <!-- WEEK NAV -->
-  <div class="flex justify-between mb-4">
-    <button type="button"
-            (click)="prevWeek()"
-            class="px-4 py-2 bg-gray-700 rounded">
-      ← Előző hét
-    </button>
-
-    <button type="button"
-            (click)="nextWeek()"
-            class="px-4 py-2 bg-gray-700 rounded">
-      Következő hét →
-    </button>
-  </div>
-
-  <!-- GRID -->
-  <div class="overflow-auto">
-    <table class="w-full border-collapse">
-
-      <!-- HEADER -->
-      <thead>
-        <tr>
-          <th class="p-2 text-left bg-gray-800">Idő</th>
-
-          <th *ngFor="let d of weekDays"
-              class="p-2 text-center bg-gray-800">
-            {{ d | date:'EEE MM.dd' }}
-          </th>
-        </tr>
-      </thead>
-
-      <!-- BODY -->
-      <tbody>
-        <tr *ngFor="let slot of timeSlots">
-
-          <!-- TIME -->
-          <td class="p-2 font-semibold bg-gray-900">
-            {{ slot }}
-          </td>
-
-          <!-- CELLS -->
-          <td *ngFor="let d of weekDays"
-              class="p-1">
-
-            <div
-              class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer"
-
-              [ngClass]="
+              <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer" [ngClass]="
                 getBookingFor(d, slot)
                   ? getBookingColor(getBookingFor(d, slot))
                   : 'bg-gray-700'
-              "
+              " (click)="openBooking(getBookingFor(d, slot))">
+                {{ getBookingFor(d, slot)?.email || '' }}
+              </div>
 
-              (click)="openBooking(getBookingFor(d, slot))"
-            >
-              {{ getBookingFor(d, slot)?.email || '' }}
-            </div>
+            </td>
+          </tr>
+        </tbody>
 
-          </td>
-        </tr>
-      </tbody>
-
-    </table>
+      </table>
+    </div>
   </div>
-</div>
-    
-<!--FIÓKOM PAGE-->
+
+  <!--FIÓKOM PAGE-->
   <div *ngIf="currentPage==='account'"
-     class="max-w-md p-8 mx-auto mt-8 bg-gray-900 shadow-xl rounded-2xl">
+    class="max-w-md p-8 mx-auto mt-8  shadow-xl rounded-2xl bg-gray-800/80 text-white">
 
-     <button type="button"
-  *ngIf="currentUserRole==='user'"
-  class="mb-4 text-blue-400 underline"
-  (click)="showPage('trainers')">
+    <button type="button" *ngIf="currentUserRole==='user'" class="mb-4 text-blue-400 underline"
+      (click)="showPage('trainers')">
 
-  ← Edzők
+      ← Edzők
 
-  </button>
+    </button>
 
-<h2 class="mb-6 text-2xl font-bold text-center">
-Fiókom
-</h2>
+    <h2 class="mb-6 text-2xl font-bold text-center">
+      Fiókom
+    </h2>
 
-<img
-  [src]="profile.avatar || 'assets/default.png'"
-  class="w-32 h-32 mx-auto mb-4 border rounded-full">
+    <img [src]="profile.avatar || 'assets/default.png'" class="w-32 h-32 mx-auto mb-4 border rounded-full">
 
-<input
-  type="file"
-  (change)="onAvatarSelected($event)"
-  class="w-full mb-3">
+    <input type="file" (change)="onAvatarSelected($event)" class="w-full mb-3">
 
-<input
-  [(ngModel)]="profile.name"
-  placeholder="Név"
-  class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+    <input [(ngModel)]="profile.name" placeholder="Név"
+      class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
 
-<input
-  [(ngModel)]="profile.email"
-  placeholder="Email cím"
-  class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+    <input [(ngModel)]="profile.email" placeholder="Email cím"
+      class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
 
-<div class="relative">
-  <input
-    [(ngModel)]="profile.password"
-    [type]="showPassword ? 'text' : 'password'"
-    placeholder="Új jelszó megadása"
-    class="w-full p-3 pr-12 text-white bg-gray-800 border border-gray-600 rounded-lg">
-</div>
+    <div class="relative">
+      <input [(ngModel)]="profile.password" [type]="showPassword ? 'text' : 'password'" placeholder="Új jelszó megadása"
+        class="w-full p-3 pr-12 text-white bg-gray-800 border border-gray-600 rounded-lg">
+    </div>
 
 
-  <button type="button" (click)="saveProfile()"
-  class="w-full p-3 font-bold bg-blue-600 rounded-lg">
-  Mentés
-  </button>
+    <button type="button" (click)="saveProfile()"
+      class="w-full p-3 font-bold bg-purple-600 hover:bg-purple-500 rounded-lg text-white">
+      Mentés
+    </button>
 
 
 
-</div>
+  </div>
 
 
 
   <!-- TRAINERS -->
- <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'">
-  <h2 class="mb-8 text-3xl font-bold text-center">
-    Válassz professzionális edzőink közül!
-  </h2>
+  <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'">
+    <h2 class="mb-8 text-3xl font-bold text-center text-white ">
+      Válassz edzőink közül!
+    </h2>
 
-  <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 
-    <div
-      *ngFor="let t of trainers"
-      class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
+      <div *ngFor="let t of trainers"
+        class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
 
-      <img src="assets/default.png"
-        class="mx-auto mb-4 border-4 border-blue-500 rounded-full w-28 h-28">
-      <!-- USER látja -->
-    <button type="button"
-      *ngIf="currentUserRole === 'user'"
-      class="w-full py-2 mt-2 transition bg-blue-600 rounded-lg hover:bg-blue-500"
-      (click)="selectTrainer(t.id)">Időpontok
-    </button>
+        <img src="assets/default.png" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+        <!-- USER látja -->
+        <button type="button" *ngIf="currentUserRole === 'user'"
+          class="w-full py-2 mt-2 transition bg-purple-600 rounded-lg hover:bg-purple-500 text-white"
+          (click)="selectTrainer(t.id)">Időpontok
+        </button>
 
-      <h3 class="mb-1 text-xl font-semibold">
-        {{ t.name }}
-      </h3>
+        <h3 class="inline-block px-3 py-1 mb-4 text-xl font-semibold text-white bg-purple-800/20 rounded">
+          {{ t.name }}
+        </h3>
+        <br>
+        <span class="inline-block px-3 py-1 mb-4 text-sm text-purple-400 rounded-full bg-purple-600/20">
+          {{ t.specialty }}
+        </span>
 
-      <span
-        class="inline-block px-3 py-1 mb-4 text-sm text-blue-400 rounded-full bg-blue-600/20"
-      >
-        {{ t.specialty }}
-      </span>
 
-      
+
+      </div>
 
     </div>
-
   </div>
-</div>
   <!-- BOOKING -->
   <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'">
 
-    <button type="button"
-  *ngIf="currentUserRole==='user'"
-  class="px-4 py-2 mb-4 bg-blue-600 rounded"
-  (click)="showPage('trainers')">
+    <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 bg-purple-600 text-white rounded text-2xl"
+      (click)="showPage('trainers')">
 
-  ← Vissza az edzőkhöz
+      ← Vissza az edzőkhöz
 
-  </button>
+    </button>
 
-    <!--ADMIN FOGLALAS SZERKESZTESE-->
-  <h2 class="mt-8 mb-4 text-2xl">Bookings</h2>
+    <!--User időpontok-->
 
-  <h2 class="mt-6 mb-2 text-xl">Activity log</h2>
+    <div *ngFor="let b of adminBookings" class="p-3 mb-3 bg-gray-800 rounded">
 
-<table class="w-full text-sm">
-<tr class="font-bold">
-  <td>ID</td>
-  <td>User</td>
-  <td>Action</td>
-  <td>Details</td>
-  <td>Date</td>
-</tr>
-
-<tr *ngFor="let l of auditLogs">
-  <td>{{l.id}}</td>
-  <td>{{l.email}}</td>
-  <td>{{l.action}}</td>
-  <td>{{l.details}}</td>
-  <td>{{l.createdAt}}</td>
-</tr>
-</table>
-
-
-  <div *ngFor="let b of adminBookings"
-     class="p-3 mb-3 bg-gray-800 rounded">
-
-    <span
-  class="inline-block px-2 py-1 ml-2 text-sm text-white rounded-full"
-  [ngClass]="{
+      <span class="inline-block px-2 py-1 ml-2 text-sm text-white rounded-full" [ngClass]="{
     'bg-yellow-500': b.status === 'pending',
     'bg-green-600': b.status === 'approved',
     'bg-red-600': b.status === 'rejected',
     'bg-gray-500': b.status === 'cancelled'}">
-    {{ b.status }}
-  </span>
+        {{ b.status }}
+      </span>
 
-  <div class="mb-2">
-    user: {{b.userId}} — trainer: {{b.trainerId}}
-  </div>
+      <div class="mb-2">
+        user: {{b.userId}} — trainer: {{b.trainerId}}
+      </div>
 
-  <input #newDate
-    type="date"
-    [value]="b.date"
-    class="p-1 mr-2 text-black rounded">
+      <input #newDate type="date" [value]="b.date" class="p-1 mr-2 text-black rounded">
 
-  <input #newTime
-    type="time"
-    [value]="b.time"
-    class="p-1 mr-2 text-black rounded">
+      <input #newTime type="time" [value]="b.time" class="p-1 mr-2 text-black rounded">
 
-  <button type="button"
-    class="px-2 py-1 mr-2 bg-blue-600 rounded"
-    (click)="adminUpdateBooking(b.id, newDate.value, newTime.value)">
-    Update
-  </button>
+      <button type="button" class="px-2 py-1 mr-2 bg-blue-600 rounded"
+        (click)="adminUpdateBooking(b.id, newDate.value, newTime.value)">
+        Update
+      </button>
 
-  <button type="button"
-  class="px-2 py-1 bg-red-700 rounded"
-  (click)="adminDeleteBooking(b.id)">
-  Delete
-  </button>
+      <button type="button" class="px-2 py-1 bg-red-700 rounded" (click)="adminDeleteBooking(b.id)">
+        Delete
+      </button>
 
-</div>
+    </div>
 
-  <h2 class="mb-6 text-2xl font-bold text-white">
-    My bookings
-  </h2>
+    <h2 class="mb-6 text-2xl font-bold text-white">
+      My bookings
+    </h2>
 
-  <div *ngIf="bookings.length === 0" class="text-gray-400">
-    You have no bookings yet.
-  </div>
+    <div *ngIf="bookings.length === 0" class="text-gray-400">
+      You have no bookings yet.
+    </div>
 
-  <div class="space-y-4">
-    <div
-      *ngFor="let b of bookings; let i = index"
-      class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
+    <div class="space-y-4">
+      <div *ngFor="let b of bookings; let i = index"
+        class="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
 
-      <div>
-  <p class="text-lg font-semibold">{{ b.trainer }}</p>
+        <div>
+          <p class="text-lg font-semibold">{{ b.trainer }}</p>
 
-  <p class="text-sm text-gray-400">
-    {{ b.date }} · {{ b.time }}
-  </p>
+          <p class="text-sm text-gray-400">
+            {{ b.date }} · {{ b.time }}
+          </p>
 
-  <span
-    class="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full"
-    [ngClass]="{
+          <span class="inline-block px-3 py-1 mt-2 text-sm text-white rounded-full" [ngClass]="{
       'bg-yellow-500': b.status === 'pending',
       'bg-green-600': b.status === 'approved',
       'bg-red-600': b.status === 'rejected',
       'bg-gray-500': b.status === 'cancelled'}">
-      {{ b.status }}
-    </span>
+            {{ b.status }}
+          </span>
+        </div>
+
+        <button type="button" class="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-500"
+          (click)="cancelBookingBackend(b.id)">
+          Cancel
+        </button>
+
+      </div>
+    </div>
   </div>
 
-      <button type="button"
-        class="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-500"
-        (click)="cancelBookingBackend(b.id)">
-        Cancel
+  <div *ngIf="currentPage === 'booking'" class="grid max-w-6xl grid-cols-1 gap-8 mx-auto md:grid-cols-2">
+    <!-- BAL OLDAL – DÁTUM -->
+    <div class="p-6 text-white bg-gray-900 rounded-xl">
+
+      <h2 class="mb-4 text-xl font-semibold text-center">
+        {{ currentYear }} – {{ monthNames[currentMonth] }}
+      </h2>
+
+      <!-- WEEKDAYS -->
+      <div class="grid grid-cols-7 mb-2 text-center text-gray-400">
+        <div>H</div>
+        <div>K</div>
+        <div>Sz</div>
+        <div>Cs</div>
+        <div>P</div>
+        <div>Szo</div>
+        <div>V</div>
+      </div>
+
+
+      <!-- DAYS -->
+      <button type="button" *ngFor="let day of calendarDays" [disabled]="!day" (click)="day && selectDay(day)"
+        [class.bg-green-600]="selectedDate?.endsWith('-' + day)"
+        class="w-10 h-10 transition bg-gray-800 rounded hover:bg-green-600 disabled:bg-transparent disabled:cursor-default">
+        {{ day }}
       </button>
-
-    </div>
-  </div>
-</div>
-
-<div *ngIf="currentPage === 'booking'"
-     class="grid max-w-6xl grid-cols-1 gap-8 mx-auto md:grid-cols-2">
-  <!-- BAL OLDAL – DÁTUM -->
-  <div class="p-6 text-white bg-gray-900 rounded-xl">
-
-  <h2 class="mb-4 text-xl font-semibold text-center">
-    {{ currentYear }} – {{ monthNames[currentMonth] }}
-  </h2>
-
-  <!-- WEEKDAYS -->
-  <div class="grid grid-cols-7 mb-2 text-center text-gray-400">
-    <div>H</div><div>K</div><div>Sz</div>
-    <div>Cs</div><div>P</div><div>Szo</div><div>V</div>
-  </div>
-
-
-  <!-- DAYS -->
-  <button type="button"
-  *ngFor="let day of calendarDays" [disabled]="!day"
-  (click)="day && selectDay(day)"
-  [class.bg-green-600]="selectedDate?.endsWith('-' + day)"
-  class="w-10 h-10 transition bg-gray-800 rounded hover:bg-green-600 disabled:bg-transparent disabled:cursor-default">
-  {{ day }}
-  </button>
-  <!-- JOBB OLDAL – IDŐPONTOK -->
-  <div>
-    <h3 class="mb-4 text-lg font-semibold">
-      Elérhető időpontok
-    </h3>
-
-    <div *ngIf="!selectedDate" class="text-gray-500">
-      Válasszon dátumot
-    </div>
-
-    <div *ngIf="selectedDate" class="space-y-4">
-
-      <!-- DÉLELŐTT -->
+      <!-- JOBB OLDAL – IDŐPONTOK -->
       <div>
-        <p class="mb-2 font-medium">Délelőtt</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            *ngFor="let t of availableTimes.morning"
-            (click)="selectTime(t)"
-            [disabled]="takenTimes.includes(t)"
-            [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''"
+        <h3 class="mb-4 text-lg font-semibold">
+          Elérhető időpontok
+        </h3>
 
-            [ngClass]="{
+        <div *ngIf="!selectedDate" class="text-gray-500">
+          Válasszon dátumot
+        </div>
+
+        <div *ngIf="selectedDate" class="space-y-4">
+
+          <!-- DÉLELŐTT -->
+          <div>
+            <p class="mb-2 font-medium">Délelőtt</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" *ngFor="let t of availableTimes.morning" (click)="selectTime(t)"
+                [disabled]="takenTimes.includes(t)" [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''" [ngClass]="{
               'bg-blue-600 text-white border-blue-400': selectedTime === t && !takenTimes.includes(t),
               'bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t),
               'opacity-40 cursor-not-allowed bg-gray-700 border-gray-600': takenTimes.includes(t)
-            }"
+            }" class="px-4 py-2 transition-all duration-200 border rounded-lg">
+                {{ t }}
+              </button>
+            </div>
+          </div>
 
-            class="px-4 py-2 transition-all duration-200 border rounded-lg">
-            {{ t }}
-          </button>
-        </div>
-      </div>
-
-      <!-- DÉLUTÁN -->
-      <div>
-        <p class="mb-2 font-medium">Délután</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            *ngFor="let t of availableTimes.afternoon"
-            (click)="selectTime(t)"
-            [disabled]="takenTimes.includes(t)"
-            [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''"
-
-            [ngClass]="{
+          <!-- DÉLUTÁN -->
+          <div>
+            <p class="mb-2 font-medium">Délután</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" *ngFor="let t of availableTimes.afternoon" (click)="selectTime(t)"
+                [disabled]="takenTimes.includes(t)" [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''" [ngClass]="{
               'bg-blue-600 text-white border-blue-400': selectedTime === t && !takenTimes.includes(t),
               'bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t),
               'opacity-40 cursor-not-allowed bg-gray-700 border-gray-600': takenTimes.includes(t)
-            }"
+            }" class="px-4 py-2 transition-all duration-200 border rounded-lg">
+                {{ t }}
+              </button>
+            </div>
+          </div>
 
-            class="px-4 py-2 transition-all duration-200 border rounded-lg">
-            {{ t }}
-          </button>
-        </div>
-      </div>
-
-      <!-- ESTE -->
-      <div>
-        <p class="mb-2 font-medium">Este</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            *ngFor="let t of availableTimes.evening"
-            (click)="selectTime(t)"
-            [disabled]="takenTimes.includes(t)"
-            [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''"
-
-            [ngClass]="{
+          <!-- ESTE -->
+          <div>
+            <p class="mb-2 font-medium">Este</p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" *ngFor="let t of availableTimes.evening" (click)="selectTime(t)"
+                [disabled]="takenTimes.includes(t)" [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''" [ngClass]="{
               'bg-blue-600 text-white border-blue-400': selectedTime === t && !takenTimes.includes(t),
               'bg-gray-800 text-gray-200 border-gray-600 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t),
               'opacity-40 cursor-not-allowed bg-gray-700 border-gray-600': takenTimes.includes(t)
-            }"
+            }" class="px-4 py-2 transition-all duration-200 border rounded-lg">
+                {{ t }}
+              </button>
+            </div>
+          </div>
 
-            class="px-4 py-2 transition-all duration-200 border rounded-lg">
-            {{ t }}
+          <!-- FOGLALÁS -->
+          <div class="mt-6">
+            <label class="block mb-2 text-sm text-gray-300">
+              Adja meg az Email címét!
+            </label>
+
+            <input type="email" [(ngModel)]="bookingEmail"
+              class="w-full max-w-xl p-3 text-white bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="valami@calengo.com">
+          </div>
+
+          <!-- FOGLALÁS GOMB -->
+          <button type="button" (click)="bookAppointment()" [disabled]="bookingLoading"
+            class="w-full px-6 py-3 mt-6 font-semibold text-white transition-all duration-150 bg-blue-600 border border-blue-400 rounded-lg hover:bg-blue-700 active:scale-95 disabled:opacity-50">
+
+            {{ bookingLoading ? 'Foglalás...' : 'Foglalás' }}
           </button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- FOGLALÁS -->
-      <div class="mt-6">
-        <label class="block mb-2 text-sm text-gray-300">
-          Adja meg az Email címét!
-        </label>
 
-        <input
-          type="email"
-          [(ngModel)]="bookingEmail"
-          class="w-full max-w-xl p-3 text-white bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="valami@calengo.com">
+  <!-- ADMIN PAGE -->
+  <div *ngIf="currentPage === 'admin'" class="max-w-4xl mx-auto">
+
+    <h2 class="mb-4 text-center text-4xl text-white">Users</h2>
+
+    <div *ngFor="let u of adminUsers"
+      class="flex items-center justify-between p-3 mb-2 bg-gray-800/80 rounded text-white">
+
+      <div>
+        {{u.name}} — {{u.email}}
       </div>
 
-      <!-- FOGLALÁS GOMB -->
-      <button
-        type="button"
-        (click)="bookAppointment()"
-        [disabled]="bookingLoading"
-        class="w-full px-6 py-3 mt-6 font-semibold text-white transition-all duration-150 bg-blue-600 border border-blue-400 rounded-lg hover:bg-blue-700 active:scale-95 disabled:opacity-50">
+      <div class="flex gap-2">
 
-        {{ bookingLoading ? 'Foglalás...' : 'Foglalás' }}
-      </button>
+        <select #roleSel class="p-1 rounded bg-gray-600 text-white">
+
+          <option value="user" [selected]="u.role==='user'" class="bg-gray-600 text-white">user</option>
+          <option value="trainer" [selected]="u.role==='trainer'" class="bg-gray-600 text-white">trainer</option>
+          <option value="admin" [selected]="u.role==='admin'" class="bg-gray-600 text-white">admin</option>
+
+        </select>
+
+        <button type="button" class="px-2 py-1 bg-blue-600 rounded" (click)="changeUserRole(u.id, roleSel.value)">
+          Save
+        </button>
+
+        <button type="button" class="px-2 py-1 bg-red-700 rounded" (click)="adminDeleteUser(u.id)">
+          Delete
+        </button>
+
+
+      </div>
     </div>
   </div>
-  </div>
-</div>
 
-  
-<!-- ADMIN PAGE -->
-<div *ngIf="currentPage === 'admin'" class="max-w-4xl mx-auto">
+  <!--booking pop up ful-->
+  <div *ngIf="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center">
 
-  <h2 class="mb-4 text-2xl">Users</h2>
+    <div class="w-full max-w-md p-6 border-2 border-purple-600 bg-gray-900/95 rounded-xl text-white">
 
-<div *ngFor="let u of adminUsers"
-     class="flex items-center justify-between p-3 mb-2 bg-gray-800 rounded">
+      <h3 class="mb-4 text-xl font-bold text-center">
+        Foglalás részletei
+      </h3>
 
-  <div>
-    {{u.name}} — {{u.email}}
-  </div>
+      <div *ngIf="selectedBooking" class="space-y-2 text-sm">
 
-  <div class="flex gap-2">
+        <p><b>Név:</b> {{ selectedBooking.name }}</p>
+        <p><b>Email:</b> {{ selectedBooking.email }}</p>
+        <p><b>Dátum:</b> {{ selectedBooking.date | date:'yyyy.MM.dd' }}</p>
+        <p><b>Idő:</b> {{ selectedBooking.time }}</p>
 
-    <select #roleSel
-      class="p-1 text-black rounded">
+      </div>
 
-      <option value="user" [selected]="u.role==='user'">user</option>
-      <option value="trainer" [selected]="u.role==='trainer'">trainer</option>
-      <option value="admin" [selected]="u.role==='admin'">admin</option>
+      <!-- BUTTONS -->
+      <div class="flex justify-between gap-2 mt-6">
 
-    </select>
+        <button (click)="updateBookingStatus('approved')" class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700">
+          Elfogadás
+        </button>
 
-    <button type="button"
-      class="px-2 py-1 bg-blue-600 rounded"
-      (click)="changeUserRole(u.id, roleSel.value)">
-      Save
-    </button>
+        <button (click)="updateBookingStatus('rejected')" class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700">
+          Elutasítás
+        </button>
 
-    <button type="button"
-  class="px-2 py-1 bg-red-700 rounded"
-  (click)="adminDeleteUser(u.id)">
-  Delete
-    </button>
-    
+        <button (click)="closeBookingModal()" class="flex-1 py-2 bg-gray-700 rounded hover:bg-gray-600">
+          Bezár
+        </button>
 
-  </div>
-</div>
-</div>
-
-<!--booking pop up ful-->
-<div *ngIf="showBookingModal"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-
-  <div class="w-full max-w-md p-6 bg-gray-900 rounded-xl">
-
-    <h3 class="mb-4 text-xl font-bold">
-      Foglalás részletei
-    </h3>
-
-    <div *ngIf="selectedBooking" class="space-y-2 text-sm">
-
-      <p><b>Név:</b> {{ selectedBooking.name }}</p>
-      <p><b>Email:</b> {{ selectedBooking.email }}</p>
-      <p><b>Dátum:</b> {{ selectedBooking.date | date:'yyyy.MM.dd' }}</p>
-      <p><b>Idő:</b> {{ selectedBooking.time }}</p>
+      </div>
 
     </div>
-
-    <!-- BUTTONS -->
-    <div class="flex justify-between gap-2 mt-6">
-
-      <button
-        (click)="updateBookingStatus('approved')"
-        class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700">
-        Accept
-      </button>
-
-      <button
-        (click)="updateBookingStatus('rejected')"
-        class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700">
-        Reject
-      </button>
-
-      <button
-        (click)="closeBookingModal()"
-        class="flex-1 py-2 bg-gray-700 rounded hover:bg-gray-600">
-        Bezár
-      </button>
-
-    </div>
-
   </div>
-</div>
-<router-outlet></router-outlet>
+  <router-outlet></router-outlet>

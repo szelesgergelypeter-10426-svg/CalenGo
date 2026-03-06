@@ -30,7 +30,7 @@ export class AppComponent {
   editDate = '';
   editTime = '';
   auditLogs: any[] = [];
-  bookingEmail: string = '';
+  bookingEmail: string = ''
   bookingSuccess: boolean = false;
   bookings: any[] = [];
   weekOffset = 0;
