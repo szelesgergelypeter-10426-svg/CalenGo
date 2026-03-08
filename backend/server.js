@@ -110,7 +110,7 @@ db.serialize(() => {
 
   db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_booking
     ON bookings(trainerId, date, time)
-    WHERE status='active'
+    WHERE status!='cancelled'
   `);
 
 });
@@ -206,7 +206,7 @@ app.post('/api/book', authLimiter, (req, res) => {
     WHERE trainerId = ?
     AND date = ?
     AND time = ?
-    AND status = 'active'
+    AND status != 'cancelled'
   `,
   [trainerId, date, time],
   (err, existing) => {

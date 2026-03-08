@@ -2,14 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
-import { RouterOutlet } from '@angular/router';
-import { Router } from '@angular/router';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterOutlet],
+  imports: [CommonModule, FormsModule,],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
@@ -20,7 +18,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: "" |'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'= 'login';
+  currentPage: "" |'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'|'booking-success' = 'login';
   currentUserRole: string | null = null;
   currentUserId: number | null = null;
   takenTimes: string[] = [];
@@ -42,8 +40,7 @@ export class AppComponent {
 
 
   constructor(
-    private api: ApiService,
-    private router: Router) {}
+    private api: ApiService) {}
 
   //NAP KIVÁLASZTÁSA
   selectDay(day: number) {
@@ -59,11 +56,11 @@ export class AppComponent {
   }
 
   showPage(page: typeof this.currentPage) {
-  this.currentPage = page;
-
-  if (page === 'trainers') {
-    this.loadTrainers();
-  }
+    this.bookingSuccess = false;
+    this.currentPage = page;
+    if (page === 'trainers') {
+      this.loadTrainers();
+    }
   }
   ///LOGOUT
   logout() {
@@ -308,6 +305,7 @@ saveEdit(id: number) {
   calendarDays: (number | null)[] = [];
 
   ngOnInit() {
+  this.bookingSuccess = false;
   this.generateCalendar();
   this.loadTrainers();
   this.generateTimeSlots();
@@ -501,37 +499,55 @@ prevWeek() {
 bookingLoading = false;
 
   bookAppointment() {
+
   if (!this.selectedDate || !this.selectedTime) {
     this.showToast('Válassz dátumot és időt','error');
     return;
   }
 
   if (!this.bookingEmail || !this.isValidEmail(this.bookingEmail)) {
-  this.showToast('Hibás email formátum','error');
-  return;
+    this.showToast('Hibás email formátum','error');
+    return;
   }
-  
+
   if (this.bookingLoading) return;
+
   this.bookingLoading = true;
 
+  this.api.createBooking({
+    userId: this.currentUserId!,
+    trainerId: this.selectedTrainerId!,
+    date: this.selectedDate!,
+    time: this.selectedTime!,
+    email: this.bookingEmail
+  })
+  .subscribe({
 
-this.api.createBooking({
-  userId: this.currentUserId!,
-  trainerId: this.selectedTrainerId!,
-  date: this.selectedDate!,
-  time: this.selectedTime!,
-  email: this.bookingEmail
-})
-.subscribe({
-  next: () => {
-    console.log('navigalokteszt');
-    this.router.navigate(['/booking-success']);
-    this.selectedTime = '';
-    this.selectedDate = '';
-  },
-  error: () => this.showToast('Foglalás sikertelen','error')
-});
-  }
+    next: (res:any) => {
+
+      this.bookingLoading = false;
+
+      if(res?.success){
+
+  this.currentPage = 'booking-success';
+
+  this.selectedDate = null;
+  this.selectedTime = null;
+  this.bookingEmail = '';
+  }   else{
+        this.showToast('Foglalás sikertelen','error');
+      }
+
+    },
+
+    error: () => {
+      this.bookingLoading = false;
+      this.showToast('Foglalás sikertelen','error');
+    }
+
+  });
+
+}
 
   loadMyBookings() {
   if (!this.currentUserId) return;

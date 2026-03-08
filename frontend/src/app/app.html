@@ -4,7 +4,7 @@
   <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
 
     <h1 class="text-4xl font-extrabold tracking-wide text-white">
-      Calen<span class="text-purple-500 text-4xl">Go</span>
+      Calen<span class="text-4xl text-purple-500">Go</span>
     </h1>
     <!-- ddd -->
     <!-- TOAST -->
@@ -22,29 +22,29 @@
 
       <!-- USER -->
       <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
-        class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
         Időpontjaim
       </button>
 
 
       <!-- USER + TRAINER -->
       <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
-        class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
         Időpontjaim
       </button>
 
       <!-- ADMIN -->
       <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
-        class="navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+        class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
         Userek
       </button>
 
       <button type="button" (click)="loadProfile(); showPage('account')"
-        class="navbtn px-4 py-2 bg-gray-600/80 text-white rounded">
+        class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
         Fiókom
       </button>
 
-      <button type="button" (click)="logoutConfirm()" class="px-4 py-2 bg-red-600 rounded text-white">
+      <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded">
         Logout
       </button>
 
@@ -61,7 +61,7 @@
 
     <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/80 rounded-2xl">
 
-      <h2 class="mb-6 font-bold text-center text-4xl text-white">
+      <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
       </h2>
 
@@ -69,7 +69,7 @@
 
       <input #password type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
-      <button type="button" class="w-full py-3 mb-3 bg-purple-600 rounded hover:bg-purple-500 text-white"
+      <button type="button" class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500"
         (click)="loginUser(email.value, password.value)">
         Belépés
       </button>
@@ -84,17 +84,17 @@
     </div>
   </div>
   <!-- REGISTER -->
-  <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto bg-gray-900/60 rounded">
+  <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto rounded bg-gray-900/60">
     <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
 
-    <input #name class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Név">
-    <input #email class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Email">
-    <input #password type="password" class="w-full p-2 mb-3 rounded bg-gray-800 text-white" placeholder="Jelszó">
+    <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Név">
+    <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
+    <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
 
 
     <button type="button" [disabled]="registerLoading"
-      class="w-full py-2 text-white bg-purple-600 hover:bg-purple-500 rounded"
+      class="w-full py-2 text-white bg-purple-600 rounded hover:bg-purple-500"
       (click)="registerUser(name.value, email.value, password.value)">
       Fiók létrehozása
     </button>
@@ -114,11 +114,11 @@
 
     <!-- WEEK NAV -->
     <div class="flex justify-between mb-4 ">
-      <button type="button" (click)="prevWeek()" class="px-4 py-2 bg-gray-700 rounded text-white">
+      <button type="button" (click)="prevWeek()" class="px-4 py-2 text-white bg-gray-700 rounded">
         ← Előző hét
       </button>
 
-      <button type="button" (click)="nextWeek()" class="px-4 py-2 bg-gray-700 rounded text-white">
+      <button type="button" (click)="nextWeek()" class="px-4 py-2 text-white bg-gray-700 rounded">
         Következő hét →
       </button>
     </div>
@@ -130,9 +130,9 @@
         <!-- HEADER -->
         <thead>
           <tr>
-            <th class="p-2 bg-gray-800 text-white text-center">Idő</th>
+            <th class="p-2 text-center text-white bg-gray-800">Idő</th>
 
-            <th *ngFor="let d of weekDays" class="p-2 text-center bg-gray-800 text-white">
+            <th *ngFor="let d of weekDays" class="p-2 text-center text-white bg-gray-800">
               {{ d | date:'EEE MM.dd' }}
             </th>
           </tr>
@@ -143,7 +143,7 @@
           <tr *ngFor="let slot of timeSlots">
 
             <!-- TIME -->
-            <td class="p-2 font-semibold bg-gray-800 text-white text-center">
+            <td class="p-2 font-semibold text-center text-white bg-gray-800">
               {{ slot }}
             </td>
 
@@ -168,7 +168,7 @@
 
   <!--FIÓKOM PAGE-->
   <div *ngIf="currentPage==='account'"
-    class="max-w-md p-8 mx-auto mt-8  shadow-xl rounded-2xl bg-gray-800/80 text-white">
+    class="max-w-md p-8 mx-auto mt-8 text-white shadow-xl rounded-2xl bg-gray-800/80">
 
     <button type="button" *ngIf="currentUserRole==='user'" class="mb-4 text-blue-400 underline"
       (click)="showPage('trainers')">
@@ -198,7 +198,7 @@
 
 
     <button type="button" (click)="saveProfile()"
-      class="w-full p-3 font-bold bg-purple-600 hover:bg-purple-500 rounded-lg text-white">
+      class="w-full p-3 font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-500">
       Mentés
     </button>
 
@@ -222,11 +222,11 @@
         <img src="assets/default.png" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
         <!-- USER látja -->
         <button type="button" *ngIf="currentUserRole === 'user'"
-          class="w-full py-2 mt-2 transition bg-purple-600 rounded-lg hover:bg-purple-500 text-white"
+          class="w-full py-2 mt-2 text-white transition bg-purple-600 rounded-lg hover:bg-purple-500"
           (click)="selectTrainer(t.id)">Időpontok
         </button>
 
-        <h3 class="inline-block px-3 py-1 mb-4 text-xl font-semibold text-white bg-purple-800/20 rounded">
+        <h3 class="inline-block px-3 py-1 mb-4 text-xl font-semibold text-white rounded bg-purple-800/20">
           {{ t.name }}
         </h3>
         <br>
@@ -243,7 +243,7 @@
   <!-- BOOKING -->
   <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'">
 
-    <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 bg-purple-600 text-white rounded text-2xl"
+    <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-2xl text-white bg-purple-600 rounded"
       (click)="showPage('trainers')">
 
       ← Vissza az edzőkhöz
@@ -427,10 +427,10 @@
   <!-- ADMIN PAGE -->
   <div *ngIf="currentPage === 'admin'" class="max-w-4xl mx-auto">
 
-    <h2 class="mb-4 text-center text-4xl text-white">Users</h2>
+    <h2 class="mb-4 text-4xl text-center text-white">Users</h2>
 
     <div *ngFor="let u of adminUsers"
-      class="flex items-center justify-between p-3 mb-2 bg-gray-800/80 rounded text-white">
+      class="flex items-center justify-between p-3 mb-2 text-white rounded bg-gray-800/80">
 
       <div>
         {{u.name}} — {{u.email}}
@@ -438,11 +438,11 @@
 
       <div class="flex gap-2">
 
-        <select #roleSel class="p-1 rounded bg-gray-600 text-white">
+        <select #roleSel class="p-1 text-white bg-gray-600 rounded">
 
-          <option value="user" [selected]="u.role==='user'" class="bg-gray-600 text-white">user</option>
-          <option value="trainer" [selected]="u.role==='trainer'" class="bg-gray-600 text-white">trainer</option>
-          <option value="admin" [selected]="u.role==='admin'" class="bg-gray-600 text-white">admin</option>
+          <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600">user</option>
+          <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600">trainer</option>
+          <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600">admin</option>
 
         </select>
 
@@ -462,7 +462,7 @@
   <!--booking pop up ful-->
   <div *ngIf="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center">
 
-    <div class="w-full max-w-md p-6 border-2 border-purple-600 bg-gray-900/95 rounded-xl text-white">
+    <div class="w-full max-w-md p-6 text-white border-2 border-purple-600 bg-gray-900/95 rounded-xl">
 
       <h3 class="mb-4 text-xl font-bold text-center">
         Foglalás részletei
@@ -496,4 +496,37 @@
 
     </div>
   </div>
-  <router-outlet></router-outlet>
+</div>
+  <!--SIKERES FOGLALÁS PAGE-->
+  <div *ngIf="currentPage === 'booking-success'"
+     class="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-50">
+
+  <h1 class="mb-4 text-4xl font-bold text-green-600">
+    ✅ Köszönjük!
+  </h1>
+
+  <p class="max-w-xl mb-8 text-lg text-center text-gray-700">
+    Időpontját sikeresen rögzítettük.
+    Várjuk szeretettel az edzésen!
+  </p>
+
+  <div class="w-full max-w-3xl overflow-hidden shadow-lg h-96 rounded-2xl">
+
+    <iframe
+      width="100%"
+      height="100%"
+      frameborder="0"
+      style="border:0"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu"
+      allowfullscreen
+      loading="lazy">
+    </iframe>
+  </div>
+    <button
+      (click)="showPage('trainers')"
+      class="px-6 py-3 mt-8 text-white transition bg-blue-600 rounded-xl hover:bg-blue-700">
+      Vissza az edzőkhöz
+    </button>
+  </div>
+
+  
