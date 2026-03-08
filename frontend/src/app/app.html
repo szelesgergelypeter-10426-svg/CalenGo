@@ -83,7 +83,7 @@
 
     </div>
   </div>
-  <!-- REGISTER -->
+  <!-- REGISZTRÁCIÓ -->
   <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto rounded bg-gray-900/60">
     <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
 
@@ -105,7 +105,7 @@
     </button>
   </div>
 
-  <!-- TRAINER DASHBOARD -->
+  <!-- TRAINER FOGLALÁSOK TÁBLÁZAT -->
   <div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl">
 
     <h2 class="mb-6 text-3xl font-bold text-center text-white">
@@ -123,11 +123,11 @@
       </button>
     </div>
 
-    <!-- GRID -->
+    
     <div class="overflow-auto">
       <table class="w-full border-collapse">
 
-        <!-- HEADER -->
+        
         <thead>
           <tr>
             <th class="p-2 text-center text-white bg-gray-800">Idő</th>
@@ -138,16 +138,16 @@
           </tr>
         </thead>
 
-        <!-- BODY -->
+        
         <tbody>
           <tr *ngFor="let slot of timeSlots">
 
-            <!-- TIME -->
+            <!-- IDŐ -->
             <td class="p-2 font-semibold text-center text-white bg-gray-800">
               {{ slot }}
             </td>
 
-            <!-- CELLS -->
+            <!-- CEELLÁK -->
             <td *ngFor="let d of weekDays" class="p-1">
 
               <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer" [ngClass]="
@@ -201,9 +201,6 @@
       class="w-full p-3 font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-500">
       Mentés
     </button>
-
-
-
   </div>
 
 
@@ -220,6 +217,7 @@
         class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
 
         <img src="assets/default.png" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+        
         <!-- USER látja -->
         <button type="button" *ngIf="currentUserRole === 'user'"
           class="w-full py-2 mt-2 text-white transition bg-purple-600 rounded-lg hover:bg-purple-500"
@@ -240,7 +238,8 @@
 
     </div>
   </div>
-  <!-- BOOKING -->
+
+  <!-- IDŐPONT FOGLALÁS -->
   <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'">
 
     <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-2xl text-white bg-purple-600 rounded"
@@ -319,14 +318,14 @@
   </div>
 
   <div *ngIf="currentPage === 'booking'" class="grid max-w-6xl grid-cols-1 gap-8 mx-auto md:grid-cols-2">
-    <!-- BAL OLDAL – DÁTUM -->
+    <!-- ÉV/HÓNAP -->
     <div class="p-6 text-white bg-gray-900 rounded-xl">
 
       <h2 class="mb-4 text-xl font-semibold text-center">
         {{ currentYear }} – {{ monthNames[currentMonth] }}
       </h2>
 
-      <!-- WEEKDAYS -->
+      <!-- HÉT NAPJAI -->
       <div class="grid grid-cols-7 mb-2 text-center text-gray-400">
         <div>H</div>
         <div>K</div>
@@ -338,12 +337,13 @@
       </div>
 
 
-      <!-- DAYS -->
+      <!-- NAPOK -->
       <button type="button" *ngFor="let day of calendarDays" [disabled]="!day" (click)="day && selectDay(day)"
         [class.bg-green-600]="selectedDate?.endsWith('-' + day)"
         class="w-10 h-10 transition bg-gray-800 rounded hover:bg-green-600 disabled:bg-transparent disabled:cursor-default">
         {{ day }}
       </button>
+
       <!-- JOBB OLDAL – IDŐPONTOK -->
       <div>
         <h3 class="mb-4 text-lg font-semibold">
@@ -424,7 +424,7 @@
   </div>
 
 
-  <!-- ADMIN PAGE -->
+  <!-- ADMIN OLDAL -->
   <div *ngIf="currentPage === 'admin'" class="max-w-4xl mx-auto">
 
     <h2 class="mb-4 text-4xl text-center text-white">Users</h2>

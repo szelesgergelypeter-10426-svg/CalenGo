@@ -1,6 +1,6 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./CalenGo.db');
 const app = express();
 const bcrypt = require('bcrypt');
@@ -10,21 +10,21 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
+const nodemailer = require('nodemailer');
 
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-
+///REQUEST LIMITER
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
+  windowMs: 15 * 60 * 1000, ///15MIN
+  max: 20, ///MAX 20REQUESTS
   message: { error: 'Túl sok próbálkozás, várj 15 percet' }
 });
 
 
-///EMAIL KÜLDŐ RENDSZER
-const nodemailer = require('nodemailer');
+///EMAIL KÜLDŐ SETUP
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -33,11 +33,26 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+function sendMail(to, subject, text) {
+  transporter.sendMail({
+    from: 'Gym Booking',
+    to,
+    subject,
+    text
+  }, (err) => {
+    if (err) console.log('MAIL ERROR:', err);
+    else console.log('MAIL SENT:', to);
+  });
+}
+///EMAIL KIKÜLDÉSE 240SOR
+
+///EMAIL VALIDÁLÁS
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 ///PROFILKÉP FELTÖLTÉS
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -47,22 +62,18 @@ const storage = multer.diskStorage({
     cb(null, unique);
   }
 });
-
 const upload = multer({ storage });
-
-// statikus fájl kiszolgálás
+// middleware, képek feltöltése
 app.use('/uploads', express.static('uploads'));
 
 
-// TEST ROUTE
-app.get('/', (req, res) => {
-  res.send('CalenGo backend running');
-});
-
+///////
+///ADATBÁZIS FELTÖLTÉSE/TÁBLÁK FELTÖLTÉSE/ADATOK FRISSÍTÉSE
+///////
 
 db.serialize(() => {
 
-  // PROFIL MEZŐK HOZZÁADÁSA - HA NINCSENEK
+  // PROFILKÉP HOZZÁADÁSA - HA NINCSENEK
  db.run(`ALTER TABLE users ADD COLUMN avatar TEXT`, ()=>{});
 
  db.run(`
@@ -108,6 +119,7 @@ db.serialize(() => {
   VALUES (1, 'John Doe'), (2, 'Jane Smith')
   `);
 
+  ///EGYEDI FOGLALÁS, 1IDŐPONTHOZ CSAK 1 FOGLALÁS LEHETSÉGES
   db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_booking
     ON bookings(trainerId, date, time)
     WHERE status!='cancelled'
@@ -116,7 +128,7 @@ db.serialize(() => {
 });
 
 
-//regiosztracio
+///REGISZTRÁCIÓ
 app.post('/api/register',
 [
   body('name').isLength({min:2}),
@@ -124,7 +136,6 @@ app.post('/api/register',
   body('password').isLength({min:8})
 ],
 async (req,res)=>{
-
   const errors = validationResult(req);
   if(!errors.isEmpty()){
     return res.status(400).json({errors: errors.array()});
@@ -142,9 +153,9 @@ async (req,res)=>{
 
       if(err){
         if(err.message.includes('UNIQUE')){
-          return res.status(409).json({error:'Email exists'});
+          return res.status(409).json({error:'Email exists'}); ///409 CONFLICT ERROR
         }
-        return res.status(500).json(err);
+        return res.status(500).json(err); ///500 SERVER ERROR
       }
 
       logAction(this.lastID,'REGISTER',email);
@@ -152,8 +163,8 @@ async (req,res)=>{
     });
 });
 
-//LOGIN + DEBUG
-app.post('/api/login', authLimiter, async (req, res) => {
+///BEJELENTKEZÉS
+app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUKODJONA AZ AWAIT A BCRYPT OSSZEHASONLITASHOZ
 
   const { email, password } = req.body;
 
@@ -185,7 +196,8 @@ app.post('/api/login', authLimiter, async (req, res) => {
   );
 });
 
-//idopont foglalas
+
+/// IDŐPONT FOGLALÁS
 app.post('/api/book', authLimiter, (req, res) => {
 
   const { userId, trainerId, date, time, email } = req.body;
@@ -195,12 +207,12 @@ app.post('/api/book', authLimiter, (req, res) => {
   if (!userId || !trainerId || !date || !time) {
     return res.status(400).json({ error: 'Missing data' });
   }
-
+  ///EMAIL VALIDÁLÁS HOGY JÓ E A FORMÁTUM
   if (!email || !isValidEmail(email)) {
   return res.status(400).json({ error: 'Hibás email formátum' });
   }
  
-  // 🔍 CHECK — van-e már foglalás erre az időpontra
+  /// VAN E MÁR FOGLÁS ERRE AZ IDŐPONTRA
   db.get(`
     SELECT id FROM bookings
     WHERE trainerId = ?
@@ -217,9 +229,7 @@ app.post('/api/book', authLimiter, (req, res) => {
       });
     }
     
-
-
-    // ha nincs → INSERT + email küldése + logolás
+    /// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
     db.run(`
     INSERT INTO bookings (userId, trainerId, date, time, status)
     VALUES (?, ?, ?, ?, 'pending')
@@ -231,34 +241,37 @@ app.post('/api/book', authLimiter, (req, res) => {
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-
+        ///EMAIL KIKÜLDÉSE USER/TRAINERNEK
     sendMail(
     email,
     "Foglalás megerősítve",
-    `Sikeres foglalás:\nDátum: ${date}\nId ő: ${time}`
+    `Sikeres foglalás:\nDátum: ${date}\nIdő: ${time}`
     );
     res.json({ success: true });
   });
-    ///TRAINER USER LEKÉRÉSE
-   db.get(
-  "SELECT email,name FROM users WHERE id=?",
-  [trainerId],
-  (e, trainer) => {
 
-    if (trainer) {
-      sendMail(
-        trainer.email,
-        "Új foglalás érkezett",
-        `Új időpont foglalás:\nDátum: ${date}\nIdő: ${time}`
-      );
-    } else {
-      console.log("Trainer email not found for id:", trainerId);
-    }
-  });
+
+  ///TRAINER USER LEKÉRÉSE
+   db.get(
+    "SELECT email,name FROM users WHERE id=?",
+    [trainerId],
+    (e, trainer) => {
+      if (trainer) {
+        sendMail(
+          trainer.email,
+          "Új foglalás érkezett",
+          `Új időpont foglalás:\nDátum: ${date}\nIdő: ${time}`
+        );
+      } else {
+        console.log("Trainer email not found for id:", trainerId);
+      }
+    });
   });
 });
 
-//foglalas lekeres usernek
+
+
+///A USER ÖSSZES FOGLALÁSÁNAK LEKÉRDEZÉSE
 app.get('/api/my-bookings/:userId', (req,res)=>{
   db.all(`
     SELECT b.*, t.name as trainerName
@@ -270,7 +283,8 @@ app.get('/api/my-bookings/:userId', (req,res)=>{
   (_,rows)=> res.json(rows));
 });
 
-  ///foglalas torlese
+
+///foglalas torlese
 app.delete('/api/bookings/:id', (req,res)=>{
   db.get(`SELECT userId FROM bookings WHERE id=?`,
     [req.params.id],
@@ -457,18 +471,6 @@ app.put('/api/profile/:id', (req,res)=>{
   ()=> res.json({success:true}));
 });
 
-///EMAIL KÜLDŐ
-function sendMail(to, subject, text) {
-  transporter.sendMail({
-    from: 'Gym Booking',
-    to,
-    subject,
-    text
-  }, (err) => {
-    if (err) console.log('MAIL ERROR:', err);
-    else console.log('MAIL SENT:', to);
-  });
-}
 
 ///PROFILKÉP FELTÖLTÉSE
 app.post('/api/upload-avatar/:id', upload.single('avatar'), (req, res) => {
@@ -507,8 +509,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-
 //------------------SZEERVER FUTTATAS------------------//
+// TEST ROUTE
+app.get('/', (req, res) => {
+  res.send('CalenGo backend running');
+});
+
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
