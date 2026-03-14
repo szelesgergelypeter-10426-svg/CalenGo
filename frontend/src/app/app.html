@@ -1,4 +1,4 @@
-<!--<spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>-->
+<spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>
   <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
 
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
@@ -12,66 +12,53 @@
       'bg-green-600': toastType==='success',
       'bg-red-600': toastType==='error'
     }">
-
         {{ toastMessage }}
-
       </div>
-
       <div class="flex items-center gap-3" *ngIf="currentUserRole">
 
         <!-- USER -->
         <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
-          class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
           Időpontjaim
         </button>
 
-
         <!-- USER + TRAINER -->
         <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
-          class="navbtn navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
           Időpontjaim
         </button>
 
         <!-- ADMIN -->
         <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
-          class="navbtn px-4 py-2 text-white bg-gray-600/80 rounded">
+          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
           Userek
         </button>
 
         <button type="button" (click)="loadProfile(); showPage('account')"
-          class="navbtn px-4 py-2 bg-gray-600/80 text-white rounded">
+          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
           Fiókom
         </button>
 
-
-        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 bg-red-600 rounded text-white">
+        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded">
           Logout
         </button>
-
       </div>
-
     </div>
   </nav>
+<div class="relative z-10">
 
-  <div class="relative z-10">
 
-
-    <!-- LOGIN -->
-    <!-- SCROLL CONTAINER -->
-<div *ngIf="currentPage === 'login'" 
-     class="snap-y snap-mandatory">
-
+<!-- LOGIN -->
+<!-- SCROLL CONTAINER -->
+<div *ngIf="currentPage === 'login'" class="h-screen overflow-y-auto snap-y snap-mandatory">
   <!-- LOGIN PANEL -->
   <section class="flex flex-col items-center justify-center min-h-screen text-center">
-
     <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl">
-
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
       </h2>
 
       <input #email class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
-
       <input #password type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button type="button"
@@ -83,45 +70,59 @@
       <p class="text-sm text-2xl text-center text-gray-300">
         Nincsen fiókja?
       </p>
-      <!-- SCROLL HINT -->
-      <p class="mt-6 text-sm text-gray-300 animate-bounce">
-        ↓ Görgess le ↓
-      </p>
 
+      <!-- GORGETES LEFELE -->
+      <p
+        class="mt-6 text-sm text-gray-300 cursor-pointer animate-bounce" (click)="scrollToRegister()">
+        ↓ Regisztráció ↓
+      </p>
     </div>
   </section>
-  <!-- LOGO PAGE -->
-  <section class="flex flex-col items-center justify-center min-h-screen text-center bg-gray-700">
-<img src="assets/projekt.png" class="float-left mr-4 mb-2 w-120 rounded">
-    <h1 class="mb-6 text-6xl font-extrabold text-white">
-      Calen<span class="text-purple-500">Go</span>
-    </h1>
 
-    <p class="max-w-xl mb-8 text-gray-400">
-      Online időpontfoglaló rendszer edzőknek és sportolóknak.
-      Foglalj időpontot pár kattintással.
-    </p>
+    <!-- LOGO PAGE / LOGO IDEIGLENESEN ELTAVOLITVA-->
+  <section id="registerSection"
+    class="flex flex-col items-center justify-center min-h-screen text-center bg-gray-700">
 
-    <button
-      (click)="showPage('register')"
-      class="px-8 py-4 text-lg text-white bg-purple-600 rounded-xl hover:bg-purple-500">
+    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl">
+
+      <h2 class="mb-6 text-4xl font-bold text-white">
       Regisztráció
-    </button>
+      </h2>
 
+      <input #name
+      class="w-full p-3 mb-3 text-white bg-gray-800 rounded"
+      placeholder="Név">
+
+      <input #regEmail
+      class="w-full p-3 mb-3 text-white bg-gray-800 rounded"
+      placeholder="Email">
+
+      <input #regPassword
+      type="password"
+      class="w-full p-3 mb-3 text-white bg-gray-800 rounded"
+      placeholder="Jelszó">
+
+      <button
+      (click)="registerUser(name.value, regEmail.value, regPassword.value)"
+      class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500">
+
+      Fiók létrehozása
+
+      </button>
+    </div>
   </section>
-
 </div>
-    <!-- REGISZTRÁCIÓ -->
-    <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto rounded bg-gray-900/60">
-      <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
-
-      <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Név">
-      <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
-      <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
 
+<!-- REGISZTRÁCIÓ -->
+<div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto rounded bg-gray-900/60">
+  <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
 
-      <button type="button" [disabled]="registerLoading"
+  <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Név">
+  <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
+    <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
+
+    <button type="button" [disabled]="registerLoading">
         class="w-full py-2 text-white bg-purple-600 rounded hover:bg-purple-500"
         (click)="registerUser(name.value, email.value, password.value)">
         Fiók létrehozása
@@ -153,11 +154,9 @@
         </button>
       </div>
 
-      
       <div class="overflow-auto">
         <table class="w-full border-collapse">
-
-          
+   
           <thead>
             <tr>
               <th class="p-2 text-center text-white bg-gray-800">Idő</th>
@@ -167,8 +166,7 @@
               </th>
             </tr>
           </thead>
-
-          
+   
           <tbody>
             <tr *ngFor="let slot of timeSlots">
 
@@ -200,7 +198,7 @@
     <div *ngIf="currentPage==='account'"
       class="max-w-md p-8 mx-auto mt-8 text-white shadow-xl rounded-2xl bg-gray-800/80">
 
-      <button type="button" *ngIf="currentUserRole==='user'" class="mb-4 text-blue-400 underline hover:border-2x   hover:border-purple-600"
+      <button type="button" *ngIf="currentUserRole==='user'" class="mb-4 text-blue-400 underline hover:border-2x hover:border-purple-600"
         (click)="showPage('trainers')">
 
         ← Edzők
@@ -233,8 +231,7 @@
       </button>
     </div>
 
-
-
+    
     <!-- TRAINERS -->
     <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'">
       <h2 class="mb-8 text-3xl font-bold text-center text-white ">

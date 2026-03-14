@@ -231,6 +231,16 @@ export class AppComponent {
   this.editTime = b.time;
 }
 
+///SMOOTH LEGORDULES
+scrollToRegister() {
+  const el = document.getElementById('registerSection');
+  if (el) {
+    el.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+}
+
 saveEdit(id: number) {
 
   if (!this.editDate || !this.editTime) {
@@ -246,10 +256,10 @@ saveEdit(id: number) {
         this.loadTrainerBookingsView();
       },
       error: () => this.showToast('Hiba','error')
-    });}
+});}
 
-  cancelEdit() {
-    this.editingId = null;}
+cancelEdit() {
+  this.editingId = null;}
       
     
 ///EDZŐK
@@ -268,7 +278,6 @@ saveEdit(id: number) {
     }
   ];
 
-  
 
   selectTrainer(id: number) {
 
