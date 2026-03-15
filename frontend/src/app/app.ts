@@ -478,9 +478,9 @@ prevWeek() {
 
   ///BÉRLET ÁRAK
   prices = [
-    { category: 'Diák', monthly: '5000 Ft', single: '1500 Ft' },
-    { category: 'Felnőtt', monthly: '8000 Ft', single: '2500 Ft' },
-    { category: 'Nyugdíjas', monthly: '6000 Ft', single: '1800 Ft' }
+    { category: 'Diák', monthly: '10000 Ft', single: '2000 Ft' },
+    { category: 'Felnőtt', monthly: '15000 Ft', single: '2500 Ft' },
+    { category: 'Nyugdíjas', monthly: '6000 Ft', single: '1500 Ft' }
   ];
 
   scrollToPrices() {
