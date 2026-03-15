@@ -18,7 +18,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: "" |'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'|'booking-success' = 'login';
+  currentPage: 'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'|'booking-success' = 'login';
   currentUserRole: string | null = null;
   currentUserId: number | null = null;
   takenTimes: string[] = [];
@@ -37,6 +37,7 @@ export class AppComponent {
   currentWeekStart!: Date;
   selectedBooking: any = null;
   showBookingModal = false;
+  trainers: any[] = [];
 
 
   constructor(
@@ -55,13 +56,18 @@ export class AppComponent {
   }
   }
 
-  showPage(page: typeof this.currentPage) {
-    this.bookingSuccess = false;
-    this.currentPage = page;
+showPage(page: typeof this.currentPage) {
+  this.bookingSuccess = false;
+  this.currentPage = page;
+
+    if (page !== 'login') {
+      this.trainers = [];
+    }
+
     if (page === 'trainers') {
       this.loadTrainers();
     }
-  }
+}
   ///LOGOUT
   logout() {
   this.currentUserRole = null;
@@ -197,12 +203,14 @@ export class AppComponent {
   this.registerLoading = true;
   
   if (!name || !email || !password) {
-    alert("Minden mező kötelező");
-    return;
+  alert("Minden mező kötelező");
+  this.registerLoading = false;
+  return;
   }
 
   if (!this.isValidEmail(email)) {
     alert("Hibás email formátum");
+    this.registerLoading = false;
     return;
   }
 
@@ -231,7 +239,7 @@ export class AppComponent {
   this.editTime = b.time;
 }
 
-///SMOOTH LEGORDULES
+///SMOOTH LEGORDULESEK /REGISZTRACIO,EDZOK,ÁRAK,ELERHETOSEG,
 scrollToRegister() {
   const el = document.getElementById('registerSection');
   if (el) {
@@ -239,6 +247,18 @@ scrollToRegister() {
       behavior: 'smooth'
     });
   }
+}
+
+scrollToTrainers() {
+  const el = document.getElementById('trainersSection');
+  el?.scrollIntoView({ behavior: 'smooth' });
+}
+
+
+
+scrollToContact() {
+  const el = document.getElementById('contactSection');
+  el?.scrollIntoView({ behavior: 'smooth' });
 }
 
 saveEdit(id: number) {
@@ -262,21 +282,6 @@ cancelEdit() {
   this.editingId = null;}
       
     
-///EDZŐK
-  trainers = [
-    {
-      id: 1,
-      name: 'John Doe',
-      specialty: 'Strength Training',
-      image: 'https://i.pravatar.cc/150?img=12'
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      specialty: 'Yoga',
-      image: 'https://i.pravatar.cc/150?img=32'
-    }
-  ];
 
 
   selectTrainer(id: number) {
@@ -286,15 +291,11 @@ cancelEdit() {
   this.selectedTime = null;
   this.takenTimes = [];
 
-  const schedule = this.trainerSchedules[id] || this.trainerSchedules[1];
+  const schedule = this.trainerSchedule;
 
   if (!schedule) return;
 
-  this.availableTimes = {
-    morning: schedule.morning,
-    afternoon: schedule.afternoon,
-    evening: schedule.evening
-  };
+  this.availableTimes = this.trainerSchedule;
 
   this.showPage('booking');
   }
@@ -316,9 +317,9 @@ cancelEdit() {
   ngOnInit() {
   this.bookingSuccess = false;
   this.generateCalendar();
-  this.loadTrainers();
   this.generateTimeSlots();
   this.generateWeek();
+  this.loadTrainers(); 
   }
 
   generateCalendar() {
@@ -469,19 +470,25 @@ prevWeek() {
   }
   
   // EDZŐ IDŐPONTOK
-
-  trainerSchedules: any = {
-    1: {
-      morning: ['08:00', '09:00', '10:00', '11:00',],
-      afternoon: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00',],
-      evening: ['18:00', '19:00', '20:00',]
-    },
-    2: {
-      morning: ['08:00', '09:00', '10:00', '11:00'],
-      afternoon: ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
-      evening: ['18:00', '19:00', '20:00']
-    }
+  trainerSchedule = {
+  morning: ['08:00','09:00','10:00'],
+  afternoon: ['13:00','14:00','15:00'],
+  evening: ['18:00','19:00','20:00']
   };
+
+  ///BÉRLET ÁRAK
+  prices = [
+    { category: 'Diák', monthly: '5000 Ft', single: '1500 Ft' },
+    { category: 'Felnőtt', monthly: '8000 Ft', single: '2500 Ft' },
+    { category: 'Nyugdíjas', monthly: '6000 Ft', single: '1800 Ft' }
+  ];
+
+  scrollToPrices() {
+    const el = document.getElementById('prices');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
 
   availableTimes = {
     morning: [] as string[],
@@ -737,23 +744,24 @@ bookingLoading = false;
     this.currentPage = 'bookings';
   }}
 
-  loadTrainers() {
-  this.api.getTrainers().subscribe((list: any[]) => {
-    this.trainers = list.map((t: any) => ({
-      id: t.id,
-      name: t.name,
-      image: 'assets/default-trainer.png',
-      specialty: 'Trainer'
-    }));
+loadTrainers() {
+  this.api.getTrainers().subscribe({
+    next: (list: any[]) => {
+      this.trainers = list;  // feltölti a frontendet
+      console.log('Trainers betöltve:', this.trainers);
+    },
+    error: (err) => {
+      console.error('Hiba a tréner lista betöltésénél', err);
+    }
   });
-  }
-
+}
 
   onDateSelected() {
   if (this.selectedTrainerId !== null) {
     this.loadTrainerBookings(this.selectedTrainerId);
   }
   }
+
  //STÁTUSZ SZÖVEG
   statusLabel(s: string) {
   return {

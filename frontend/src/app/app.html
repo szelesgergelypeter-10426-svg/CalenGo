@@ -1,17 +1,34 @@
-<spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>
-  <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
-
+<!--<spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>-->
+  <nav *ngIf="currentPage === 'login'" class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
       <h1 class="text-4xl font-extrabold tracking-wide text-white">
         Calen<span class="text-4xl text-purple-500">Go</span>
       </h1>
-      <!-- ddd -->
+      
+      <div class="flex gap-6 ml-10 text-white">
+      <button (click)="scrollToRegister()" class="hover:text-purple-400">
+        Regisztráció
+      </button>
+
+      <button (click)="scrollToTrainers()" class="hover:text-purple-400">
+        Edzők
+      </button>
+
+      <button (click)="scrollToPrices()" class="px-4 py-2 font-bold text-gray-900 transition bg-yellow-400 rounded hover:bg-yellow-300">
+        Áraink
+      </button>
+
+      <button (click)="scrollToContact()" class="hover:text-purple-400">
+        Kapcsolat
+      </button>
+    </div>
+      
       <!-- TOAST -->
       <div *ngIf="toastMessage"
         class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg top-6 left-1/2" [ngClass]="{
       'bg-green-600': toastType==='success',
       'bg-red-600': toastType==='error'
-    }">
+      }">
         {{ toastMessage }}
       </div>
       <div class="flex items-center gap-3" *ngIf="currentUserRole">
@@ -50,7 +67,7 @@
 
 <!-- LOGIN -->
 <!-- SCROLL CONTAINER -->
-<div *ngIf="currentPage === 'login'" class="h-screen overflow-y-auto snap-y snap-mandatory">
+<div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory">
   <!-- LOGIN PANEL -->
   <section class="flex flex-col items-center justify-center min-h-screen text-center">
     <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl">
@@ -134,14 +151,38 @@
         Vissza a bejelentkezéshez
       </button>
       </p>
+</div>
+
+<!-- MAIN PAGE EDZŐK-->
+<section id="trainersSection" class="flex flex-col items-center justify-center min-h-screen text-white bg-gray-800">
+  <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let t of trainers" class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
+      <img [src]="t.avatar || 'assets/default.png'" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+      <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
+      <p class="text-sm text-purple-400">{{ t.specialty || 'személyi edző' }}</p>
     </div>
+  </div>
+</section>
 
-    <!-- TRAINER FOGLALÁSOK TÁBLÁZAT -->
-    <div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl">
+<!-- ÁRAINK-->
+<div id="prices" class="max-w-4xl p-6 mx-auto mt-10 text-white bg-gray-900 rounded-xl">
+  <h2 class="mb-4 text-2xl font-bold text-center text-yellow-400">Áraink</h2>
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div *ngFor="let p of prices" class="p-4 text-center bg-gray-800 rounded-lg">
+      <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
+      <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
+      <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
+    </div>
+  </div>
+</div>
 
-      <h2 class="mb-6 text-3xl font-bold text-center text-white">
-        Heti foglalások
-      </h2>
+
+<!-- TRAINER FOGLALÁSOK TÁBLÁZAT -->
+<div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl">
+  <h2 class="mb-6 text-3xl font-bold text-center text-white">
+    Heti foglalások
+  </h2>
 
       <!-- WEEK NAV -->
       <div class="flex justify-between mb-4 ">
@@ -232,7 +273,7 @@
     </div>
 
     
-    <!-- TRAINERS -->
+    <!-- TRAINERS PAGE-->
     <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'">
       <h2 class="mb-8 text-3xl font-bold text-center text-white ">
         Válassz edzőink közül!
@@ -243,7 +284,7 @@
         <div *ngFor="let t of trainers"
           class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
 
-          <img src="assets/default.png" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+          <img [src]="t.avatar || 'assets/default.png'" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
           
           <!-- USER látja -->
           <button type="button" *ngIf="currentUserRole === 'user'"
@@ -256,13 +297,9 @@
           </h3>
           <br>
           <span class="inline-block px-3 py-1 mb-4 text-sm text-purple-400 rounded-full bg-purple-600/20">
-            {{ t.specialty }}
+            {{ t.specialty || 'személyi edző' }}
           </span>
-
-
-
         </div>
-
       </div>
     </div>
 
@@ -555,5 +592,3 @@
         Vissza az edzőkhöz
       </button>
     </div>
-
-    

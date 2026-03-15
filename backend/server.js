@@ -109,15 +109,7 @@ db.serialize(() => {
     VALUES (1, 'Admin', 'admin@calengo.com', 'admin123', 'admin')
   `);
 
-  db.run(`
-  CREATE TABLE IF NOT EXISTS trainers (
-    id INTEGER PRIMARY KEY,
-    name TEXT)
-  `);
-
-  db.run(`INSERT OR IGNORE INTO trainers (id, name)
-  VALUES (1, 'John Doe'), (2, 'Jane Smith')
-  `);
+  
 
   ///EGYEDI FOGLALÁS, 1IDŐPONTHOZ CSAK 1 FOGLALÁS LEHETSÉGES
   db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_booking
@@ -421,10 +413,16 @@ app.put('/api/trainer-booking-status/:id', (req, res) => {
 });
 
 ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
-app.get('/api/trainers',(req,res)=>{
+app.get('/api/trainers', (req, res) => {
   db.all(
-    `SELECT id,name FROM users WHERE role='trainer'`,
-    (_,rows)=> res.json(rows)
+    `SELECT id, name, avatar FROM users WHERE role='trainer'`,
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(rows);
+    }
   );
 });
 //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
