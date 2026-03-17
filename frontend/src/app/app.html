@@ -54,7 +54,7 @@
           Fiókom
         </button>
 
-        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 hover:float-none text-white hover:scale-105 bg-red-600 rounded">
+        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded">
           Logout
         </button>
       </div>
@@ -282,7 +282,7 @@
 
 <!-- IDŐPONT FOGLALÁS -->
 <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'">
-  <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-xl hover:scale-105 text-white bg-purple-600 rounded" (click)="showPage('trainers')">
+  <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-2xl text-white bg-purple-600 rounded" (click)="showPage('trainers')">
     ← Vissza az edzőkhöz
   </button>
 
