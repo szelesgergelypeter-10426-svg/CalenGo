@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   imports: [CommonModule, FormsModule,],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.html',
-  styleUrls: ['./app.css']
+  styleUrls: ['./app.css', './app.extra.css']
 })
 export class AppComponent {
 
@@ -38,10 +39,12 @@ export class AppComponent {
   selectedBooking: any = null;
   showBookingModal = false;
   trainers: any[] = [];
+  currentTime: string = ''
 
-
+  
   constructor(
     private api: ApiService) {}
+    
 
   //NAP KIVÁLASZTÁSA
   selectDay(day: number) {
@@ -61,7 +64,7 @@ showPage(page: typeof this.currentPage) {
   this.currentPage = page;
 
     if (page !== 'login') {
-      this.trainers = [];
+      //this.trainers = [];
     }
 
     if (page === 'trainers') {
@@ -216,6 +219,7 @@ showPage(page: typeof this.currentPage) {
 
   if (password.length < 8) {
     alert("A jelszó túl rövid");
+    this.registerLoading = false;
     return;
   }
 
@@ -320,7 +324,16 @@ cancelEdit() {
   this.generateTimeSlots();
   this.generateWeek();
   this.loadTrainers(); 
+  this.updateClock(); // azonnal mutassa az aktuális időt
   }
+
+  updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  this.currentTime = `${h}:${m}:${s}`;
+}
 
   generateCalendar() {
     this.calendarDays = [];
@@ -777,4 +790,41 @@ loadTrainers() {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
   }
+  prevMonth() {
+  const now = new Date();
+
+  if (
+    this.currentYear === now.getFullYear() &&
+    this.currentMonth === now.getMonth()
+  ) {
+    return;
+  }
+
+  this.currentMonth--;
+
+  if (this.currentMonth < 0) {
+    this.currentMonth = 11;
+    this.currentYear--;
+  }
+
+  this.generateCalendar();
+  this.resetSelection();
+}
+
+nextMonth() {
+  this.currentMonth++;
+
+  if (this.currentMonth > 11) {
+    this.currentMonth = 0;
+    this.currentYear++;
+  }
+
+  this.generateCalendar();
+  this.resetSelection();
+}
+resetSelection() {
+  this.selectedDate = null;
+  this.selectedTime = null;
+  this.takenTimes = [];
+}
 }
