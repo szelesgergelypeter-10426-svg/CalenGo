@@ -6,19 +6,19 @@
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex gap-6 ml-10 text-white">
         <div class="flex gap-6 ml-10 text-white">
-          <button (click)="scrollToRegister()" class="hover:text-purple-400">
+          <button (click)="scrollToRegister()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Regisztráció
           </button>
 
-          <button (click)="scrollToTrainers()" class="hover:text-purple-400">
+          <button (click)="scrollToTrainers()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Edzők
           </button>
 
-          <button (click)="scrollToPrices()" class="hover:text-purple-400">
+          <button (click)="scrollToPrices()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Áraink
           </button>
 
-          <button (click)="scrollToContact()" class="hover:text-purple-400">
+          <button (click)="scrollToContact()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Kapcsolat
           </button>
         </div>
@@ -33,28 +33,28 @@
 
         <!-- USER -->
         <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
-          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
+          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Időpontjaim
         </button>
 
         <!-- USER + TRAINER -->
         <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
-          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
+          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Időpontjaim
         </button>
 
         <!-- ADMIN -->
         <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
-          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
+          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Userek
         </button>
 
         <button type="button" (click)="loadProfile(); showPage('account')"
-          class="px-4 py-2 text-white rounded navbtn bg-gray-600/80">
+          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Fiókom
         </button>
 
-        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded">
+        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 hover:float-none text-white hover:scale-105 bg-red-600 rounded">
           Logout
         </button>
       </div>
@@ -75,7 +75,7 @@
       <input #password type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button type="button"
-        class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500"
+        class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105"
         (click)="loginUser(email.value, password.value)">
         Belépés
       </button>
@@ -107,7 +107,7 @@
       <input #regPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button (click)="registerUser(name.value, regEmail.value, regPassword.value)" 
-        class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500">
+        class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105">
         Fiók létrehozása
       </button>
     </div>
@@ -184,11 +184,11 @@
   </h2>
       <!-- WEEK NAV -->
       <div class="flex justify-between mb-4 ">
-        <button type="button" (click)="prevWeek()" class="px-4 py-2 text-white bg-gray-700 rounded">
+        <button type="button" (click)="prevWeek()" class="px-4 py-2 text-white bg-gray-700 rounded hover:bg-purple-800 hover:scale-105">
           ← Előző hét
         </button>
 
-        <button type="button" (click)="nextWeek()" class="px-4 py-2 text-white bg-gray-700 rounded">
+        <button type="button" (click)="nextWeek()" class="px-4 py-2 text-white bg-gray-700 rounded hover:bg-purple-800 hover:scale-105">
           Következő hét →
         </button>
       </div>
@@ -207,12 +207,12 @@
           <tbody>
             <tr *ngFor="let slot of timeSlots">
               <!-- IDŐ -->
-              <td class="p-2 font-semibold text-center text-white bg-gray-800">
+              <td class="p-2 font-semibold text-center text-white bg-gray-800 ">
                 {{ slot }}
               </td>
               <!-- CEELLÁK -->
               <td *ngFor="let d of weekDays" class="p-1">
-                <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer" [ngClass]="
+                <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer hover:scale-105" [ngClass]="
                   getBookingFor(d, slot) ? getBookingColor(getBookingFor(d, slot)): 'bg-gray-700'" (click)="openBooking(getBookingFor(d, slot))">
                   {{ getBookingFor(d, slot)?.email || '' }}
                 </div>
@@ -282,7 +282,7 @@
 
 <!-- IDŐPONT FOGLALÁS -->
 <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'">
-  <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-2xl text-white bg-purple-600 rounded" (click)="showPage('trainers')">
+  <button type="button" *ngIf="currentUserRole==='user'" class="px-4 py-2 mb-4 text-xl hover:scale-105 text-white bg-purple-600 rounded" (click)="showPage('trainers')">
     ← Vissza az edzőkhöz
   </button>
 
@@ -473,10 +473,10 @@
       </div>
     </div>
 
-    <!--booking pop up ful-->
+    <!--booking pop up full-->
     <div *ngIf="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center">
 
-      <div class="w-full max-w-md p-6 text-white border-2 border-purple-600 bg-gray-900/95 rounded-xl">
+      <div class="w-full max-w-md p-6 text-white border-2 border-purple-600 bg-gray-900/95 rounded-xl ">
 
         <h3 class="mb-4 text-xl font-bold text-center">
           Foglalás részletei
@@ -494,15 +494,15 @@
         <!-- BUTTONS -->
         <div class="flex justify-between gap-2 mt-6">
 
-          <button (click)="updateBookingStatus('approved')" class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700">
+          <button (click)="updateBookingStatus('approved')" class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700 hover:scale-105">
             Elfogadás
           </button>
 
-          <button (click)="updateBookingStatus('rejected')" class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700">
+          <button (click)="updateBookingStatus('rejected')" class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700 hover:scale-105">
             Elutasítás
           </button>
 
-          <button (click)="closeBookingModal()" class="flex-1 py-2 bg-gray-700 rounded hover:bg-gray-600">
+          <button (click)="closeBookingModal()" class="flex-1 py-2 bg-gray-700 rounded hover:bg-gray-600 hover:scale-105">
             Bezár
           </button>
 
