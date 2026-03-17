@@ -223,46 +223,109 @@ app.post('/api/book', authLimiter, (req, res) => {
 
       /// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
       db.run(`
-    INSERT INTO bookings (userId, trainerId, date, time, status)
-    VALUES (?, ?, ?, ?, 'pending')
-    `,
-        [userId, trainerId, date, time],
-        function (err) {
+  INSERT INTO bookings (userId, trainerId, date, time, status)
+  VALUES (?, ?, ?, ?, 'pending')
+`,
+[userId, trainerId, date, time],
+function (err) {
 
-          if (err) {
-            console.error(err);
-            return res.status(500).json({ error: err.message });
-          }
-          ///EMAIL KIKÜLDÉSE USER/TRAINERNEK
-          sendMail
-          (email, 
-            "Foglalás megerősítve",
-            `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px;">
-              <tr> <td align="center">
-                <table width="500" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #dddddd;">
-                  <tr> <td style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold;">
-                    Foglalás megerősítve ✅ </td> </tr> <tr>
-                    <td style="padding: 20px; color: #333333; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
-                      <p>Kedves Ügyfelünk!</p> <p>Köszönjük a foglalást, az alábbi időpontra sikeresen rögzítettük:</p>
-                      <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #f9f9f9; margin: 15px 0;">
-                        <tr> <td style="font-weight: bold;">Dátum:</td> <td>${date}</td> </tr> <tr> <td style="font-weight: bold;">Idő:</td>
-                          <td>${time}</td>ö </tr> </table>  <p>Várunk szeretettel az edzésen!</p> <p style="margin-top: 20px;">Üdvözlettel,<br />
-                        <strong>A csapat</strong></p> </td> </tr> <tr> <td style="background-color: #eeeeee; text-align: center; padding: 10px; font-size: 12px; color: #777777; font-family: Arial, sans-serif;">
-                          Ez egy automatikus üzenet, kérjük ne válaszolj rá. </td> </tr> </table> </td> </tr> </table>`);
-          res.json({ success: true });
-        });
+  if (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+
+  // 👉 EDZŐ NEVÉNEK LEKÉRÉSE
+  db.get(
+  "SELECT name FROM users WHERE id = ?",
+  [trainerId],
+  (err, trainer) => {
+
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      const trainerName = trainer?.name || "Ismeretlen";
+
+      // 👉 EMAIL KÜLDÉS
+      sendMail(
+        email,
+        "Foglalás megerősítve",
+        `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px;">
+        <tr><td align="center">
+          <table width="500" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #dddddd;">
+            <tr>
+              <td style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold;">
+                Foglalás megerősítve ✅
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px; color: #333333; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+                <p>Kedves Ügyfelünk!</p>
+                <p>Köszönjük a foglalást, az alábbi időpontra sikeresen rögzítettük:</p>
+
+                <table width="100%" cellspacing="0" cellpadding="10" style="background-color: #f9f9f9; margin: 15px 0;">
+                  <tr>
+                    <td style="font-weight: bold;">Edző:</td>
+                    <td>${trainerName}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold;">Dátum:</td>
+                    <td>${date}</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: bold;">Idő:</td>
+                    <td>${time}</td>
+                  </tr>
+                </table>
+
+                <p>Várunk szeretettel az edzésen!</p>
+                <p style="margin-top: 20px;">Üdvözlettel,<br><strong>A csapat</strong></p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        </table>`
+      );
+
+      res.json({ success: true });
+    }
+  );
+});
 
 
       ///TRAINER USER LEKÉRÉSE
-      db.get(
-        "SELECT email,name FROM users WHERE id=?",
-        [trainerId],
-        (e, trainer) => {
-          if (trainer) {
+      db.get(`
+        SELECT 
+        t.email as trainerEmail,
+        t.name as trainerName,
+        u.name as userName,
+        u.email as userEmail
+          FROM users t
+          JOIN users u ON u.id = ?
+          WHERE t.id = ?
+        `,
+        [userId, trainerId],
+        (e, data) => {
+          if (data) {
             sendMail(
-              trainer.email,
+              data.trainerEmail,
               "Új foglalás érkezett",
-              `Új időpont foglalás érkezett:\nIdő: ${time}`
+              `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px;">
+              <tr> <td align="center">
+                <table width="500" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #dddddd;">
+                  <tr> <td style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold;">
+                    Új foglalás érkezett ✅ </td> </tr> <tr>
+                    <td style="padding: 20px; color: #333333; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">
+                      <p>Tisztelt ${data.trainerName}</p> <p> Új Foglalása érkezett, az alábbi időpontra:</p>
+                      <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #f9f9f9; margin: 15px 0;">
+                        <tr> <td style="font-weight: bold;">Név:</td> <td>${data.userName}</td> </tr>
+                        <tr><td style="font-weight: bold;">Email:</td> <td>${data.userEmail}</td> </tr>
+                        <tr> <td style="font-weight: bold;">Dátum:</td> <td>${date}</td> </tr>
+                        <tr> <td style="font-weight: bold;">Idő:</td> <td>${time}</td> </tr>
+                        </table>  <p>Várunk szeretettel az edzésen!</p> <p style="margin-top: 20px;">Üdvözlettel,<br />
+                        <strong>A csapat</strong></p> </td> </tr> <tr> <td style="background-color: #eeeeee; text-align: center; padding: 10px; font-size: 12px; color: #777777; font-family: Arial, sans-serif;">
+                          Ez egy automatikus üzenet, kérjük ne válaszolj rá. </td> </tr> </table> </td> </tr> </table>`
             );
           } else {
             console.log("Trainer email not found for id:", trainerId);
