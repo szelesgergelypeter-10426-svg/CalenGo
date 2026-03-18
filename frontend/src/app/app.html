@@ -5,6 +5,9 @@
         Calen<span class="text-4xl text-purple-500">Go</span>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 md:ml-10 text-white">
+          <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
+            Bejelentkezés
+          </button>
           <button (click)="scrollToRegister()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Regisztráció
           </button>
@@ -41,6 +44,12 @@
           Időpontjaim
         </button>
 
+        <!-- USER: edzők -->
+        <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('trainers')"
+          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
+          Edzők
+        </button>
+
         <!-- ADMIN -->
         <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
@@ -57,6 +66,7 @@
         </button>
       </div>
     </div>
+  </nav>
 
 
 <div class="relative z-10 min-h-screen bg-gray-900">
@@ -288,17 +298,6 @@
 
 <!-- IDŐPONT FOGLALÁS -->
 <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="fade-in">
-  <button
-  type="button"
-  *ngIf="currentUserRole==='user'"
-  (click)="showPage('trainers')"
-  class="mb-6 inline-flex items-center px-4 py-2 text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 active:scale-95 transition-transform"
->
-  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M15 18l-6-6 6-6"></path>
-  </svg>
-  Vissza az edzőkhöz
-</button>
 
     <!--User időpontok-->
     <div *ngFor="let b of adminBookings" class="p-3 mb-3 bg-gray-800 rounded">
