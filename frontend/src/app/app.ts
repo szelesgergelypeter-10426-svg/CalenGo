@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { NgZone } from '@angular/core';
+import { ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -40,11 +40,18 @@ export class AppComponent {
   showBookingModal = false;
   trainers: any[] = [];
   currentTime: string = ''
+  
 
   
   constructor(
     private api: ApiService) {}
     
+    scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
 
   //NAP KIVÁLASZTÁSA
   selectDay(day: number) {
@@ -280,7 +287,10 @@ saveEdit(id: number) {
         this.loadTrainerBookingsView();
       },
       error: () => this.showToast('Hiba','error')
+      
 });}
+
+
 
 cancelEdit() {
   this.editingId = null;}
