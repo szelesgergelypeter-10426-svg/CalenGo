@@ -3,7 +3,7 @@
       <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
         Calen<span class="text-4xl text-purple-500">Go</span>
       </h1>
-      <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 md:ml-10 text-white">
+      <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
           <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Bejelentkezés
           </button>
@@ -25,7 +25,7 @@
       </div>
       <!-- TOAST -->
         <div *ngIf="toastMessage"
-          class="toast fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg top-6 left-1/2" [ngClass]="{
+          class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg toast top-6 left-1/2" [ngClass]="{
         'bg-green-600': toastType==='success', 'bg-red-600': toastType==='error'}">
           {{ toastMessage }}
         </div>
@@ -72,9 +72,9 @@
 <div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory fade-in">
   <!-- LOGIN PANEL -->
   <section 
-  class="flex items-center justify-center h-screen text-center bg-cover bg-center"
+  class="flex items-center justify-center h-screen text-center bg-center bg-cover"
   [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
-    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl border-2 border-purple-600">
+    <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
       </h2>
@@ -103,16 +103,16 @@
     
   <!--regisztracio a main pagen-->
   <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-gray-700">
-    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl transform border-2 border-purple-600">
+    <div class="w-full max-w-md p-8 transform border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-white">
         Regisztráció
       </h2>
 
-      <input #name class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Név">
+      <input #name class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Név">
 
-      <input #regEmail class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Email">
+      <input #regEmail class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Email">
 
-      <input #regPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Jelszó">
+      <input #regPassword type="password" class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Jelszó">
 
       <button (click)="registerUser(name.value, regEmail.value, regPassword.value)" 
         class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105">
@@ -127,9 +127,9 @@
       <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div *ngFor="let t of trainers"
-            class="p-6 text-center transition duration-300 transform cursor-pointer bg-gray-900 shadow-lg rounded-2xl hover:scale-115 hover:border-2 hover:border-purple-600">
+            class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg cursor-pointer rounded-2xl hover:scale-110 hover:border-2 hover:border-purple-600">
 
-            <img [src]="t.avatar || 'assets/default.png'" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+            <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
             <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
             <p class="text-sm text-purple-400">{{ t.specialty || 'személyi edző' }}</p>
           </div>
@@ -143,7 +143,7 @@
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
 
       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div *ngFor="let p of prices" class="p-4 text-center cursor-pointer bg-gray-800 rounded-lg transition duration-300 hover:scale-110 hover:border-2 hover:border-purple-600">
+        <div *ngFor="let p of prices" class="p-4 text-center transition duration-300 bg-gray-800 rounded-lg cursor-pointer hover:scale-110 hover:border-2 hover:border-purple-600">
           <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
           <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
           <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
@@ -153,16 +153,15 @@
   </section>
 
   <!-- KAPCSOLAT-->
-  <section id="contactSection" class="flex items-center crusor-p justify-center h-screen text-white">
+  <section id="contactSection" class="flex items-center justify-center h-screen text-white cursor-pointer">
     <div class="text-center cursor-pointer"> 
       <h2 class="mb-6 text-4xl font-bold">Kapcsolat</h2>
-      <p class="mt-4 px-3 py-2 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
-      <p class="mt-4 px-3 py-2 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">+36 70 123 4567</p>
+      <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
+      <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">+36 70 123 4567</p>
       <p>
           <button
   (click)="scrollToTop()"
-  class="mt-6 px-4 py-3 text-white bg-purple-600 rounded-full shadow-lg
-         hover:bg-purple-500 hover:scale-110 transition-all duration-300">
+  class="px-4 py-3 mt-6 text-white transition-all duration-300 bg-purple-600 rounded-full shadow-lg hover:bg-purple-500 hover:scale-110">
   ↑ Vissza a tetejére ↑
 </button>
       </p>
@@ -181,7 +180,7 @@
 
     <button type="button"
     [disabled]="registerLoading"
-    class="w-full py-2 text-white bg-purple-600 rounded hover:bg-purple-500 transform active:scale-95 disabled:opacity-50"
+    class="w-full py-2 text-white transform bg-purple-600 rounded hover:bg-purple-500 active:scale-95 disabled:opacity-50"
     (click)="registerUser(name.value, email.value, password.value)">
     {{ registerLoading ? 'Betöltés...' : 'Fiók létrehozása' }}
   </button>
@@ -246,7 +245,7 @@
     <h2 class="mb-6 text-2xl font-bold text-center">
       Fiókom
     </h2>
-      <img [src]="profile.avatar || 'assets/default.png'" class="w-32 h-32 mx-auto mb-4 border rounded-full">
+      <img [src]="getAvatarUrl(profile.avatar)" class="w-32 h-32 border">
 
       <input type="file" (change)="onAvatarSelected($event)" class="w-full mb-3">
 
@@ -275,7 +274,7 @@
   </h2>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       <div *ngFor="let t of trainers" class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
-        <img [src]="t.avatar || 'assets/default.png'" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
+        <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
 
           <!-- USER látja -->
           <button type="button" *ngIf="currentUserRole === 'user'"
@@ -321,26 +320,26 @@
             Delete
           </button>
     </div>
-      <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="fade-in max-w-3xl mx-auto px-4">
+      <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="max-w-3xl px-4 mx-auto fade-in">
   <h2 class="mb-8 text-3xl font-extrabold text-center text-white">
     Időpontjaim
   </h2>
 
-  <div *ngIf="bookings.length === 0" class="text-center text-gray-400 italic">
-    You have no bookings yet.
+  <div *ngIf="bookings.length === 0" class="italic text-center text-gray-400">
+    Jelenleg nincs foglalásod.
   </div>
 
   <div class="space-y-6">
-    <div *ngFor="let b of bookings" class="flex items-center justify-between p-5 from-purple-800 to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div *ngFor="let b of bookings" class="flex items-center justify-between p-5 transition-shadow duration-300 shadow-lg from-purple-800 to-purple-700 rounded-xl hover:shadow-xl">
       <div>
-        <p class="text-xl font-semibold text-white tracking-wide">
+        <p class="text-xl font-semibold tracking-wide text-white">
           {{ b.trainer }}
         </p>
         <p class="text-gray-300">
           {{ b.date }} · {{ b.time }}
         </p>
         <span
-          class="inline-block mt-2 px-3 py-1 text-sm font-semibold rounded-full"
+          class="inline-block px-3 py-1 mt-2 text-sm font-semibold rounded-full"
           [ngClass]="{
             'bg-yellow-400 text-yellow-900': b.status === 'pending',
             'bg-green-500 text-green-900': b.status === 'approved',
@@ -355,7 +354,7 @@
       <button
         type="button"
         (click)="cancelBookingBackend(b.id)"
-        class="px-4 py-2 font-semibold text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 active:scale-95 transition-transform"
+        class="px-4 py-2 font-semibold text-white transition-transform bg-red-600 rounded-lg shadow-md hover:bg-red-700 active:scale-95"
         aria-label="Cancel booking"
       >
         Cancel
@@ -366,17 +365,17 @@
 </div>
 
 <div *ngIf="currentPage === 'booking'"
-  class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 fade-in">
+  class="grid max-w-6xl grid-cols-1 gap-10 mx-auto md:grid-cols-2 fade-in">
 
   <!-- BAL OLDAL – NAPTÁR -->
-  <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800">
+  <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
 
     <div class="flex items-center justify-between mb-6">
 
   <!-- BAL NYÍL -->
   <button
     (click)="prevMonth()"
-    class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
+    class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700">
     ←
   </button>
 
@@ -388,14 +387,14 @@
   <!-- JOBB NYÍL -->
   <button
     (click)="nextMonth()"
-    class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition">
+    class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700">
     →
   </button>
 
 </div>
 
     <!-- HÉT NAPJAI -->
-    <div class="grid grid-cols-7 text-center text-gray-500 mb-3 text-sm">
+    <div class="grid grid-cols-7 mb-3 text-sm text-center text-gray-500">
       <div>H</div><div>K</div><div>Sz</div>
       <div>Cs</div><div>P</div><div>Szo</div><div>V</div>
     </div>
@@ -408,10 +407,7 @@
         [disabled]="!day"
         (click)="day && selectDay(day)"
         [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)"
-        class="h-11 rounded-lg bg-gray-800 hover:bg-gray-700 transition-all duration-200
-               disabled:bg-transparent disabled:cursor-default
-               hover:scale-105 active:scale-95
-               text-sm font-medium">
+        class="text-sm font-medium transition-all duration-200 bg-gray-800 rounded-lg h-11 hover:bg-gray-700 disabled:bg-transparent disabled:cursor-default hover:scale-105 active:scale-95">
 
         {{ day }}
       </button>
@@ -419,19 +415,19 @@
   </div>
 
   <!-- JOBB OLDAL -->
-  <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-xl border border-gray-800">
+  <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
     <!--ÓRA-->
-        <div class="flex items-center justify-center mb-6 p-4 bg-gray-800 rounded-xl shadow-lg text-white text-2xl font-mono tracking-widest">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-center justify-center p-4 mb-6 font-mono text-2xl tracking-widest text-white bg-gray-800 shadow-lg rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           {{ currentTime }}
         </div>
-    <h3 class="text-xl font-semibold mb-6">
+    <h3 class="mb-6 text-xl font-semibold">
       Elérhető időpontok
     </h3>
 
-    <div *ngIf="!selectedDate" class="text-gray-500 text-sm">
+    <div *ngIf="!selectedDate" class="text-sm text-gray-500">
       Válassz egy dátumot a bal oldalon 👈
     </div>
 
@@ -445,7 +441,7 @@
       ]">
 
         <div>
-          <p class="mb-2 text-gray-300 font-medium">
+          <p class="mb-2 font-medium text-gray-300">
             {{ block.label }}
           </p>
 
@@ -461,9 +457,7 @@
                 'bg-gray-800 text-gray-200 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t),
                 'opacity-30 cursor-not-allowed bg-gray-700': takenTimes.includes(t)
               }"
-              class="px-4 py-2 rounded-lg border border-gray-700
-                     transition-all duration-200
-                     hover:scale-105 active:scale-95 text-sm">
+              class="px-4 py-2 text-sm transition-all duration-200 border border-gray-700 rounded-lg hover:scale-105 active:scale-95">
 
               {{ t }}
             </button>
@@ -474,16 +468,14 @@
 
       <!-- EMAIL -->
       <div class="mt-6">
-        <label class="block text-sm text-gray-400 mb-2">
+        <label class="block mb-2 text-sm text-gray-400">
           Email cím
         </label>
 
         <input
           type="email"
           [(ngModel)]="bookingEmail"
-          class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700
-                 focus:ring-2 focus:ring-blue-500 focus:outline-none
-                 transition-all"
+          class="w-full p-3 transition-all bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
           placeholder="valami@calengo.com">
       </div>
 
@@ -492,11 +484,7 @@
         type="button"
         (click)="bookAppointment()"
         [disabled]="bookingLoading"
-        class="w-full mt-6 py-3 rounded-xl font-semibold
-               bg-purple-800
-               hover:scale-105 active:scale-95 transition-all
-               duration-150 shadow-lg shadow-purple-600/30
-               disabled:opacity-50">
+        class="w-full py-3 mt-6 font-semibold transition-all duration-150 bg-purple-800 shadow-lg rounded-xl hover:scale-105 active:scale-95 shadow-purple-600/30 disabled:opacity-50">
 
         {{ bookingLoading ? 'Foglalás...' : 'Foglalás' }}
       </button>

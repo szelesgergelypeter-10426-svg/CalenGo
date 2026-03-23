@@ -71,7 +71,7 @@ showPage(page: typeof this.currentPage) {
   this.currentPage = page;
 
     if (page !== 'login') {
-      //this.trainers = [];
+      
     }
 
     if (page === 'trainers') {
@@ -110,9 +110,6 @@ showPage(page: typeof this.currentPage) {
     this.profile.password = '';
     });
   }
-
-  
-
   
   ///STÁTUSZ OSZTÁLY
   statusClass(s: string) {
@@ -126,6 +123,9 @@ showPage(page: typeof this.currentPage) {
   
   //PROFIL MENTÉSE
   saveProfile() {
+    console.log("MENTÉS ELŐTT:", this.profile);
+     
+  
   ///EMAIL VALIDÁCIÓ
   if (!this.isValidEmail(this.profile.email)) {
   this.showToast('Hibás email formátum', 'error');
@@ -138,8 +138,11 @@ showPage(page: typeof this.currentPage) {
     .subscribe({
 
       next: () => {
-        this.showToast('Profil frissítve');
-      },
+  this.showToast('Profil frissítve');
+
+  
+  this.loadProfile();
+  },
 
       error: () => {
         this.showToast('Mentés hiba', 'error');
@@ -304,13 +307,7 @@ cancelEdit() {
   this.selectedDate = null;
   this.selectedTime = null;
   this.takenTimes = [];
-
-  const schedule = this.trainerSchedule;
-
-  if (!schedule) return;
-
   this.availableTimes = this.trainerSchedule;
-
   this.showPage('booking');
   }
 
@@ -335,6 +332,7 @@ cancelEdit() {
   this.generateWeek();
   this.loadTrainers(); 
   this.updateClock(); // azonnal mutassa az aktuális időt
+  setInterval(() => this.updateClock(), 1000); /// nem megy az ido debug
   }
 
   updateClock() {
@@ -368,16 +366,21 @@ cancelEdit() {
 
 
   ///acccept/reject pop up gomb
-  updateBookingStatus(status: 'approved' | 'rejected') {
+updateBookingStatus(status: 'approved' | 'rejected') {
   if (!this.selectedBooking) return;
 
-  this.selectedBooking.status = status;
-
-  // 🔥 BACKEND CALL HELYE (később bekötjük)
-  // this.api.updateBookingStatus(...)
-
-  this.closeBookingModal();
-  }
+  this.api.setBookingStatus(this.selectedBooking.id, status)
+    .subscribe({
+      next: () => {
+        this.showToast('Státusz frissítve');
+        this.loadTrainerBookingsView();
+        this.closeBookingModal();
+      },
+      error: () => {
+        this.showToast('Hiba', 'error');
+      }
+    });
+}
   
   ///IDŐPONTOK GENERÁLÁSA
   generateTimeSlots() {
@@ -531,7 +534,7 @@ prevWeek() {
 
 
   // =====================
-  // BOOKINGS (FRONTEND MOCK — NEXT STEP BACKEND)
+  // BOOKINGS 
   // =====================
 
     
@@ -676,6 +679,18 @@ bookingLoading = false;
   avatar: ''
   };
 
+  ///PROFILKÉP MŰKÖDÉSE
+  getAvatarUrl(path: string | null): string {
+  if (!path) return 'assets/default.png';
+
+  const base = path.startsWith('http')
+    ? path
+    : 'http://localhost:3000' + path;
+
+
+  return base + '?t=' + new Date().getTime();
+  }
+
 
 
   //FOGLALT NAPOK LETILTASA
@@ -741,8 +756,8 @@ bookingLoading = false;
   //TRAINER BOOKING VIEW STATUS CHANGE
   trainerSetStatus(id: number, status: string) {
 
-  this.api.setBookingStatus(id, status)
-    .subscribe({
+  this.api.setBookingStatus(this.selectedBooking.id, status)
+  .subscribe({
 
       next: () => {
         this.showToast('Státusz módosítva');
@@ -800,16 +815,9 @@ loadTrainers() {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
   }
-  prevMonth() {
-  const now = new Date();
 
-  if (
-    this.currentYear === now.getFullYear() &&
-    this.currentMonth === now.getMonth()
-  ) {
-    return;
-  }
-
+///hónap navigáció
+prevMonth() {
   this.currentMonth--;
 
   if (this.currentMonth < 0) {
@@ -819,7 +827,7 @@ loadTrainers() {
 
   this.generateCalendar();
   this.resetSelection();
-}
+  }
 
 nextMonth() {
   this.currentMonth++;

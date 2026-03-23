@@ -64,7 +64,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 // middleware, képek feltöltése
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 ///////
@@ -73,8 +73,25 @@ app.use('/uploads', express.static('uploads'));
 
 db.serialize(() => {
 
+  ///alap admin user +jelszava le hashelve a biztonsag kedveert
+  db.get(`SELECT * FROM users WHERE email = ?`, ['admin@calengo.com'], async (err, user) => {
+  if (!user) {
+    const hash = await bcrypt.hash('admin123', 10);
+
+    db.run(
+      `INSERT INTO users (name, email, password, role)
+       VALUES (?, ?, ?, 'admin')`,
+      ['Admin', 'admin@calengo.com', hash]
+    );
+
+  }
+  });
+  
+
   // PROFILKÉP HOZZÁADÁSA - HA NINCSENEK
   db.run(`ALTER TABLE users ADD COLUMN avatar TEXT`, () => { });
+
+  db.run(`ALTER TABLE bookings ADD COLUMN email TEXT`, () => {});
 
   db.run(`
   CREATE TABLE IF NOT EXISTS audit_log (
@@ -104,11 +121,6 @@ db.serialize(() => {
     time TEXT,
     status TEXT DEFAULT 'pending')
   `);
-
-  db.run(`INSERT OR IGNORE INTO users (id, name, email, password, role)
-    VALUES (1, 'Admin', 'admin@calengo.com', 'admin123', 'admin')
-  `);
-
 
 
   ///EGYEDI FOGLALÁS, 1IDŐPONTHOZ CSAK 1 FOGLALÁS LEHETSÉGES
@@ -223,10 +235,10 @@ app.post('/api/book', authLimiter, (req, res) => {
 
       /// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
       db.run(`
-  INSERT INTO bookings (userId, trainerId, date, time, status)
-  VALUES (?, ?, ?, ?, 'pending')
+  INSERT INTO bookings (userId, trainerId, date, time, status, email)
+  VALUES (?, ?, ?, ?, 'pending', ?)
 `,
-[userId, trainerId, date, time],
+[userId, trainerId, date, time, email],
 function (err) {
 
   if (err) {
@@ -234,7 +246,7 @@ function (err) {
     return res.status(500).json({ error: err.message });
   }
 
-  // 👉 EDZŐ NEVÉNEK LEKÉRÉSE
+  
   db.get(
   "SELECT name FROM users WHERE id = ?",
   [trainerId],
@@ -247,7 +259,7 @@ function (err) {
 
       const trainerName = trainer?.name || "Ismeretlen";
 
-      // 👉 EMAIL KÜLDÉS
+      
       sendMail(
         email,
         "Foglalás megerősítve",
@@ -374,18 +386,6 @@ app.get('/api/trainer-bookings/:trainerId', (req, res) => {
   );
 });
 
-
-
-//foglalas torlese
-app.put('/api/cancel/:id', (req, res) => {
-  const { id } = req.params;
-
-  db.run(
-    `UPDATE bookings SET status = 'cancelled' WHERE id = ?`,
-    [id],
-    () => res.json({ message: 'Cancelled' })
-  );
-});
 
 //ADMIN MODOSITAS - ADMIN-AL
 app.put('/api/booking/:id', (req, res) => {
@@ -530,16 +530,28 @@ app.get('/api/profile/:id', (req, res) => {
 });
 
 //UPDATE PROFILE
-app.put('/api/profile/:id', (req, res) => {
+app.put('/api/profile/:id', async (req, res) => {
   const { name, email, password, avatar } = req.body;
 
-  db.run(`
-    UPDATE users
-    SET name=?, password=?, avatar=?
-    WHERE id=?
-  `,
-    [name, password, avatar, req.params.id],
-    () => res.json({ success: true }));
+  db.get(`SELECT avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
+
+    let finalAvatar = avatar || user.avatar;
+
+    let finalPassword = password;
+
+    if (password) {
+      finalPassword = await bcrypt.hash(password, 10);
+    }
+
+    db.run(`
+      UPDATE users
+      SET name=?, email=?, password=?, avatar=?
+      WHERE id=?
+    `,
+      [name, email, finalPassword, finalAvatar, req.params.id],
+      () => res.json({ success: true })
+    );
+  });
 });
 
 
@@ -553,7 +565,7 @@ app.post('/api/upload-avatar/:id', upload.single('avatar'), (req, res) => {
     [filePath, req.params.id],
     () => res.json({ path: filePath })
   );
-
+  
 });
 
 ///LOGIN HELPER
