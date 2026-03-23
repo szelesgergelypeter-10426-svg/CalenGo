@@ -1,7 +1,6 @@
-<!--<spline-viewer url="https://prod.spline.design/iJdHjsnuOmWOZol3/scene.splinecode"></spline-viewer>-->
   <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
-      <h1 class="text-4xl font-extrabold tracking-wide text-white">
+      <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
         Calen<span class="text-4xl text-purple-500">Go</span>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 md:ml-10 text-white">
@@ -72,8 +71,10 @@
 <div class="relative z-10 min-h-screen bg-gray-900">
 <div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory fade-in">
   <!-- LOGIN PANEL -->
-  <section #loginSection class="flex items-center justify-center h-screen text-center bg-gray-900">
-    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl">
+  <section 
+  class="flex items-center justify-center h-screen text-center bg-cover bg-center"
+  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
+    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl border-2 border-purple-600">
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
       </h2>
@@ -102,16 +103,16 @@
     
   <!--regisztracio a main pagen-->
   <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-gray-700">
-    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl">
+    <div class="w-full max-w-md p-8 shadow-xl bg-gray-900/60 rounded-2xl transform border-2 border-purple-600">
       <h2 class="mb-6 text-4xl font-bold text-white">
         Regisztráció
       </h2>
 
-      <input #name class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Név">
+      <input #name class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Név">
 
-      <input #regEmail class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
+      <input #regEmail class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Email">
 
-      <input #regPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
+      <input #regPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-600/80 rounded" placeholder="Jelszó">
 
       <button (click)="registerUser(name.value, regEmail.value, regPassword.value)" 
         class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105">
@@ -121,12 +122,12 @@
   </section>
 
   <!-- MAIN PAGE EDZŐK-->
-  <section id="trainersSection" class="flex items-center justify-center h-screen text-white bg-gray-900">
+  <section id="trainersSection" class="flex items-center justify-center h-screen text-white">
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div *ngFor="let t of trainers"
-            class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
+            class="p-6 text-center transition duration-300 transform cursor-pointer bg-gray-900 shadow-lg rounded-2xl hover:scale-115 hover:border-2 hover:border-purple-600">
 
             <img [src]="t.avatar || 'assets/default.png'" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
             <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
@@ -139,10 +140,10 @@
   <!-- ÁRAINK-->
   <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700">
     <div class="text-center">
-      <h2 class="mb-4 text-2xl font-bold">Áraink</h2>
+      <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
 
       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div *ngFor="let p of prices" class="p-4 text-center bg-gray-800 rounded-lg">
+        <div *ngFor="let p of prices" class="p-4 text-center cursor-pointer bg-gray-800 rounded-lg transition duration-300 hover:scale-110 hover:border-2 hover:border-purple-600">
           <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
           <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
           <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
@@ -152,11 +153,11 @@
   </section>
 
   <!-- KAPCSOLAT-->
-  <section id="contactSection" class="flex items-center justify-center h-screen text-white bg-gray-900">
-    <div class="text-center">
+  <section id="contactSection" class="flex items-center crusor-p justify-center h-screen text-white">
+    <div class="text-center cursor-pointer"> 
       <h2 class="mb-6 text-4xl font-bold">Kapcsolat</h2>
-      <p class="text-lg text-gray-300">ProjectCalenGo@gmail.com</p>
-      <p class="text-lg text-gray-300">+36 70 123 4567</p>
+      <p class="mt-4 px-3 py-2 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
+      <p class="mt-4 px-3 py-2 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">+36 70 123 4567</p>
       <p>
           <button
   (click)="scrollToTop()"
@@ -174,13 +175,13 @@
 <div *ngIf="currentPage === 'register'" class="max-w-md p-6 mx-auto rounded bg-gray-900/60 fade-in">
   <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
 
-  <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Név">
-  <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
-  <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
+  <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Név">
+  <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Email">
+  <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Jelszó">
 
     <button type="button"
     [disabled]="registerLoading"
-    class="w-full py-2 text-white bg-purple-600 rounded hover:bg-purple-500 transition transform active:scale-95 disabled:opacity-50"
+    class="w-full py-2 text-white bg-purple-600 rounded hover:bg-purple-500 transform active:scale-95 disabled:opacity-50"
     (click)="registerUser(name.value, email.value, password.value)">
     {{ registerLoading ? 'Betöltés...' : 'Fiók létrehozása' }}
   </button>
@@ -240,10 +241,8 @@
 </div>
 
 <!--FIÓKOM PAGE-->
-<div *ngIf="currentPage==='account'" class="max-w-md p-8 mx-auto mt-8 text-white shadow-xl rounded-2xl bg-gray-800/80 fade-in">
-  <button type="button" *ngIf="currentUserRole==='user'" class="mb-6 inline-flex items-center px-4 py-2 bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 hover:scale-105 transition-transform" (click)="showPage('trainers')">
-    ← Edzők
-  </button>
+<div *ngIf="currentPage==='account'" class="max-w-md p-8 mx-auto text-white shadow-xl rounded-2xl bg-gray-800/80 fade-in">
+
     <h2 class="mb-6 text-2xl font-bold text-center">
       Fiókom
     </h2>
@@ -428,8 +427,6 @@
           </svg>
           {{ currentTime }}
         </div>
-
-
     <h3 class="text-xl font-semibold mb-6">
       Elérhető időpontok
     </h3>
