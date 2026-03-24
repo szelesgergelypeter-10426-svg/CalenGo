@@ -230,7 +230,10 @@
               <td *ngFor="let d of weekDays" class="p-1">
                 <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer hover:scale-105" [ngClass]="
                   getBookingFor(d, slot) ? getBookingColor(getBookingFor(d, slot)): 'bg-gray-700'" (click)="openBooking(getBookingFor(d, slot))">
-                  {{ getBookingFor(d, slot)?.email || '' }}
+                   <!-- {{ getBookingFor(d, slot)?.name || 'Szabad' }}  
+                   EBBE A RÉSZBE RAKJUK MAJD BELE HOGY AZ ADOTT KOCKÁK STÁTUSZA MILYEN VAGY AMIT MAJD KITALÁLUNK  
+                   + A STÁTUSZJELZŐKET ÁTÍRNI, ÁTFOGALMAZNI MAGYARRA / AHOGY JOBBAN KINÉZ
+                   -->
                 </div>
               </td>
             </tr>

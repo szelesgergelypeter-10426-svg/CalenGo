@@ -256,10 +256,7 @@ function (err) {
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-
       const trainerName = trainer?.name || "Ismeretlen";
-
-      
       sendMail(
         email,
         "Foglalás megerősítve",
@@ -340,7 +337,7 @@ function (err) {
                           Ez egy automatikus üzenet, kérjük ne válaszolj rá. </td> </tr> </table> </td> </tr> </table>`
             );
           } else {
-            console.log("Trainer email not found for id:", trainerId);
+            console.log("nincsen email az adott id hez:", trainerId);
           }
         });
     });
@@ -454,13 +451,13 @@ app.get('/api/all-bookings-grouped', (req, res) => {
   `, (e, r) => res.json(r))
 })
 
-// TRAINER APPROVE / REJECT
+// TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
 app.put('/api/trainer-booking-status/:id', (req, res) => {
 
   const { status } = req.body;
 
   db.get(`
-    SELECT u.email, b.date, b.time
+    SELECT u.email, u.name as userName, b.date, b.time
     FROM bookings b
     JOIN users u ON b.userId=u.id
     WHERE b.id=?`,
@@ -470,9 +467,29 @@ app.put('/api/trainer-booking-status/:id', (req, res) => {
       if (row && row.email) {
         sendMail(
           row.email,
-          "Foglalás státusz frissítve",
-          `Státusz: ${status}\n${row.date} ${row.time}`
+          "Időpont foglalás státusza frissítve",
+          `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px;">
+          <tr><td align="center">
+            <table width="500" style="background-color: #ffffff; border: 1px solid #dddddd;">
+              <tr><td style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; font-size: 24px;">
+               Időpontja módosítva!</td> </tr> <tr>
+                <td style="padding: 20px; font-family: Arial;">
+                  <p>Kedves ${row.userName}!</p>
+                  <p>A foglalásod módosításra került:</p>
+                  <table width="100%" cellpadding="10" style="background:#f9f9f9;">
+                    <tr> <td><b>Státusz:</b> </td> <td>${status}</td></tr>
+                    <tr><td><b>Dátum:</b></td><td>${row.date}</td></tr>
+                    <tr><td><b>Idő:</b></td><td>${row.time}</td></tr>
+                  </table>
+                  <p>Várunk szeretettel!</p>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+          </table>`
         );
+      } else {
+        console.log("Nincs email ehhez a bookinghoz");
       }
     }
   );
