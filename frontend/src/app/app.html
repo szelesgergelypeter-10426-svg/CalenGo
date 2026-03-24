@@ -102,7 +102,7 @@
 
     
   <!--regisztracio a main pagen-->
-  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-gray-700">
+  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
     <div class="w-full max-w-md p-8 transform border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-white">
         Regisztráció
@@ -122,7 +122,8 @@
   </section>
 
   <!-- MAIN PAGE EDZŐK-->
-  <section id="trainersSection" class="flex items-center justify-center h-screen text-white">
+  <section id="trainersSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover"
+  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}" >
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -138,7 +139,8 @@
   </section>
 
   <!-- ÁRAINK-->
-  <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700">
+  <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700 bg-center bg-cover"
+  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
 
@@ -153,7 +155,7 @@
   </section>
 
   <!-- KAPCSOLAT-->
-  <section id="contactSection" class="flex items-center justify-center h-screen text-white cursor-pointer">
+  <section id="contactSection" class="flex items-center justify-center h-screen text-white cursor-pointer bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
     <div class="text-center cursor-pointer"> 
       <h2 class="mb-6 text-4xl font-bold">Kapcsolat</h2>
       <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
