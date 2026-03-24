@@ -108,13 +108,13 @@
         Regisztráció
       </h2>
 
-      <input #name class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Név">
+      <input #regName class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Név">
 
       <input #regEmail class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Email">
 
       <input #regPassword type="password" class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Jelszó">
 
-      <button (click)="registerUser(name.value, regEmail.value, regPassword.value)" 
+      <button (click)="registerUser(regName.value, regEmail.value, regPassword.value)" 
         class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105">
         Fiók létrehozása
       </button>
@@ -155,7 +155,7 @@
   </section>
 
   <!-- KAPCSOLAT-->
-  <section id="contactSection" class="flex items-center justify-center h-screen text-white cursor-pointer bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
+  <section id="contactSection" class="flex items-center justify-center h-screen text-white bg-center bg-cover cursor-pointer" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
     <div class="text-center cursor-pointer"> 
       <h2 class="mb-6 text-4xl font-bold">Kapcsolat</h2>
       <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
@@ -325,7 +325,7 @@
             Delete
           </button>
     </div>
-      <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="max-w-3xl px-4 mx-auto fade-in">
+      <div class="max-w-3xl px-4 mx-auto fade-in">
   <h2 class="mb-8 text-3xl font-extrabold text-center text-white">
     Időpontjaim
   </h2>

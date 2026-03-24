@@ -571,7 +571,7 @@ bookingLoading = false;
 
       if(res?.success){
 
-  this.currentPage = 'booking-success';
+  this.showPage('booking-success');
 
   this.selectedDate = null;
   this.selectedTime = null;
@@ -756,7 +756,7 @@ bookingLoading = false;
   //TRAINER BOOKING VIEW STATUS CHANGE --jó api bekötve
   trainerSetStatus(id: number, status: string) {
 
-  this.api.setBookingStatus(this.selectedBooking.id, status)
+  this.api.setBookingStatus(id, status)
   .subscribe({
 
       next: () => {

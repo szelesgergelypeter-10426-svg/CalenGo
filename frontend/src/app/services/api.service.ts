@@ -58,9 +58,6 @@ export class ApiService {
     return this.http.delete(this.base + '/bookings/' + id); 
   }
 
-  trainerSetStatus(id: number, status: string) {
-    return this.http.put(this.base + '/trainer-booking-status/' + id, { status });
-  }
 
   getProfile(id: number) {
   return this.http.get<any>(this.base + '/profile/' + id);

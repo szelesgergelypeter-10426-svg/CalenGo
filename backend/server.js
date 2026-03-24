@@ -554,9 +554,9 @@ app.put('/api/profile/:id', async (req, res) => {
 
     let finalAvatar = avatar || user.avatar;
 
-    let finalPassword = password;
+    let finalPassword = user.password;
 
-    if (password) {
+    if (password && password.trim() !== '') {
       finalPassword = await bcrypt.hash(password, 10);
     }
 
