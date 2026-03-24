@@ -97,4 +97,6 @@ export class ApiService {
   getAuditLog() {
   return this.http.get<any[]>(`${this.base}/audit`);
   }
+
+  ///kitisztítva
 }

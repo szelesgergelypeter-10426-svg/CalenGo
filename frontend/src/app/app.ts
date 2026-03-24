@@ -753,7 +753,7 @@ bookingLoading = false;
     .subscribe((b: any[]) => this.trainerBookings = b);
   }
 
-  //TRAINER BOOKING VIEW STATUS CHANGE
+  //TRAINER BOOKING VIEW STATUS CHANGE --jó api bekötve
   trainerSetStatus(id: number, status: string) {
 
   this.api.setBookingStatus(this.selectedBooking.id, status)
