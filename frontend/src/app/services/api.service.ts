@@ -46,18 +46,13 @@ export class ApiService {
     return this.http.get<any[]>(this.base + '/trainer-bookings/' + trainerId);
   }
 
-  cancelBooking(id: number) {
-    return this.http.put(this.base + '/cancel/' + id, {});
+  deleteBooking(id: number) {
+  return this.http.delete(this.base + '/bookings/' + id);
   }
 
   getAllBookings() {
     return this.http.get<any[]>(this.base + '/all-bookings-grouped');
   }
-
-  adminDeleteBooking(id: number) {
-    return this.http.delete(this.base + '/bookings/' + id); 
-  }
-
 
   getProfile(id: number) {
   return this.http.get<any>(this.base + '/profile/' + id);
@@ -67,9 +62,6 @@ export class ApiService {
   return this.http.put(this.base + '/profile/' + id, data);
   }
 
-  deleteBooking(id: number) {
-  return this.http.put(this.base + '/cancel/' + id, {});
-  }
 
   updateBooking(id: number, date: string, time: string) {
   return this.http.put(`${this.base}/booking/${id}`, { date, time });
@@ -94,6 +86,4 @@ export class ApiService {
   getAuditLog() {
   return this.http.get<any[]>(`${this.base}/audit`);
   }
-
-  ///kitisztítva
 }

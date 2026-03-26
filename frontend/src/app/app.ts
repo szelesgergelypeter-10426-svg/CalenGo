@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ViewChild, ElementRef } from '@angular/core';
+
+
 
 @Component({
   selector: 'app-root',
@@ -216,7 +217,7 @@ showPage(page: typeof this.currentPage) {
   this.registerLoading = true;
   
   if (!name || !email || !password) {
-  alert("Minden mező kötelező");
+  this.showToast("Minden mező kötelező", "error");
   this.registerLoading = false;
   return;
   }
@@ -325,6 +326,8 @@ cancelEdit() {
 
   calendarDays: (number | null)[] = [];
 
+  intervalId: any; ///elmenti z interval id t hogy ne fusson tovabb ha kilepünk az oldalrol
+
   ngOnInit() {
   this.bookingSuccess = false;
   this.generateCalendar();
@@ -332,7 +335,11 @@ cancelEdit() {
   this.generateWeek();
   this.loadTrainers(); 
   this.updateClock(); // azonnal mutassa az aktuális időt
-  setInterval(() => this.updateClock(), 1000); /// nem megy az ido debug
+  this.intervalId = setInterval(() => this.updateClock(), 1000); /// meghivja az updateclockot masodpercenkent.
+  }
+
+  ngOnDestroy() {
+  clearInterval(this.intervalId); ///ez akkor fut le amikor elhagyjuk az oldalt, vagy ujratoltjuk hogy ne fusson allandoan es ne nyiljon  meg a hatterben minden ujratoltesnel.
   }
 
   updateClock() {
@@ -560,7 +567,9 @@ bookingLoading = false;
     userId: this.currentUserId!,
     trainerId: this.selectedTrainerId!,
     date: this.selectedDate!,
-    time: this.selectedTime!,
+    time: this.selectedTime!.includes('-')
+  ? this.selectedTime!.split('-')[0]
+  : this.selectedTime!,
     email: this.bookingEmail
   })
   .subscribe({
@@ -652,8 +661,8 @@ bookingLoading = false;
   }
 
   //ADMIN FOGLALAS TÖRLÉSE
-  adminDeleteBooking(id: number) {
-  this.api.adminDeleteBooking(id)
+  deleteBooking(id: number) {
+  this.api.deleteBooking(id)
     .subscribe(() => this.loadAdminData());
   }
  //ADMIN USER TORLESE

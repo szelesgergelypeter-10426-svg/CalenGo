@@ -185,7 +185,7 @@ app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUK
         return res.status(401).json({ error: 'Invalid login' });
       }
 
-      const ok = password === user.password || await bcrypt.compare(password, user.password);
+      const ok = await bcrypt.compare(password, user.password);
 
       if (!ok) {
         return res.status(401).json({ error: 'Invalid login' });
@@ -297,13 +297,13 @@ function (err) {
         </table>`
       );
 
-      res.json({ success: true });
+      
     }
   );
 });
 
 
-      ///TRAINER USER LEKÉRÉSE
+      ///USER EMAIL KÜLDÉS
       db.get(`
         SELECT 
         t.email as trainerEmail,
@@ -336,10 +336,11 @@ function (err) {
                         <strong>A csapat</strong></p> </td> </tr> <tr> <td style="background-color: #eeeeee; text-align: center; padding: 10px; font-size: 12px; color: #777777; font-family: Arial, sans-serif;">
                           Ez egy automatikus üzenet, kérjük ne válaszolj rá. </td> </tr> </table> </td> </tr> </table>`
             );
-          } else {
+            } else {
             console.log("nincsen email az adott id hez:", trainerId);
           }
         });
+        res.json({ success: true });
     });
 });
 
@@ -539,7 +540,7 @@ app.delete('/api/users/:id', (req, res) => {
 //GET MY PROFILE
 app.get('/api/profile/:id', (req, res) => {
   db.get(
-    `SELECT id,name,email,password,avatar
+    `SELECT id,name,email,avatar
      FROM users WHERE id=?`,
     [req.params.id],
     (_, row) => res.json(row)

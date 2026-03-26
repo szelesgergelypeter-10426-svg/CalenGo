@@ -79,12 +79,12 @@
         Bejelentkezés
       </h2>
 
-      <input #email class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
-      <input #password type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
+      <input #logineEmail class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Email">
+      <input #LoginPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button type="button"
         class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105"
-        (click)="loginUser(email.value, password.value)">
+        (click)="loginUser(logineEmail.value, LoginPassword.value)">
         Belépés
       </button>
 
@@ -177,13 +177,13 @@
   <h2 class="mb-4 text-4xl text-center text-white ">Regisztráció</h2>
 
   <input #name class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Név">
-  <input #email class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Email">
-  <input #password type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Jelszó">
+  <input #regEmail class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Email">
+  <input #regPassword type="password" class="w-full p-2 mb-3 text-white bg-gray-800 rounded " placeholder="Jelszó">
 
     <button type="button"
     [disabled]="registerLoading"
     class="w-full py-2 text-white transform bg-purple-600 rounded hover:bg-purple-500 active:scale-95 disabled:opacity-50"
-    (click)="registerUser(name.value, email.value, password.value)">
+    (click)="registerUser(name.value, regEmail.value, regPassword.value)">
     {{ registerLoading ? 'Betöltés...' : 'Fiók létrehozása' }}
   </button>
 
@@ -321,7 +321,7 @@
             Update
           </button>
 
-          <button type="button" class="px-2 py-1 bg-red-700 rounded" (click)="adminDeleteBooking(b.id)">
+          <button type="button" class="px-2 py-1 bg-red-700 rounded" (click)="deleteBooking(b.id)">
             Delete
           </button>
     </div>
@@ -609,7 +609,7 @@
     calengo accounts
 
     ----------------------------WEBOLDALON-------------------
-    admin@caelngo.com
+    admin@calengo.com
     admin123
 
     kormoska007@gmail.com
