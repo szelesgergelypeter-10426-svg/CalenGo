@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core'; ///ez kell a sikeres foglalás után hogy megjelenjen a sikeres foglalás page, mert magatol nem frissul le csak is valamilyen kattintas utan
 
 
 
@@ -45,7 +46,8 @@ export class AppComponent {
 
   
   constructor(
-    private api: ApiService) {}
+    private api: ApiService,
+    private cd: ChangeDetectorRef ) {} ///kenyszeriti az angulart hogy frissitse a viewet amikor pl a sikeres foglalas utan a sikeres foglalas page nek kell megjenenie
     
     scrollToTop() {
   window.scrollTo({
@@ -71,13 +73,13 @@ showPage(page: typeof this.currentPage) {
   this.bookingSuccess = false;
   this.currentPage = page;
 
-    if (page !== 'login') {
-      
-    }
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, 0);
 
-    if (page === 'trainers') {
-      this.loadTrainers();
-    }
+  if (page === 'trainers') {
+    this.loadTrainers();
+  }
 }
   ///LOGOUT
   logout() {
@@ -578,18 +580,27 @@ bookingLoading = false;
 
       this.bookingLoading = false;
 
-      if(res?.success){
+      if (res?.success) {
 
-  this.showPage('booking-success');
+        this.selectedDate = null;
+        this.selectedTime = null;
+        this.bookingEmail = '';
 
-  this.selectedDate = null;
-  this.selectedTime = null;
-  this.bookingEmail = '';
-  }   else{
-        this.showToast('Foglalás sikertelen','error');
-      }
+        
+        this.showPage('booking-success');
 
-    },
+        this.cd.detectChanges(); /// itt forcoljuk az angulart hogy frissitse a viewt
+
+        
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        }, 50);
+        }
+      else{
+            this.showToast('Foglalás sikertelen','error');
+          }
+
+        },
 
     error: () => {
       this.bookingLoading = false;

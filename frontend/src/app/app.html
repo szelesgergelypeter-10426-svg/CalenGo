@@ -69,11 +69,12 @@
 
 
 <div class="relative z-10 min-h-screen bg-gray-900">
+  <!--MAIN PAGES-->
 <div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory fade-in">
   <!-- LOGIN PANEL -->
   <section 
   class="flex items-center justify-center h-screen text-center bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
+  [ngStyle]="{'background-image': 'url(assets/)'}">
     <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
@@ -102,7 +103,7 @@
 
     
   <!--regisztracio a main pagen-->
-  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
+  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
     <div class="w-full max-w-md p-8 transform border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-white">
         Regisztráció
@@ -123,7 +124,7 @@
 
   <!-- MAIN PAGE EDZŐK-->
   <section id="trainersSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}" >
+  [ngStyle]="{'background-image': 'url(assets/.jpg)'}" >
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -140,7 +141,7 @@
 
   <!-- ÁRAINK-->
   <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700 bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
+  [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
 
@@ -154,21 +155,92 @@
     </div>
   </section>
 
-  <!-- KAPCSOLAT-->
-  <section id="contactSection" class="flex items-center justify-center h-screen text-white bg-center bg-cover cursor-pointer" [ngStyle]="{'background-image': 'url(assets/hatter3.jpg)'}">
-    <div class="text-center cursor-pointer"> 
-      <h2 class="mb-6 text-4xl font-bold">Kapcsolat</h2>
-      <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">ProjectCalenGo@gmail.com</p>
-      <p class="px-3 py-2 mt-4 text-lg text-gray-300 bg-purple-600/60 rounded-4xl">+36 70 123 4567</p>
-      <p>
-          <button
-  (click)="scrollToTop()"
-  class="px-4 py-3 mt-6 text-white transition-all duration-300 bg-purple-600 rounded-full shadow-lg hover:bg-purple-500 hover:scale-110">
-  ↑ Vissza a tetejére ↑
-</button>
-      </p>
+<!-- KAPCSOLAT -->
+<section id="contactSection"
+  class="min-h-screen text-white bg-gradient-to-br from-[#0f172a] to-[#020617] flex items-center justify-center px-6 py-16">
+
+  <div class="grid w-full max-w-6xl gap-12 md:grid-cols-2">
+
+    
+    <div class="space-y-6">
+
+      <h2 class="text-4xl font-bold">Kapcsolat</h2>
+
+     
+      <div class="p-6 shadow-xl bg-white/5 backdrop-blur-lg rounded-2xl w-fit">
+        
+        <div class="w-64 h-64 mb-4 overflow-hidden rounded-xl">
+          <iframe
+            width="100%"F+36
+            style="border:0"
+            loading="lazy"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu"
+>
+          </iframe>
+        </div>
+
+        <div class="space-y-1 text-sm text-gray-300">
+          <p> ProjectCalenGo@gmail.com</p>
+          <p> +36 70 123 4567</p>
+        </div>
+
+        
+        <a href="https://www.instagram.com/calen.go/"
+           target="_blank"
+           class="inline-block mt-4 transition hover:scale-105">
+          <img src="assets/instagram.png" class="w-8 h-8" />
+        </a>
+
+      </div>
+
+      
+      <div class="space-y-2 text-sm text-gray-400">
+        <p>✔ Modern edzőterem</p>
+        <p>✔ Személyi edzők</p>
+        <p>✔ Online időpontfoglalás</p>
+      </div>
+
     </div>
-  </section>
+
+    
+    <div class="flex flex-col items-end gap-6">
+
+      
+      <div class="p-6 text-right shadow-xl bg-white/5 backdrop-blur-lg rounded-2xl w-fit">
+        <h3 class="mb-4 text-xl font-semibold text-white">Nyitvatartás</h3>
+
+        <div class="space-y-1 text-sm text-gray-300">
+          <p>Hétfő: 05:00 - 20:00</p>
+          <p>Kedd: 05:00 - 20:00</p>
+          <p>Szerda: 05:00 - 20:00</p>
+          <p>Csütörtök: 05:00 - 20:00</p>
+          <p>Péntek: 05:00 - 20:00</p>
+          <p>Szombat: 05:00 - 20:00</p>
+          <p>Vasárnap: 05:00 - 20:00</p>
+        </div>
+      </div>
+
+      
+      <div class="max-w-xs text-right">
+        <p class="text-sm text-gray-400">
+          Foglalj időpontot még ma, és kezd el a fejlődést!
+        </p>
+        <button class="px-5 py-2 mt-3 text-sm transition bg-purple-600 hover:bg-purple-700 rounded-xl">
+          Időpont foglalás
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<footer class="py-6 text-sm text-center text-gray-400 bg-black border-t border-white/10">
+  <p>© Copyright Calengo 2026</p>
+  <p class="mt-1 text-gray-500">Minden jog fenntartva</p>
+</footer>
 </div>
 
 
@@ -419,9 +491,9 @@
     </div>
   </div>
 
-  <!-- JOBB OLDAL -->
+  
   <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
-    <!--ÓRA-->
+    
         <div class="flex items-center justify-center p-4 mb-6 font-mono text-2xl tracking-widest text-white bg-gray-800 shadow-lg rounded-xl">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -573,8 +645,7 @@
     </div>
   </div>
     <!--SIKERES FOGLALÁS PAGE-->
-    <div *ngIf="currentPage === 'booking-success'"
-      class="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-50">
+    <div *ngIf="currentPage === 'booking-success'" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 overflow-auto bg-gray-900">
 
     <h1 class="mb-4 text-4xl font-bold text-green-600">
       ✅ Köszönjük!
