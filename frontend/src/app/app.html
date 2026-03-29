@@ -1,4 +1,4 @@
-  <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
+<nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
       <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
         Calen<span class="text-4xl text-purple-500">Go</span>
@@ -7,6 +7,7 @@
           <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Bejelentkezés
           </button>
+
           <button (click)="scrollToRegister()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
             Regisztráció
           </button>
@@ -24,20 +25,17 @@
           </button>
       </div>
       <!-- TOAST -->
-        <div *ngIf="toastMessage"
-          class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg toast top-6 left-1/2" [ngClass]="{
-        'bg-green-600': toastType==='success', 'bg-red-600': toastType==='error'}">
-          {{ toastMessage }}
-        </div>
+      <div *ngIf="toastMessage" class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg toast top-6 left-1/2"
+       [ngClass]="{'bg-green-600': toastType==='success', 'bg-red-600': toastType==='error'}"> {{ toastMessage }}
+      </div>
       <div class="flex items-center gap-3" *ngIf="currentUserRole">
-
-        <!-- USER -->
+        <!-- TRAINER IDŐPONTJAI -->
         <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Időpontjaim
         </button>
 
-        <!-- USER + TRAINER -->
+        <!-- USER IDŐPONTJAI -->
         <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Időpontjaim
@@ -54,18 +52,20 @@
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Userek
         </button>
-
+        
+        <!--FIÓKOM-->
         <button type="button" (click)="loadProfile(); showPage('account')"
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Fiókom
         </button>
 
+        <!--KIJELENTKEZÉS-->
         <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded hover:scale-105">
           Logout
         </button>
       </div>
-    </div>
-  </nav>
+  </div>
+</nav>
 
 
 <div class="relative z-10 min-h-screen bg-gray-900">

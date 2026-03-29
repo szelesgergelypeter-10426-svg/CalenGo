@@ -338,6 +338,7 @@ cancelEdit() {
   this.loadTrainers(); 
   this.updateClock(); // azonnal mutassa az aktuális időt
   this.intervalId = setInterval(() => this.updateClock(), 1000); /// meghivja az updateclockot masodpercenkent.
+  this.loadTrainers(); 
   }
 
   ngOnDestroy() {
@@ -569,9 +570,7 @@ bookingLoading = false;
     userId: this.currentUserId!,
     trainerId: this.selectedTrainerId!,
     date: this.selectedDate!,
-    time: this.selectedTime!.includes('-')
-  ? this.selectedTime!.split('-')[0]
-  : this.selectedTime!,
+    time: this.selectedTime!.split('-')[0],
     email: this.bookingEmail
   })
   .subscribe({
@@ -806,7 +805,10 @@ loadTrainers() {
   this.api.getTrainers().subscribe({
     next: (list: any[]) => {
       this.trainers = list;  // feltölti a frontendet
+      this.trainers = list;
       console.log('Trainers betöltve:', this.trainers);
+
+      this.cd.detectChanges(); 
     },
     error: (err) => {
       console.error('Hiba a tréner lista betöltésénél', err);

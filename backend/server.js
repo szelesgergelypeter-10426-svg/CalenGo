@@ -233,8 +233,10 @@ app.post('/api/book', authLimiter, (req, res) => {
         });
       }
 
+
+
       /// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
-      db.run(`
+db.run(`
   INSERT INTO bookings (userId, trainerId, date, time, status, email)
   VALUES (?, ?, ?, ?, 'pending', ?)
 `,
@@ -336,11 +338,13 @@ function (err) {
                         <strong>A csapat</strong></p> </td> </tr> <tr> <td style="background-color: #eeeeee; text-align: center; padding: 10px; font-size: 12px; color: #777777; font-family: Arial, sans-serif;">
                           Ez egy automatikus üzenet, kérjük ne válaszolj rá. </td> </tr> </table> </td> </tr> </table>`
             );
+
             } else {
             console.log("nincsen email az adott id hez:", trainerId);
           }
+          res.json({ success: true });
         });
-        res.json({ success: true });
+        
     });
 });
 
@@ -551,7 +555,7 @@ app.get('/api/profile/:id', (req, res) => {
 app.put('/api/profile/:id', async (req, res) => {
   const { name, email, password, avatar } = req.body;
 
-  db.get(`SELECT avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
+  db.get(`SELECT password, avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
 
     let finalAvatar = avatar || user.avatar;
 
