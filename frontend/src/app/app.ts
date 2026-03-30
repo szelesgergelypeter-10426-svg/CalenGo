@@ -24,7 +24,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: 'login'|'register'|'trainers'|'booking'|'bookings'|'trainer'|'admin'|'account'|'booking-success' = 'login';
+  currentPage: string = 'login';
   currentUserRole: string | null = null;
   currentUserId: number | null = null;
   takenTimes: string[] = [];
@@ -59,18 +59,22 @@ export class AppComponent {
   });
 }
 
-  //NAP KIVÁLASZTÁSA
-  selectDay(day: number) {
+///NAP KIVÁLASZTÁSA
+selectDay(day: number) {
+    if (this.isPastDate(day)) {
+    this.showToast('Nem foglalhatsz múltbeli időpontra', 'error');
+    return;
+    }
 
-  const m = String(this.currentMonth + 1).padStart(2, '0');
-  const d = String(day).padStart(2, '0');
+    const m = String(this.currentMonth + 1).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
 
-  this.selectedDate = `${this.currentYear}-${m}-${d}`;
+    this.selectedDate = `${this.currentYear}-${m}-${d}`;
 
-  if (this.selectedTrainerId) {
-    this.loadTrainerBookings(this.selectedTrainerId);
-  }
-  }
+    if (this.selectedTrainerId) {
+      this.loadTrainerBookings(this.selectedTrainerId);
+    }
+}
 
 showPage(page: typeof this.currentPage) {
   this.bookingSuccess = false;
@@ -541,6 +545,10 @@ prevWeek() {
   }
 
   selectTime(time: string) {
+    if (this.isPastTime(time)) {
+    this.showToast('Ez az időpont már elmúlt', 'error');
+    return;
+    }
     this.selectedTime = time;
   }
 
@@ -780,14 +788,45 @@ bookingLoading = false;
   }
   
   ///LOGIN UTANI OLDAL IRANYITAS
-  goMyBookings() {
+goMyBookings() {
   if (this.currentUserRole === 'trainer') {
     this.loadTrainerBookingsView();
     this.currentPage = 'trainer';
   } else if (this.currentUserRole === 'user') {
     this.loadMyBookings();
     this.currentPage = 'bookings';
-  }}
+}}
+
+/// MÚLTBELI IDŐPONTOK LETILTÁSA
+isPastDate(day: number): boolean {
+  const today = new Date();
+
+  const checkDate = new Date(
+    this.currentYear,
+    this.currentMonth,
+    day
+  );
+  
+  today.setHours(0,0,0,0);
+  checkDate.setHours(0,0,0,0);
+
+  return checkDate < today;
+}
+
+///múltbeli dátum (óra szerint) tiltás
+isPastTime(time: string): boolean {
+  if (!this.selectedDate) return false;
+
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+
+  if (this.selectedDate !== todayStr) return false;
+
+  const currentHour = now.getHours();
+  const slotHour = parseInt(time.split(':')[0]);
+
+  return slotHour <= currentHour;
+}
 
 loadTrainers() {
   this.api.getTrainers().subscribe({
@@ -832,6 +871,17 @@ loadTrainers() {
 
 ///hónap navigáció
 prevMonth() {
+  const now = new Date();
+
+    ///ne lehessen visszalepni multbeli honapokra
+  if (
+    this.currentYear === now.getFullYear() &&
+    this.currentMonth === now.getMonth()
+  ) {
+    this.showToast('Nem léphetsz vissza múltbeli hónapra', 'error');
+    return;
+  }
+
   this.currentMonth--;
 
   if (this.currentMonth < 0) {
@@ -841,7 +891,7 @@ prevMonth() {
 
   this.generateCalendar();
   this.resetSelection();
-  }
+}
 
 nextMonth() {
   this.currentMonth++;
