@@ -520,11 +520,26 @@ prevWeek() {
   };
 
   ///BÉRLET ÁRAK
-  prices = [
-    { category: 'Diák', monthly: '10000 Ft', single: '2000 Ft' },
-    { category: 'Felnőtt', monthly: '15000 Ft', single: '2500 Ft' },
-    { category: 'Nyugdíjas', monthly: '6000 Ft', single: '1500 Ft' }
-  ];
+prices = [
+  { 
+    category: 'Diák', 
+    monthly: '10000 Ft', 
+    single: '2000 Ft',
+    description: 'Kedvezményes bérlet diákok számára, korlátlan teremhasználattal.'
+  },
+  { 
+    category: 'Felnőtt', 
+    monthly: '15000 Ft', 
+    single: '2500 Ft',
+    description: 'Teljes hozzáférés minden szolgáltatáshoz és eszközhöz.'
+  },
+  { 
+    category: 'Nyugdíjas', 
+    monthly: '6000 Ft', 
+    single: '1500 Ft',
+    description: 'Kedvezményes ár nyugdíjasok számára.'
+  }
+];
 
   scrollToPrices() {
     const el = document.getElementById('prices');
@@ -811,6 +826,16 @@ isPastDate(day: number): boolean {
   checkDate.setHours(0,0,0,0);
 
   return checkDate < today;
+}
+///árak legördülő menü
+openedPriceIndex: number | null = null;
+
+togglePrice(i: number) {
+  if (this.openedPriceIndex === i) {
+    this.openedPriceIndex = null;
+  } else {
+    this.openedPriceIndex = i;
+  }
 }
 
 ///múltbeli dátum (óra szerint) tiltás

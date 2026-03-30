@@ -141,15 +141,19 @@
 
   <!-- ÁRAINK-->
   <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700 bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
+    [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
-
       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div *ngFor="let p of prices" class="p-4 text-center transition duration-300 bg-gray-800 rounded-lg cursor-pointer hover:scale-110 hover:border-2 hover:border-purple-600">
+        <div *ngFor="let p of prices; let i = index" (click)="togglePrice(i)" class="p-4 text-center transition duration-300 bg-gray-800 rounded-lg cursor-pointer hover:scale-105 hover:border-2 hover:border-purple-600">
           <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
           <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
           <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
+            <div class="overflow-hidden transition-all duration-500 ease-in-out" [ngClass]="openedPriceIndex === i ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'">
+              <div class="pt-3 text-sm text-gray-300 border-t border-gray-600">
+                {{ p.description }}
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -541,18 +545,11 @@
     <!-- NAPOK -->
     <div class="grid grid-cols-7 gap-2">
       <button
-        type="button"
-    *ngFor="let day of calendarDays"
-
-    [disabled]="!day || isPastDate(day)"
-    (click)="day && !isPastDate(day) && selectDay(day)"
-
-    [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)"
-
-    [class.opacity-40]="day && isPastDate(day)"
-    [class.cursor-not-allowed]="day && isPastDate(day)"
-
-    class="text-sm font-medium transition-all duration-200 bg-gray-800 rounded-lg h-11 hover:bg-gray-700 disabled:bg-transparent disabled:cursor-default hover:scale-105 active:scale-95">
+        type="button" *ngFor="let day of calendarDays" [disabled]="!day || isPastDate(day)" (click)="day && !isPastDate(day) && selectDay(day)"
+        [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)"
+        [class.opacity-40]="day && isPastDate(day)"
+        [class.cursor-not-allowed]="day && isPastDate(day)"
+        class="text-sm font-medium transition-all duration-200 bg-gray-800 rounded-lg h-11 hover:bg-gray-700 disabled:bg-transparent disabled:cursor-default hover:scale-105 active:scale-95">
         {{ day }}
       </button>
     </div>
@@ -757,7 +754,7 @@
     aaaaaaaa
 
     szaboadam-10414@taszi.hu
-    
+    12345678
 
     calengotrainer1@gmail.com
     aaaaaaaa
