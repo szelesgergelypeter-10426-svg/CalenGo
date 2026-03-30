@@ -9,6 +9,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
+const PORT = process.env.PORT || 3000;
+
+
 
 app.use(express.json());
 app.use(cors());
