@@ -157,75 +157,139 @@
 
 <!-- KAPCSOLAT -->
 <section id="contactSection"
-  class="min-h-screen text-white bg-gradient-to-br from-[#0f172a] to-[#020617] flex items-center justify-center px-6 py-16">
+  class="min-h-screen text-white bg-linear-to-r from-[#0f172a] via-[#1e293b] to-[#020617] flex flex-col items-center justify-center px-6 py-16">
+
+  <!-- FELSŐ CÍMSOR -->
+  <div class="text-center mb-12">
+    <h2 class="text-5xl font-bold mb-4 bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+      Kapcsolat
+    </h2>
+    <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+      Indítsd el a változást ma. Mi itt vagyunk hozzá.
+    </p>
+  </div>
 
   <div class="grid w-full max-w-6xl gap-12 md:grid-cols-2">
 
-    
-    <div class="space-y-6">
+    <!-- BAL OLDAL: KAPCSOLATI INFORMÁCIÓK -->
+    <div class="space-y-8">
 
-      <h2 class="text-4xl font-bold">Kapcsolat</h2>
+      <!-- TÉRKÉP ÉS KAPCSOLAT KÁRTYA -->
+      <div class="p-8 shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+        <h3 class="text-2xl font-semibold mb-6 text-center">Találj meg minket</h3>
 
-     
-      <div class="p-6 shadow-xl bg-white/5 backdrop-blur-lg rounded-2xl w-fit">
-        
-        <div class="w-64 h-64 mb-4 overflow-hidden rounded-xl">
+        <div class="w-full h-64 mb-6 overflow-hidden rounded-2xl shadow-lg">
           <iframe
-            width="100%"F+36
+            width="100%"
+            height="100%"
             style="border:0"
             loading="lazy"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu"
->
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu">
           </iframe>
         </div>
 
-        <div class="space-y-1 text-sm text-gray-300">
-          <p> ProjectCalenGo@gmail.com</p>
-          <p> +36 70 123 4567</p>
+        <!-- KAPCSOLATI ADATOK -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-gray-400">Email</p>
+              <p class="text-white font-medium">ProjectCalenGo@gmail.com</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm text-gray-400">Telefon</p>
+              <p class="text-white font-medium">+36 70 123 4567</p>
+            </div>
+          </div>
         </div>
 
-        
-        <a href="https://www.instagram.com/calen.go/"
-           target="_blank"
-           class="inline-block mt-4 transition hover:scale-105">
-          <img src="assets/instagram.png" class="w-8 h-8" />
-        </a>
-
+        <!-- KÖZÖSSÉGI MÉDIA -->
+        <div class="flex justify-center">
+          <a href="https://www.instagram.com/calen.go/"
+             target="_blank"
+             class="inline-flex items-center space-x-2 px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 rounded-full hover:from-pink-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg">
+            <img src="assets/instagram.png" class="w-6 h-6" alt="Instagram" />
+            <span class="text-white font-medium">@calen.go</span>
+          </a>
+        </div>
       </div>
 
-      
-      <div class="space-y-2 text-sm text-gray-400">
-        <p>✔ Modern edzőterem</p>
-        <p>✔ Személyi edzők</p>
-        <p>✔ Online időpontfoglalás</p>
+      <!-- JELLEMZŐK -->
+      <div class="grid grid-cols-1 gap-4">
+        <div class="flex items-center space-x-3 p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
+          <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-gray-300">Modern edzőterem felszereltséggel</span>
+        </div>
+
+        <div class="flex items-center space-x-3 p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
+          <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-gray-300">Személyi edzők szakmai támogatással</span>
+        </div>
+
+        <div class="flex items-center space-x-3 p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10">
+          <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-gray-300">Egyszerű online időpontfoglalás</span>
+        </div>
       </div>
 
     </div>
 
-    
-    <div class="flex flex-col items-end gap-6">
+    <!-- JOBB OLDAL: NYITVATARTÁS ÉS AKCIÓ -->
+    <div class="flex flex-col items-center md:items-end gap-8">
 
-      
-      <div class="p-6 text-right shadow-xl bg-white/5 backdrop-blur-lg rounded-2xl w-fit">
-        <h3 class="mb-4 text-xl font-semibold text-white">Nyitvatartás</h3>
+      <!-- NYITVATARTÁS KÁRTYA -->
+      <div class="p-8 text-center shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300 w-full max-w-sm">
+        <h3 class="mb-6 text-2xl font-semibold text-white flex items-center justify-center space-x-2">
+          <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+          </svg>
+          <span>Nyitvatartás</span>
+        </h3>
 
-        <div class="space-y-1 text-sm text-gray-300">
-          <p>Hétfő: 05:00 - 20:00</p>
-          <p>Kedd: 05:00 - 20:00</p>
-          <p>Szerda: 05:00 - 20:00</p>
-          <p>Csütörtök: 05:00 - 20:00</p>
-          <p>Péntek: 05:00 - 20:00</p>
-          <p>Szombat: 05:00 - 20:00</p>
-          <p>Vasárnap: 05:00 - 20:00</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between py-2 px-3 bg-white/5 rounded-lg">
+            <span class="text-gray-300">Hétfő - Péntek:</span>
+            <span class="text-white font-medium">06:00 - 22:00</span>
+          </div>
+          <div class="flex justify-between py-2 px-3 bg-white/5 rounded-lg">
+            <span class="text-gray-300">Szombat - Vasárnap:</span>
+            <span class="text-white font-medium">08:00 - 18:00</span>
+          </div>
         </div>
       </div>
 
-      
-      <div class="max-w-xs text-right">
-        <p class="text-sm text-gray-400">
-          Foglalj időpontot még ma, és kezd el a fejlődést!
+      <!-- CALL-TO-ACTION -->
+      <div class="p-8 text-center shadow-2xl bg-linear-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl rounded-3xl border border-purple-500/30 w-full max-w-sm">
+        <h3 class="mb-4 text-xl font-semibold text-white">Kész a változásra?</h3>
+        <p class="text-gray-300 mb-6">
+          Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
         </p>
-        <button class="px-5 py-2 mt-3 text-sm transition bg-purple-600 hover:bg-purple-700 rounded-xl">
+        <button class="w-full px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-purple-500/25">
           Időpont foglalás
         </button>
       </div>
@@ -481,7 +545,7 @@
         *ngFor="let day of calendarDays"
         [disabled]="!day"
         (click)="day && selectDay(day)"
-        [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)"
+        [class.bg-linear-to-r]="selectedDate?.endsWith('-' + day)"
         class="text-sm font-medium transition-all duration-200 bg-gray-800 rounded-lg h-11 hover:bg-gray-700 disabled:bg-transparent disabled:cursor-default hover:scale-105 active:scale-95">
 
         {{ day }}
