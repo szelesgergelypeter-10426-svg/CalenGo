@@ -126,7 +126,7 @@
   <section id="trainersSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover"
   [ngStyle]="{'background-image': 'url(assets/.jpg)'}" >
     <div class="text-center">
-      <h2 class="mb-10 text-4xl font-bold">Edzőink</h2>
+      <h2 class="mb-10 text-4xl font-bold text-white">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div *ngFor="let t of trainers"
             class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg cursor-pointer rounded-2xl hover:scale-110 hover:border-2 hover:border-purple-600">
@@ -322,9 +322,7 @@
     <h2 class="mb-6 text-2xl font-bold text-center">
       Fiókom
     </h2>
-      <img [src]="getAvatarUrl(profile.avatar)" class="w-32 h-32 border">
-
-      <input type="file" (change)="onAvatarSelected($event)" class="w-full mb-3">
+      <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
 
       <input [(ngModel)]="profile.name" placeholder="Név"
         class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
@@ -377,11 +375,11 @@
     <!--User időpontok-->
     <div *ngFor="let b of adminBookings" class="p-3 mb-3 bg-gray-800 rounded">
       <span class="inline-block px-2 py-1 ml-2 text-sm text-white rounded-full" [ngClass]="{
-        'bg-yellow-500': b.status === 'pending',
-        'bg-green-600': b.status === 'approved',
-        'bg-red-600': b.status === 'rejected',
-        'bg-gray-500': b.status === 'cancelled'}">
-          {{ b.status }}
+        'bg-yellow-500': b.status === 'folyamatban',
+        'bg-green-600': b.status === 'elfogadva',
+        'bg-red-600': b.status === 'elutasítva',
+        'bg-gray-500': b.status === 'törölve'}">
+          {{ statusLabel(b.status) }}
       </span>
       <div class="mb-2">
         user: {{b.userId}} — trainer: {{b.trainerId}}
@@ -418,13 +416,13 @@
         <span
           class="inline-block px-3 py-1 mt-2 text-sm font-semibold rounded-full"
           [ngClass]="{
-            'bg-yellow-400 text-yellow-900': b.status === 'pending',
-            'bg-green-500 text-green-900': b.status === 'approved',
-            'bg-red-500 text-red-900': b.status === 'rejected',
-            'bg-gray-500 text-gray-900': b.status === 'cancelled'
+            'bg-yellow-400 text-yellow-900': b.status === 'folyamatban',
+            'bg-green-500 text-green-900': b.status === 'elfogadva',
+            'bg-red-500 text-red-900': b.status === 'elutasítva',
+            'bg-gray-500 text-gray-900': b.status === 'törölve'
           }"
         >
-          {{ b.status }}
+          {{ statusLabel(b.status) }}
         </span>
       </div>
 
@@ -444,7 +442,7 @@
 <div *ngIf="currentPage === 'booking'"
   class="grid max-w-6xl grid-cols-1 gap-10 mx-auto md:grid-cols-2 fade-in">
 
-  <!-- BAL OLDAL – NAPTÁR -->
+  
   <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
 
     <div class="flex items-center justify-between mb-6">
@@ -456,7 +454,7 @@
     ←
   </button>
 
-  <!-- HÓNAP -->
+  
   <h2 class="text-xl font-semibold tracking-wide">
     {{ currentYear }} – {{ monthNames[currentMonth] }}
   </h2>
@@ -574,7 +572,7 @@
     <!-- ADMIN OLDAL -->
     <div *ngIf="currentPage === 'admin'" class="max-w-4xl mx-auto fade-in">
 
-      <h2 class="mb-4 text-4xl text-center text-white">Users</h2>
+      <h2 class="mb-4 text-4xl text-center text-white">Felhasználók</h2>
 
       <div *ngFor="let u of adminUsers"
         class="flex items-center justify-between p-3 mb-2 text-white rounded bg-gray-800/80">
@@ -587,18 +585,18 @@
 
           <select #roleSel class="p-1 text-white bg-gray-600 rounded">
 
-            <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600">user</option>
-            <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600">trainer</option>
-            <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600">admin</option>
+            <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600">Felhasználó</option>
+            <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600">Edző</option>
+            <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600">Admin</option>
 
           </select>
 
           <button type="button" class="px-2 py-1 bg-blue-600 rounded" (click)="changeUserRole(u.id, roleSel.value)">
-            Save
+            Mentés
           </button>
 
           <button type="button" class="px-2 py-1 bg-red-700 rounded" (click)="adminDeleteUser(u.id)">
-            Delete
+            Törlés
           </button>
 
 
@@ -627,11 +625,11 @@
         <!-- BUTTONS -->
         <div class="flex justify-between gap-2 mt-6">
 
-          <button (click)="updateBookingStatus('approved')" class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700 hover:scale-105">
+          <button (click)="updateBookingStatus('elfogadva')" class="flex-1 py-2 bg-green-600 rounded hover:bg-green-700 hover:scale-105">
             Elfogadás
           </button>
 
-          <button (click)="updateBookingStatus('rejected')" class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700 hover:scale-105">
+          <button (click)="updateBookingStatus('elutasítva')" class="flex-1 py-2 bg-red-600 rounded hover:bg-red-700 hover:scale-105">
             Elutasítás
           </button>
 
@@ -688,6 +686,9 @@
 
     szaboadamka526@gmail.com
     aaaaaaaa
+
+    szaboadam-10414@taszi.hu
+    
 
     calengotrainer1@gmail.com
     aaaaaaaa

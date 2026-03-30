@@ -8,8 +8,6 @@ require('dotenv').config();
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const multer = require('multer');
-const path = require('path');
 const nodemailer = require('nodemailer');
 
 app.use(express.json());
@@ -50,22 +48,6 @@ function sendMail(to, subject, html) {
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
-///PROFILKÉP FELTÖLTÉS
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const unique = Date.now() + path.extname(file.originalname);
-    cb(null, unique);
-  }
-});
-const upload = multer({ storage });
-// middleware, képek feltöltése
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 ///////
 ///ADATBÁZIS FELTÖLTÉSE/TÁBLÁK FELTÖLTÉSE/ADATOK FRISSÍTÉSE
@@ -119,14 +101,14 @@ db.serialize(() => {
     trainerId INTEGER,
     date TEXT,
     time TEXT,
-    status TEXT DEFAULT 'pending')
+    status TEXT DEFAULT 'folyamatban')
   `);
 
 
   ///EGYEDI FOGLALÁS, 1IDŐPONTHOZ CSAK 1 FOGLALÁS LEHETSÉGES
   db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_booking
     ON bookings(trainerId, date, time)
-    WHERE status!='cancelled'
+    WHERE status!='törölve'
   `);
 
 });
@@ -157,7 +139,7 @@ app.post('/api/register',
 
         if (err) {
           if (err.message.includes('UNIQUE')) {
-            return res.status(409).json({ error: 'Email exists' }); ///409 CONFLICT ERROR
+            return res.status(409).json({ error: 'A megadott email már használt' }); ///409 CONFLICT ERROR
           }
           return res.status(500).json(err); ///500 SERVER ERROR
         }
@@ -173,7 +155,7 @@ app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUK
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'Missing data' });
+    return res.status(400).json({ error: 'Hiányzó adatok' });
   }
 
   db.get(
@@ -182,13 +164,13 @@ app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUK
     async (err, user) => {
 
       if (!user) {
-        return res.status(401).json({ error: 'Invalid login' });
+        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
 
       const ok = await bcrypt.compare(password, user.password);
 
       if (!ok) {
-        return res.status(401).json({ error: 'Invalid login' });
+        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
 
       res.json({
@@ -209,7 +191,7 @@ app.post('/api/book', authLimiter, (req, res) => {
   console.log("BOOK REQ:", req.body);
 
   if (!userId || !trainerId || !date || !time) {
-    return res.status(400).json({ error: 'Missing data' });
+    return res.status(400).json({ error: 'Hiányzó adatok' });
   }
   ///EMAIL VALIDÁLÁS HOGY JÓ E A FORMÁTUM
   if (!email || !isValidEmail(email)) {
@@ -222,7 +204,7 @@ app.post('/api/book', authLimiter, (req, res) => {
     WHERE trainerId = ?
     AND date = ?
     AND time = ?
-    AND status != 'cancelled'
+    AND status != 'törölve'
   `,
     [trainerId, date, time],
     (err, existing) => {
@@ -235,10 +217,10 @@ app.post('/api/book', authLimiter, (req, res) => {
 
 
 
-      /// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
+/// HA NEM FOGLALT -> ADATBÁZISBA FELTÖLTÉS + EMAIL KÜLDÉS
 db.run(`
   INSERT INTO bookings (userId, trainerId, date, time, status, email)
-  VALUES (?, ?, ?, ?, 'pending', ?)
+  VALUES (?, ?, ?, ?, 'folyamatban', ?)
 `,
 [userId, trainerId, date, time, email],
 function (err) {
@@ -427,7 +409,7 @@ app.put('/api/user-role/:id', (req, res) => {
   const { role } = req.body;
 
   if (!['user', 'trainer', 'admin'].includes(role)) {
-    return res.status(400).json({ error: 'Invalid role' });
+    return res.status(400).json({ error: 'Érvénytelen szerepkör' });
   }
 
   db.run(
@@ -461,6 +443,19 @@ app.put('/api/trainer-booking-status/:id', (req, res) => {
 
   const { status } = req.body;
 
+  function translateStatus(status) { ///STATUSZ FORDÍTÁS A MAGYARRA
+  return {
+    'pending': 'Folyamatban',
+    'approved': 'Elfogadva',
+    'rejected': 'Elutasítva',
+    'cancelled': 'Törölve',
+    'folyamatban': 'Folyamatban',
+    'elfogadva': 'Elfogadva',
+    'elutasítva': 'Elutasítva',
+    'törölve': 'Törölve'
+  }[status] || status;
+}
+
   db.get(`
     SELECT u.email, u.name as userName, b.date, b.time
     FROM bookings b
@@ -482,7 +477,7 @@ app.put('/api/trainer-booking-status/:id', (req, res) => {
                   <p>Kedves ${row.userName}!</p>
                   <p>A foglalásod módosításra került:</p>
                   <table width="100%" cellpadding="10" style="background:#f9f9f9;">
-                    <tr> <td><b>Státusz:</b> </td> <td>${status}</td></tr>
+                    <tr> <td><b>Státusz:</b> </td> <td>${translateStatus(status)}</td></tr>
                     <tr><td><b>Dátum:</b></td><td>${row.date}</td></tr>
                     <tr><td><b>Idő:</b></td><td>${row.time}</td></tr>
                   </table>
@@ -577,18 +572,7 @@ app.put('/api/profile/:id', async (req, res) => {
 });
 
 
-///PROFILKÉP FELTÖLTÉSE
-app.post('/api/upload-avatar/:id', upload.single('avatar'), (req, res) => {
 
-  const filePath = '/uploads/' + req.file.filename;
-
-  db.run(
-    `UPDATE users SET avatar=? WHERE id=?`,
-    [filePath, req.params.id],
-    () => res.json({ path: filePath })
-  );
-  
-});
 
 ///LOGIN HELPER
 function logAction(userId, action, details = '') {

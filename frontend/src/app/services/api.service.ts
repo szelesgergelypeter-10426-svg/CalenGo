@@ -75,14 +75,6 @@ export class ApiService {
   return this.http.put(this.base + '/trainer-booking-status/' + id, { status });
   }
 
-  uploadAvatar(userId: number, file: File) {
-  const fd = new FormData();
-  fd.append('avatar', file);
-
-  return this.http.post<any>(
-    `${this.base}/upload-avatar/${userId}`, fd );
-  }
-
   getAuditLog() {
   return this.http.get<any[]>(`${this.base}/audit`);
   }

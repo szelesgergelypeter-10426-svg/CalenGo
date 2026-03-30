@@ -4,16 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from './services/api.service';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core'; ///ez kell a sikeres foglalás után hogy megjelenjen a sikeres foglalás page, mert magatol nem frissul le csak is valamilyen kattintas utan
+import { registerLocaleData } from '@angular/common';///magyar dátumok
+import localeHu from '@angular/common/locales/hu';///magyar dátumok
+import { LOCALE_ID } from '@angular/core';///magyar dátumok
 
-
-
+registerLocaleData(localeHu);
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule, FormsModule,],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.html',
-  styleUrls: ['./app.css', './app.extra.css']
+  styleUrls: ['./app.css', './app.extra.css'],
+  providers: [{ provide: LOCALE_ID, useValue: 'hu' }],///magyar dátumok
 })
 export class AppComponent {
 
@@ -106,23 +109,23 @@ showPage(page: typeof this.currentPage) {
   loadProfile(){
   if(!this.currentUserId) return;
 
-
   this.api.getProfile(this.currentUserId)
     .subscribe(p => {
     this.profile = p;
     this.profile.password = '';
+    this.cd.detectChanges();
     });
   }
   
   ///STÁTUSZ OSZTÁLY
-  statusClass(s: string) {
-    return {
-      pending: 'bg-yellow-500 text-white px-2 py-1 rounded',
-      approved: 'bg-green-600 text-white px-2 py-1 rounded',
-      rejected: 'bg-red-600 text-white px-2 py-1 rounded',
-      cancelled: 'bg-gray-500 text-white px-2 py-1 rounded'
-    }[s];
-  }
+statusClass(s: string) {
+  return {
+    folyamatban: 'bg-yellow-500 text-white px-2 py-1 rounded',
+    elfogadva: 'bg-green-600 text-white px-2 py-1 rounded',
+    elutasítva: 'bg-red-600 text-white px-2 py-1 rounded',
+    törölve: 'bg-gray-500 text-white px-2 py-1 rounded'
+  }[s];
+}
   
   //PROFIL MENTÉSE
   saveProfile() {
@@ -321,10 +324,10 @@ cancelEdit() {
   currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth();
 
-  monthNames = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December'
-  ];
+monthNames = [
+  'Január', 'Február', 'Március', 'Április', 'Május', 'Június',
+  'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'
+];
 
   calendarDays: (number | null)[] = [];
 
@@ -338,7 +341,6 @@ cancelEdit() {
   this.loadTrainers(); 
   this.updateClock(); // azonnal mutassa az aktuális időt
   this.intervalId = setInterval(() => this.updateClock(), 1000); /// meghivja az updateclockot masodpercenkent.
-  this.loadTrainers(); 
   }
 
   ngOnDestroy() {
@@ -376,7 +378,7 @@ cancelEdit() {
 
 
   ///acccept/reject pop up gomb
-updateBookingStatus(status: 'approved' | 'rejected') {
+updateBookingStatus(status: 'elfogadva' | 'elutasítva') {
   if (!this.selectedBooking) return;
 
   this.api.setBookingStatus(this.selectedBooking.id, status)
@@ -450,10 +452,11 @@ prevWeek() {
   const s = String(b.status).toLowerCase().trim();
 
   const map: Record<string, string> = {
-    pending: 'bg-purple-600',
-    approved: 'bg-green-600',
-    rejected: 'bg-red-600'
-  };
+    ///magyar státuszok
+    'folyamatban': 'bg-purple-600',
+    'elfogadva': 'bg-green-600',
+    'elutasítva': 'bg-red-600'
+    };
 
   return map[s] || 'bg-gray-700';
   }
@@ -477,9 +480,9 @@ prevWeek() {
 
   if (!b) return 'bg-gray-800 hover:bg-gray-700';
 
-  if (b.status === 'pending') return 'bg-purple-600';
-  if (b.status === 'approved') return 'bg-green-600';
-  if (b.status === 'rejected') return 'bg-red-600';
+  if (b.status === 'folyamatban') return 'bg-purple-600';
+  if (b.status === 'elfogadva') return 'bg-green-600';
+  if (b.status === 'elutasítva') return 'bg-red-600';
 
   return '';
   }
@@ -654,21 +657,6 @@ bookingLoading = false;
     this.api.getAuditLog().subscribe(l => this.auditLogs = l);
   }
 
-  ///PROFILKÉP FELTÖLTÉSE
-  onAvatarSelected(event: any) {
-  const file = event.target.files[0];
-  if (!file || !this.currentUserId) return;
-
-  this.api.uploadAvatar(this.currentUserId, file)
-    .subscribe({
-      next: r => {
-        this.profile.avatar = r.path;
-        this.showToast('Profilkép frissítve');
-      },
-      error: () => this.showToast('Upload hiba','error')
-    });
-
-  }
 
   //ADMIN FOGLALAS TÖRLÉSE
   deleteBooking(id: number) {
@@ -719,7 +707,7 @@ bookingLoading = false;
       .subscribe((rows: any[]) => {
 
         this.takenTimes = rows
-        .filter(b => b.date === this.selectedDate && b.status !== 'cancelled')
+        .filter(b => b.date === this.selectedDate && b.status !== 'törölve')
           .map(b => b.time);
         console.log("FOGLALT IDŐK:", this.takenTimes);
         });
@@ -804,7 +792,6 @@ bookingLoading = false;
 loadTrainers() {
   this.api.getTrainers().subscribe({
     next: (list: any[]) => {
-      this.trainers = list;  // feltölti a frontendet
       this.trainers = list;
       console.log('Trainers betöltve:', this.trainers);
 
@@ -828,7 +815,12 @@ loadTrainers() {
     pending: 'Folyamatban',
     approved: 'Elfogadva',
     rejected: 'Elutasítva',
-    cancelled: 'Törölve'
+    cancelled: 'Törölve',
+
+    folyamatban: 'Folyamatban',
+    elfogadva: 'Elfogadva',
+    elutasítva: 'Elutasítva',
+    törölve: 'Törölve'
   }[s] || s;
   }
 
