@@ -1,7 +1,7 @@
 <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
       <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
-        <span class="[text-shadow:0_0_3px_#fff,0_0_6px_#fff,0_0_10px_#fff]">Calen</span><span class="text-4xl text-purple-500 [text-shadow:0_0_3px_#a855f7,0_0_6px_#a855f7,0_0_10px_#a855f7]">Go</span>
+        <span class="[text-shadow:0_0_3px_rgb(255,255,255,0.5),0_0_6px_rgb(255,255,255,0.5),0_0_10px_rgb(255,255,255,0.5)]">Calen</span><span class="text-4xl text-purple-500 [text-shadow:0_0_3px_rgb(168,85,247,0.5),0_0_6px_rgb(168,85,247,0.5),0_0_10px_rgb(168,85,247,0.5)]">Go</span>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
           <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
@@ -338,7 +338,7 @@
 <!-- TRAINER FOGLALÁSOK TÁBLÁZAT -->
 <div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl fade-in">
   <h2 class="mb-6 text-3xl font-bold text-center text-white">
-    Heti foglalások
+    Heti <span class="text-purple-500">foglalások</span>
   </h2>
       <!-- WEEK NAV -->
       <div class="flex justify-between mb-4 ">
@@ -352,7 +352,7 @@
       </div>
 
       <div class="overflow-auto">
-        <table class="w-full border-collapse">
+        <table class="w-full border border-purple-500">
           <thead>
             <tr>
               <th class="p-2 text-center text-white bg-gray-800">Idő</th>
@@ -388,7 +388,7 @@
 <div *ngIf="currentPage==='account'" class="max-w-md p-8 mx-auto text-white shadow-xl rounded-2xl bg-gray-800/80 fade-in">
 
     <h2 class="mb-6 text-2xl font-bold text-center">
-      Fiókom
+      Fiók<span class="text-purple-500">om</span>
     </h2>
       <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
 
@@ -400,7 +400,7 @@
 
       <div class="relative">
         <input [(ngModel)]="profile.password" [type]="showPassword ? 'text' : 'password'" placeholder="Új jelszó megadása"
-          class="w-full p-3 pr-12 text-white bg-gray-800 border border-gray-600 rounded-lg">
+          class="w-full p-3 mb-3 pr-12 text-white bg-gray-800 border border-gray-600 rounded-lg">
       </div>
 
       <button type="button" (click)="saveProfile()"
@@ -413,7 +413,7 @@
 <!-- TRAINERS PAGE-->
 <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="fade-in">
   <h2 class="mb-8 text-3xl font-bold text-center text-white ">
-    Válassz edzőink közül!
+    Válassz <span class="text-purple-500">edzőink</span> közül!
   </h2>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       <div *ngFor="let t of trainers" class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
@@ -465,7 +465,7 @@
     </div>
       <div class="max-w-3xl px-4 mx-auto fade-in">
   <h2 class="mb-8 text-3xl font-extrabold text-center text-white">
-    Időpontjaim
+    Idő<span class="text-purple-500">pontjaim</span>
   </h2>
 
   <div *ngIf="bookings.length === 0" class="italic text-center text-gray-400">
