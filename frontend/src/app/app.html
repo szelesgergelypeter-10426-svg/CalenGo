@@ -1,7 +1,7 @@
 <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
       <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
-        Calen<span class="text-4xl text-purple-500">Go</span>
+        <span class="[text-shadow:0_0_3px_#fff,0_0_6px_#fff,0_0_10px_#fff]">Calen</span><span class="text-4xl text-purple-500 [text-shadow:0_0_3px_#a855f7,0_0_6px_#a855f7,0_0_10px_#a855f7]">Go</span>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
           <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
@@ -52,7 +52,7 @@
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
           Userek
         </button>
-        
+
         <!--FIÓKOM-->
         <button type="button" (click)="loadProfile(); showPage('account')"
           class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
@@ -72,7 +72,7 @@
   <!--MAIN PAGES-->
 <div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory fade-in">
   <!-- LOGIN PANEL -->
-  <section 
+  <section
   class="flex items-center justify-center h-screen text-center bg-center bg-cover"
   [ngStyle]="{'background-image': 'url(assets/)'}">
     <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
@@ -101,7 +101,7 @@
     </div>
   </section>
 
-    
+
   <!--regisztracio a main pagen-->
   <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
     <div class="w-full max-w-md p-8 transform border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
@@ -115,7 +115,7 @@
 
       <input #regPassword type="password" class="w-full p-3 mb-3 text-white rounded bg-gray-600/80" placeholder="Jelszó">
 
-      <button (click)="registerUser(regName.value, regEmail.value, regPassword.value)" 
+      <button (click)="registerUser(regName.value, regEmail.value, regPassword.value)"
         class="w-full py-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105">
         Fiók létrehozása
       </button>
@@ -361,7 +361,7 @@
               </th>
             </tr>
           </thead>
-   
+
           <tbody>
             <tr *ngFor="let slot of timeSlots">
               <!-- IDŐ -->
@@ -372,8 +372,8 @@
               <td *ngFor="let d of weekDays" class="p-1">
                 <div class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer hover:scale-105" [ngClass]="
                   getBookingFor(d, slot) ? getBookingColor(getBookingFor(d, slot)): 'bg-gray-700'" (click)="openBooking(getBookingFor(d, slot))">
-                   <!-- {{ getBookingFor(d, slot)?.name || 'Szabad' }}  
-                   EBBE A RÉSZBE RAKJUK MAJD BELE HOGY AZ ADOTT KOCKÁK STÁTUSZA MILYEN VAGY AMIT MAJD KITALÁLUNK  
+                   <!-- {{ getBookingFor(d, slot)?.name || 'Szabad' }}
+                   EBBE A RÉSZBE RAKJUK MAJD BELE HOGY AZ ADOTT KOCKÁK STÁTUSZA MILYEN VAGY AMIT MAJD KITALÁLUNK
                    + A STÁTUSZJELZŐKET ÁTÍRNI, ÁTFOGALMAZNI MAGYARRA / AHOGY JOBBAN KINÉZ
                    -->
                 </div>
@@ -409,7 +409,7 @@
       </button>
 </div>
 
-    
+
 <!-- TRAINERS PAGE-->
 <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="fade-in">
   <h2 class="mb-8 text-3xl font-bold text-center text-white ">
@@ -510,7 +510,7 @@
 <div *ngIf="currentPage === 'booking'"
   class="grid max-w-6xl grid-cols-1 gap-10 mx-auto md:grid-cols-2 fade-in">
 
-  
+
   <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
 
     <div class="flex items-center justify-between mb-6">
@@ -522,7 +522,7 @@
     ←
   </button>
 
-  
+
   <h2 class="text-xl font-semibold tracking-wide">
     {{ currentYear }} – {{ monthNames[currentMonth] }}
   </h2>
@@ -555,9 +555,9 @@
     </div>
   </div>
 
-  
+
   <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
-    
+
         <div class="flex items-center justify-center p-4 mb-6 font-mono text-2xl tracking-widest text-white bg-gray-800 shadow-lg rounded-xl">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -641,13 +641,13 @@
       <h2 class="mb-4 text-4xl text-center text-white">Felhasználók</h2>
 
       <div *ngFor="let u of adminUsers"
-        class="flex items-center justify-between p-3 mb-2 text-white rounded bg-gray-800/80">
+        class="flex border border-purple-500 items-center justify-between p-3 mb-2 text-white rounded bg-gray-800/80">
 
         <div>
           {{u.name}} — {{u.email}}
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex gap-2" >
 
           <select #roleSel class="p-1 text-white bg-gray-600 rounded">
 
@@ -657,7 +657,7 @@
 
           </select>
 
-          <button type="button" class="px-2 py-1 bg-blue-600 rounded" (click)="changeUserRole(u.id, roleSel.value)">
+          <button type="button" class="px-2 py-1 bg-purple-500 rounded" (click)="changeUserRole(u.id, roleSel.value)">
             Mentés
           </button>
 
