@@ -24,7 +24,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: string = 'login';
+  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success' = 'login';
   currentUserRole: string | null = null;
   currentUserId: number | null = null;
   takenTimes: string[] = [];
@@ -45,8 +45,8 @@ export class AppComponent {
   showBookingModal = false;
   trainers: any[] = [];
   currentTime: string = ''
-  
-
+  loginEmail: string = '';
+  loginPassword: string = '';
   
   constructor(
     private api: ApiService,
@@ -76,7 +76,7 @@ selectDay(day: number) {
     }
 }
 
-showPage(page: typeof this.currentPage) {
+showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success') {
   this.bookingSuccess = false;
   this.currentPage = page;
 
@@ -178,6 +178,10 @@ statusClass(s: string) {
   // =====================
 
   loginUser(email: string, password: string) {
+  if (!email || !password) {
+    this.showToast('Email és jelszó megadása kötelező', 'error');
+    return;
+  }
 
   this.api.login(email, password)
     .subscribe({
@@ -188,6 +192,10 @@ statusClass(s: string) {
         this.currentUserId = user.id;
 
         this.showToast('Sikeres bejelentkezés');
+
+        // Clear login form
+        this.loginEmail = '';
+        this.loginPassword = '';
 
         // USER
         if (user.role === 'user') {
