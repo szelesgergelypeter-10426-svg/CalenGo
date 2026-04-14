@@ -4,24 +4,24 @@
         <span class="[text-shadow:0_0_3px_rgb(255,255,255,0.5),0_0_6px_rgb(255,255,255,0.5),0_0_10px_rgb(255,255,255,0.5)]">Calen</span><span class="text-4xl text-purple-500 [text-shadow:0_0_3px_rgb(168,85,247,0.5),0_0_6px_rgb(168,85,247,0.5),0_0_10px_rgb(168,85,247,0.5)]">Go</span>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
-          <button (click)="scrollToTop()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-            Bejelentkezés
+          <button (click)="scrollToTop()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-right-to-bracket">
+            
           </button>
 
-          <button (click)="scrollToRegister()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-            Regisztráció
+          <button (click)="scrollToRegister()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
+            
           </button>
 
-          <button (click)="scrollToTrainers()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-            Edzők
+          <button (click)="scrollToTrainers()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+            
           </button>
 
-          <button (click)="scrollToPrices()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-            Áraink
+          <button (click)="scrollToPrices()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
+            
           </button>
 
-          <button (click)="scrollToContact()" class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-            Kapcsolat
+          <button (click)="scrollToContact()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
+            
           </button>
       </div>
       <!-- TOAST -->
@@ -31,50 +31,46 @@
       <div class="flex items-center gap-3" *ngIf="currentUserRole">
         <!-- TRAINER IDŐPONTJAI -->
         <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
-          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-          Időpontjaim
+          class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+          
         </button>
 
         <!-- USER IDŐPONTJAI -->
         <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
-          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-          Időpontjaim
+          class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+          
         </button>
 
         <!-- USER: edzők -->
         <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('trainers')"
-          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-          Edzők
+          class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+          
         </button>
 
         <!-- ADMIN -->
         <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
-          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-          Userek
+          class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-users">
+          
         </button>
 
         <!--FIÓKOM-->
         <button type="button" (click)="loadProfile(); showPage('account')"
-          class="px-4 py-2 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80">
-          Fiókom
-        </button>
-
+          class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user">
+      </button>
         <!--KIJELENTKEZÉS-->
-        <button type="button" (click)="logoutConfirm()" class="px-4 py-2 text-white bg-red-600 rounded hover:scale-105">
-          Logout
+        <button type="button" (click)="logoutConfirm()" class="px-6 py-3 text-white bg-red-600 rounded hover:scale-105 fa-solid fa-right-from-bracket">
         </button>
       </div>
   </div>
 </nav>
 
 
-<div class="relative z-10 min-h-screen bg-gray-900">
+<div class="relative z-10 min-h-screen">
   <!--MAIN PAGES-->
 <div *ngIf="currentPage === 'login'" class="min-h-screen snap-y snap-mandatory fade-in">
   <!-- LOGIN PANEL -->
   <section
-  class="flex items-center justify-center h-screen text-center bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/)'}">
+  class="flex items-center justify-center h-screen text-center bg-center bg-cover">
     <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
@@ -103,7 +99,7 @@
 
 
   <!--regisztracio a main pagen-->
-  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
+  <section id="registerSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover">
     <div class="w-full max-w-md p-8 transform border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
       <h2 class="mb-6 text-4xl font-bold text-white">
         Regisztráció
@@ -140,7 +136,7 @@
   </section>
 
   <!-- ÁRAINK-->
-  <section id="prices" class="flex items-center justify-center h-screen text-white bg-gray-700 bg-center bg-cover"
+  <section id="prices" class="flex items-center justify-center h-screen text-white bg-center bg-cover"
     [ngStyle]="{'background-image': 'url(assets/.jpg)'}">
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
@@ -161,7 +157,7 @@
 
 <!-- KAPCSOLAT -->
 <section id="contactSection"
-  class="min-h-screen text-white bg-linear-to-r from-[#0f172a] via-[#1e293b] to-[#020617] flex flex-col items-center justify-center px-6 py-16">
+  class="min-h-screen text-white flex flex-col items-center justify-center px-6 py-16">
 
   <!-- FELSŐ CÍMSOR -->
   <div class="mb-12 text-center">
@@ -293,7 +289,7 @@
         <p class="mb-6 text-gray-300">
           Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
         </p>
-        <button class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-linear-to-r from-purple-600 to-pink-600 rounded-2xl hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-purple-500/25">
+        <button type="button" (click)="showPage('login')" class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-linear-to-r from-purple-600 to-pink-600 rounded-2xl  hover:to-pink-700 hover:shadow-purple-500/25">
           Időpont foglalás
         </button>
       </div>
@@ -388,7 +384,7 @@
 <div *ngIf="currentPage==='account'" class="max-w-md p-8 mx-auto text-white shadow-xl rounded-2xl bg-gray-800/80 fade-in">
 
     <h2 class="mb-6 text-2xl font-bold text-center">
-      Fiók<span class="text-purple-500">om</span>
+      Fiókom
     </h2>
       <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
 
