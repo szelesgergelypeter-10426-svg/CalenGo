@@ -11,8 +11,6 @@ const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
 
 
-
-
 app.use(express.json());
 app.use(cors());
 app.use(helmet());

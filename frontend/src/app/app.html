@@ -1,26 +1,26 @@
 <nav class="sticky top-0 z-50 bg-gray-800 border-b border-purple-600 backdrop-blur">
     <div class="flex items-center justify-between max-w-6xl px-6 py-4 mx-auto">
       <h1 class="text-4xl font-extrabold tracking-wide text-white cursor-pointer hover:animate-pulse">
-        <span class="[text-shadow:0_0_3px_rgb(255,255,255,0.5),0_0_6px_rgb(255,255,255,0.5),0_0_10px_rgb(255,255,255,0.5)]">Calen</span><span class="text-4xl text-purple-500 [text-shadow:0_0_3px_rgb(168,85,247,0.5),0_0_6px_rgb(168,85,247,0.5),0_0_10px_rgb(168,85,247,0.5)]">Go</span>
+         <button (click)="scrollToTop()" class="[text-shadow:0_0_3px_rgb(255,255,255,0.5),0_0_6px_rgb(255,255,255,0.5),0_0_10px_rgb(255,255,255,0.5)]">Calen</button> <button (click)="scrollToTop()" class="text-4xl text-purple-500 [text-shadow:0_0_3px_rgb(168,85,247,0.5),0_0_6px_rgb(168,85,247,0.5),0_0_10px_rgb(168,85,247,0.5)]">Go</button>
       </h1>
       <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
           <button (click)="scrollToTop()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-right-to-bracket">
             
           </button>
 
-          <button (click)="scrollToRegister()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-user-plus transition-all">
+          <button (click)="scrollToRegister()" class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
             
           </button>
 
-          <button (click)="scrollToTrainers()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-dumbbell transition-all">
+          <button (click)="scrollToTrainers()" class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
             
           </button>
 
-          <button (click)="scrollToPrices()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-tags transition-all">
+          <button (click)="scrollToPrices()" class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
             
           </button>
 
-          <button (click)="scrollToContact()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-phone transition-all">
+          <button (click)="scrollToContact()" class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
             
           </button>
       </div>
@@ -58,7 +58,7 @@
           class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user">
       </button>
         <!--KIJELENTKEZÉS-->
-        <button type="button" (click)="logoutConfirm()" class="px-6 py-3 text-white bg-red-600 rounded hover:scale-105 fa-solid fa-right-from-bracket">
+        <button type="button" (click)="logoutConfirm()" class="px-6 py-3 text-white bg-red-600 rounded hover:scale-105 navbtn fa-solid fa-right-from-bracket">
         </button>
       </div>
   </div>
@@ -80,7 +80,7 @@
       <input #LoginPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button type="button"
-        class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105 transition-all rounded-2xl"
+        class="w-full py-3 mb-3 text-white transition-all bg-purple-600 rounded hover:bg-purple-500 hover:scale-105 rounded-2xl"
         (click)="loginUser(logineEmail.value, LoginPassword.value)">
         Belépés
       </button>
@@ -157,11 +157,11 @@
 
 <!-- KAPCSOLAT -->
 <section id="contactSection"
-  class="min-h-screen text-white flex flex-col items-center justify-center px-6 py-16">
+  class="flex flex-col items-center justify-center min-h-screen px-6 py-16 text-white">
 
   <!-- FELSŐ CÍMSOR -->
   <div class="mb-12 text-center">
-    <h2 class="mb-4 text-5xl font-bold bg-linear-to-r text-white bg-clip-text">
+    <h2 class="mb-4 text-5xl font-bold text-white bg-linear-to-r bg-clip-text">
       Kapcsolat
     </h2>
     <p class="max-w-2xl mx-auto text-lg text-gray-300">
@@ -220,7 +220,7 @@
         <div class="flex justify-center">
           <a href="https://www.instagram.com/calen.go/"
              target="_blank"
-             class="inline-flex items-center px-4 py-2 space-x-2 transition-all duration-300 rounded-full shadow-lg bg-linear-to-r bg-purple-600 hover:scale-105 hover:shadow-purple-500/25">
+             class="inline-flex items-center px-4 py-2 space-x-2 transition-all duration-300 bg-purple-600 rounded-full shadow-lg bg-linear-to-r hover:scale-105 hover:shadow-purple-500/25">
             <img src="assets/instagram.png" class="w-6 h-6" alt="Instagram" />
             <span class="font-medium text-white">@calen.go</span>
           </a>
@@ -274,11 +274,11 @@
         <div class="space-y-2 text-sm">
           <div class="flex justify-between px-3 py-2 rounded-lg bg-white/5">
             <span class="text-gray-300">Hétfő - Péntek:</span>
-            <span class="font-medium text-white">06:00 - 22:00</span>
+            <span class="font-medium text-white">08:00 - 20:00</span>
           </div>
           <div class="flex justify-between px-3 py-2 rounded-lg bg-white/5">
             <span class="text-gray-300">Szombat - Vasárnap:</span>
-            <span class="font-medium text-white">08:00 - 18:00</span>
+            <span class="font-medium text-white">08:00 - 20:00</span>
           </div>
         </div>
       </div>
@@ -289,7 +289,7 @@
         <p class="mb-6 text-gray-300">
           Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
         </p>
-        <button type="button" (click)="showPage('login')" class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-linear-to-r bg-purple-600 rounded-2xl hover:shadow-purple-500/25 hover:scale-105 ">
+        <button type="button" (click)="showPage('login')" class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 bg-purple-600 shadow-lg bg-linear-to-r rounded-2xl hover:shadow-purple-500/25 hover:scale-105 ">
           Időpont foglalás
         </button>
       </div>
@@ -397,7 +397,7 @@
 
       <div class="relative">
         <input [(ngModel)]="profile.password" [type]="showPassword ? 'text' : 'password'" placeholder="Új jelszó megadása"
-          class="w-full p-3 mb-3 pr-12 text-white bg-gray-800 border border-gray-600 rounded-lg">
+          class="w-full p-3 pr-12 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
       </div>
 
       <button type="button" (click)="saveProfile()"
@@ -409,7 +409,7 @@
 
 
 <!-- TRAINERS PAGE-->
-<div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="max-w-6xl mx-auto px-4 fade-in">
+<div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="max-w-6xl px-4 mx-auto fade-in">
   <h2 class="mb-8 text-3xl font-bold text-center text-white ">
     Válassz <span class="text-purple-500">edzőink</span> közül!
   </h2>
@@ -436,7 +436,7 @@
 </div>
 
 <!-- IDŐPONT FOGLALÁS -->
-<div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="max-w-4xl mx-auto px-4 fade-in">
+<div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="max-w-4xl px-4 mx-auto fade-in">
 
     <!--User időpontok-->
     <div *ngFor="let b of adminBookings" class="p-3 mb-3 bg-gray-800 rounded">
@@ -633,12 +633,12 @@
 
     <!-- ADMIN OLDAL -->
     <div *ngIf="currentPage === 'admin'" class="flex items-center justify-center min-h-screen fade-in">
-      <div class="w-full max-w-4xl mx-auto px-4">
+      <div class="w-full max-w-4xl px-4 mx-auto">
 
         <h2 class="mb-4 text-4xl text-center text-white">Felhasználók</h2>
 
         <div *ngFor="let u of adminUsers"
-          class="flex border border-purple-500 items-center justify-between p-3 mb-2 text-white rounded bg-gray-800/80">
+          class="flex items-center justify-between p-3 mb-2 text-white border border-purple-500 rounded bg-gray-800/80">
 
           <div>
             {{u.name}} — {{u.email}}
