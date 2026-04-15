@@ -8,19 +8,19 @@
             
           </button>
 
-          <button (click)="scrollToRegister()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
+          <button (click)="scrollToRegister()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-user-plus transition-all">
             
           </button>
 
-          <button (click)="scrollToTrainers()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+          <button (click)="scrollToTrainers()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-dumbbell transition-all">
             
           </button>
 
-          <button (click)="scrollToPrices()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
+          <button (click)="scrollToPrices()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-tags transition-all">
             
           </button>
 
-          <button (click)="scrollToContact()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
+          <button (click)="scrollToContact()" class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 items-center fa-solid fa-phone transition-all">
             
           </button>
       </div>
@@ -71,7 +71,7 @@
   <!-- LOGIN PANEL -->
   <section
   class="flex items-center justify-center h-screen text-center bg-center bg-cover">
-    <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl">
+    <div class="w-full max-w-md p-8 border-2 border-purple-600 shadow-xl bg-gray-900/60 rounded-2xl ">
       <h2 class="mb-6 text-4xl font-bold text-center text-white">
         Bejelentkezés
       </h2>
@@ -80,7 +80,7 @@
       <input #LoginPassword type="password" class="w-full p-3 mb-3 text-white bg-gray-800 rounded" placeholder="Jelszó">
 
       <button type="button"
-        class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105"
+        class="w-full py-3 mb-3 text-white bg-purple-600 rounded hover:bg-purple-500 hover:scale-105 transition-all rounded-2xl"
         (click)="loginUser(logineEmail.value, LoginPassword.value)">
         Belépés
       </button>
@@ -125,7 +125,7 @@
       <h2 class="mb-10 text-4xl font-bold text-white">Edzőink</h2>
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div *ngFor="let t of trainers"
-            class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg cursor-pointer rounded-2xl hover:scale-110 hover:border-2 hover:border-purple-600">
+            class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg cursor-pointer rounded-2xl hover:scale-110">
 
             <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
             <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
@@ -141,7 +141,7 @@
     <div class="text-center">
       <h2 class="mb-10 text-4xl font-bold">Áraink</h2>
       <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div *ngFor="let p of prices; let i = index" (click)="togglePrice(i)" class="p-4 text-center transition duration-300 bg-gray-800 rounded-lg cursor-pointer hover:scale-105 hover:border-2 hover:border-purple-600">
+        <div *ngFor="let p of prices; let i = index" (click)="togglePrice(i)" class="p-4 text-center transition duration-300 bg-gray-800 rounded-lg cursor-pointer hover:scale-105 ">
           <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
           <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
           <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
@@ -161,7 +161,7 @@
 
   <!-- FELSŐ CÍMSOR -->
   <div class="mb-12 text-center">
-    <h2 class="mb-4 text-5xl font-bold text-transparent bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text">
+    <h2 class="mb-4 text-5xl font-bold bg-linear-to-r text-white bg-clip-text">
       Kapcsolat
     </h2>
     <p class="max-w-2xl mx-auto text-lg text-gray-300">
@@ -175,7 +175,7 @@
     <div class="space-y-8">
 
       <!-- TÉRKÉP ÉS KAPCSOLAT KÁRTYA -->
-      <div class="p-8 transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20 hover:bg-white/15">
+      <div class="p-8 transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20 ">
         <h3 class="mb-6 text-2xl font-semibold text-center">Találj meg minket</h3>
 
         <div class="w-full h-64 mb-6 overflow-hidden shadow-lg rounded-2xl">
@@ -199,7 +199,7 @@
             </div>
             <div>
               <p class="text-sm text-gray-400">Email</p>
-              <p class="font-medium text-white">ProjectCalenGo@gmail.com</p>
+              <p class="font-medium text-white">projectcalenco@gmail.com</p>
             </div>
           </div>
 
@@ -220,7 +220,7 @@
         <div class="flex justify-center">
           <a href="https://www.instagram.com/calen.go/"
              target="_blank"
-             class="inline-flex items-center px-4 py-2 space-x-2 transition-all duration-300 rounded-full shadow-lg bg-linear-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 hover:scale-105">
+             class="inline-flex items-center px-4 py-2 space-x-2 transition-all duration-300 rounded-full shadow-lg bg-linear-to-r bg-purple-600 hover:scale-105 hover:shadow-purple-500/25">
             <img src="assets/instagram.png" class="w-6 h-6" alt="Instagram" />
             <span class="font-medium text-white">@calen.go</span>
           </a>
@@ -230,7 +230,7 @@
       <!-- JELLEMZŐK -->
       <div class="grid grid-cols-1 gap-4">
         <div class="flex items-center p-4 space-x-3 border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10">
-          <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full">
+          <div class="flex items-center justify-center w-8 h-8 bg-purple-400 rounded-full">
             <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
@@ -239,7 +239,7 @@
         </div>
 
         <div class="flex items-center p-4 space-x-3 border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10">
-          <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full">
+          <div class="flex items-center justify-center w-8 h-8 bg-purple-400 rounded-full">
             <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
@@ -248,7 +248,7 @@
         </div>
 
         <div class="flex items-center p-4 space-x-3 border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10">
-          <div class="flex items-center justify-center w-8 h-8 bg-green-500 rounded-full">
+          <div class="flex items-center justify-center w-8 h-8 bg-purple-400 rounded-full">
             <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
             </svg>
@@ -263,7 +263,7 @@
     <div class="flex flex-col items-center gap-8 md:items-end">
 
       <!-- NYITVATARTÁS KÁRTYA -->
-      <div class="w-full max-w-sm p-8 text-center transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20 hover:bg-white/15">
+      <div class="w-full max-w-sm p-8 text-center transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20 ">
         <h3 class="flex items-center justify-center mb-6 space-x-2 text-2xl font-semibold text-white">
           <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
@@ -285,11 +285,11 @@
 
       <!-- CALL-TO-ACTION -->
       <div class="w-full max-w-sm p-8 text-center border shadow-2xl bg-linear-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl rounded-3xl border-purple-500/30">
-        <h3 class="mb-4 text-xl font-semibold text-white">Kész vagy a változásra?</h3>
+        <h3 class="mb-4 text-xl font-semibold text-white">Kész állsz a változásra?</h3>
         <p class="mb-6 text-gray-300">
           Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
         </p>
-        <button type="button" (click)="showPage('login')" class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-linear-to-r from-purple-600 to-pink-600 rounded-2xl  hover:to-pink-700 hover:shadow-purple-500/25">
+        <button type="button" (click)="showPage('login')" class="w-full px-6 py-3 font-semibold text-white transition-all duration-300 shadow-lg bg-linear-to-r bg-purple-600 rounded-2xl hover:shadow-purple-500/25 hover:scale-105 ">
           Időpont foglalás
         </button>
       </div>
