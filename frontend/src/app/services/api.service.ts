@@ -78,4 +78,12 @@ export class ApiService {
   getAuditLog() {
   return this.http.get<any[]>(`${this.base}/audit`);
   }
+
+  getTrainerBio(id: number) {
+  return this.http.get<any>(this.base + '/trainer-bio/' + id);
+  }
+
+  updateTrainerBio(id: number, bio: string) {
+  return this.http.put(this.base + '/trainer-bio/' + id, { bio });
+  }
 }

@@ -47,6 +47,8 @@ export class AppComponent {
   currentTime: string = ''
   loginEmail: string = '';
   loginPassword: string = '';
+  trainerBio: string = '';
+  selectedTrainer: any = null;
   
   constructor(
     private api: ApiService,
@@ -119,6 +121,12 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
     this.profile.password = '';
     this.cd.detectChanges();
     });
+
+    ///a trainer profilon mutassa a bio-t
+    if (this.currentUserRole === 'trainer') {
+      this.api.getTrainerBio(this.currentUserId!)
+        .subscribe(res => {this.trainerBio = res.bio || '';});
+      }
   }
   
   ///STÁTUSZ OSZTÁLY
@@ -132,34 +140,27 @@ statusClass(s: string) {
 }
   
   //PROFIL MENTÉSE
-  saveProfile() {
+saveProfile() {
     console.log("MENTÉS ELŐTT:", this.profile);
-     
-  
   ///EMAIL VALIDÁCIÓ
   if (!this.isValidEmail(this.profile.email)) {
   this.showToast('Hibás email formátum', 'error');
   return;
   }
-
   if (!confirm('Biztosan módosítod az adatokat?')) return;
-
   this.api.updateProfile(this.currentUserId!, this.profile)
-    .subscribe({
-
-      next: () => {
-  this.showToast('Profil frissítve');
-
-  
-  this.loadProfile();
-  },
+    .subscribe({next: () => {
+      this.showToast('Profil frissítve');
+      this.loadProfile();
+      if (this.currentUserRole === 'trainer') {
+        this.api.updateTrainerBio(this.currentUserId!, this.trainerBio)
+        .subscribe();}
+      },
 
       error: () => {
         this.showToast('Mentés hiba', 'error');
       }
-
     });
-
   }
 
   showToast(msg: string, type: 'success' | 'error' = 'success') {
@@ -315,12 +316,10 @@ saveEdit(id: number) {
 
 cancelEdit() {
   this.editingId = null;}
-      
-    
-
 
   selectTrainer(id: number) {
 
+  this.selectedTrainer = this.trainers.find(t => t.id === id);
   this.selectedTrainerId = id;
   this.selectedDate = null;
   this.selectedTime = null;
@@ -844,6 +843,18 @@ togglePrice(i: number) {
   } else {
     this.openedPriceIndex = i;
   }
+}
+
+///trainerek legördülő bio a main pagen
+openedTrainer: number | null = null;
+
+toggleTrainer(i: number) {
+  this.openedTrainer = this.openedTrainer === i ? null : i;
+}
+
+getTrainerBioText(t: any): string {
+  if (!t.bio || t.bio.trim() === '') {return `${t.name} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;}
+  return t.bio;
 }
 
 ///múltbeli dátum (óra szerint) tiltás

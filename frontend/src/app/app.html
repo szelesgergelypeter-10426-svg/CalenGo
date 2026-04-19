@@ -119,19 +119,28 @@
   </section>
 
   <!-- MAIN PAGE EDZŐK-->
-  <section id="trainersSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover"
-  [ngStyle]="{'background-image': 'url(assets/.jpg)'}" >
+  <section id="trainersSection" class="flex items-center justify-center h-screen text-center bg-center bg-cover" [ngStyle]="{'background-image': 'url(assets/.jpg)'}" > 
     <div class="text-center">
-      <h2 class="mb-10 text-4xl font-bold text-white">Edzőink</h2>
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          <div *ngFor="let t of trainers"
-            class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg cursor-pointer rounded-2xl hover:scale-110">
+      <h2 class="mb-10 text-4xl font-bold text-white">Válassz professzionális edzőink közül</h2>
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div *ngFor="let t of trainers; let i = index" class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl w-80">
+
+          <!-- kattinthato resz -->
+          <div (click)="toggleTrainer(i)" class="cursor-pointer hover:scale-110">
 
             <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
-            <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
-            <p class="text-sm text-purple-400">{{ t.specialty || 'személyi edző' }}</p>
+              <h3 class="text-xl font-semibold text-white">{{ t.name }}</h3>
+                <p class="text-sm text-purple-400">
+                  {{ t.specialty || 'személyi edző' }}
+                </p>
+          </div>
+
+          <!-- lenyilo BIO -->
+          <div *ngIf="openedTrainer === i" class="pt-3 mt-4 text-sm text-gray-300 border-t border-gray-700 animate-fadeIn">
+            {{ getTrainerBioText(t) }}
           </div>
         </div>
+      </div>
     </div>
   </section>
 
@@ -199,7 +208,7 @@
             </div>
             <div>
               <p class="text-sm text-gray-400">Email</p>
-              <p class="font-medium text-white">projectcalenco@gmail.com</p>
+              <p class="font-medium text-white">projectcalengo@gmail.com</p>
             </div>
           </div>
 
@@ -284,8 +293,8 @@
       </div>
 
       <!-- CALL-TO-ACTION -->
-      <div class="w-full max-w-sm p-8 text-center border shadow-2xl bg-linear-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl rounded-3xl border-purple-500/30">
-        <h3 class="mb-4 text-xl font-semibold text-white">Kész állsz a változásra?</h3>
+      <div class="w-full max-w-sm p-8 text-center transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20 ">
+        <h3 class="mb-4 text-xl font-semibold text-white">Készen állsz a változásra?</h3>
         <p class="mb-6 text-gray-300">
           Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
         </p>
@@ -400,6 +409,13 @@
           class="w-full p-3 pr-12 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
       </div>
 
+      <!--edző bio, csak nála jelenik meg-->
+      <div *ngIf="currentUserRole === 'trainer'">
+        <textarea [(ngModel)]="trainerBio" placeholder="Írj magadról (kor, tapasztalat, stb...)"
+        class="w-full h-32 p-3 mt-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+        </textarea>
+      </div>
+
       <button type="button" (click)="saveProfile()"
         class="w-full p-3 font-bold text-white bg-purple-600 rounded-lg hover:scale-105 hover:bg-purple-500">
         Mentés
@@ -503,34 +519,22 @@
   </div>
 </div>
 
-<div *ngIf="currentPage === 'booking'"
-  class="grid max-w-6xl grid-cols-1 gap-10 mx-auto md:grid-cols-2 fade-in">
-
-
-  <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
-
+<!--IDŐPONTFOGLALÁS USERKÉNT-->
+<div *ngIf="currentPage === 'booking'" class="grid items-start grid-cols-1 gap-12 mx-auto max-w-7xl lg:grid-cols-2 fade-in">
+  <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl w-90">
     <div class="flex items-center justify-between mb-6">
+        <button (click)="prevMonth()" class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700"><!-- BAL NYÍL -->
+          ←
+        </button>
 
-  <!-- BAL NYÍL -->
-  <button
-    (click)="prevMonth()"
-    class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700">
-    ←
-  </button>
+        <h2 class="text-xl font-semibold tracking-wide">
+          {{ currentYear }} – {{ monthNames[currentMonth] }}
+        </h2>
 
-
-  <h2 class="text-xl font-semibold tracking-wide">
-    {{ currentYear }} – {{ monthNames[currentMonth] }}
-  </h2>
-
-  <!-- JOBB NYÍL -->
-  <button
-    (click)="nextMonth()"
-    class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700">
-    →
-  </button>
-
-</div>
+        <button (click)="nextMonth()" class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700"><!-- JOBB NYÍL -->
+          →
+        </button>
+    </div>
 
     <!-- HÉT NAPJAI -->
     <div class="grid grid-cols-7 mb-3 text-sm text-center text-gray-500">
@@ -540,8 +544,7 @@
 
     <!-- NAPOK -->
     <div class="grid grid-cols-7 gap-2">
-      <button
-        type="button" *ngFor="let day of calendarDays" [disabled]="!day || isPastDate(day)" (click)="day && !isPastDate(day) && selectDay(day)"
+      <button type="button" *ngFor="let day of calendarDays" [disabled]="!day || isPastDate(day)" (click)="day && !isPastDate(day) && selectDay(day)"
         [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)"
         [class.opacity-40]="day && isPastDate(day)"
         [class.cursor-not-allowed]="day && isPastDate(day)"
@@ -549,17 +552,8 @@
         {{ day }}
       </button>
     </div>
-  </div>
-
 
   <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
-
-        <div class="flex items-center justify-center p-4 mb-6 font-mono text-2xl tracking-widest text-white bg-gray-800 shadow-lg rounded-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {{ currentTime }}
-        </div>
     <h3 class="mb-6 text-xl font-semibold">
       Elérhető időpontok
     </h3>
@@ -589,18 +583,13 @@
               (click)="selectTime(t)"
               [disabled]="takenTimes.includes(t)"
               [title]="takenTimes.includes(t) ? 'Foglalt időpont' : ''"
-              [ngClass]="{
-                'bg-purple-600 text-white shadow-lg shadow-blue-600/30': selectedTime === t && !takenTimes.includes(t),
-                'bg-gray-800 text-gray-200 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t),
-                'opacity-30 cursor-not-allowed bg-gray-700': takenTimes.includes(t)
-              }"
+              [ngClass]="{'bg-purple-600 text-white shadow-lg shadow-blue-600/30': selectedTime === t && !takenTimes.includes(t), 'bg-gray-800 text-gray-200 hover:bg-gray-700': selectedTime !== t && !takenTimes.includes(t), 'opacity-30 cursor-not-allowed bg-gray-700': takenTimes.includes(t)}"
               class="px-4 py-2 text-sm transition-all duration-200 border border-gray-700 rounded-lg hover:scale-105 active:scale-95">
 
               {{ t }}
             </button>
           </div>
         </div>
-
       </ng-container>
 
       <!-- EMAIL -->
@@ -609,49 +598,51 @@
           Email cím
         </label>
 
-        <input
-          type="email"
-          [(ngModel)]="bookingEmail"
-          class="w-full p-3 transition-all bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          placeholder="valami@calengo.com">
+        <input type="email" [(ngModel)]="bookingEmail" class="w-full p-3 transition-all bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="valami@calengo.com">
       </div>
 
       <!-- FOGLALÁS GOMB -->
-      <button
-        type="button"
-        (click)="bookAppointment()"
-        [disabled]="bookingLoading"
+      <button type="button" (click)="bookAppointment()" [disabled]="bookingLoading"
         class="w-full py-3 mt-6 font-semibold transition-all duration-150 bg-purple-800 shadow-lg rounded-xl hover:scale-105 active:scale-95 shadow-purple-600/30 disabled:opacity-50">
-
         {{ bookingLoading ? 'Foglalás...' : 'Foglalás' }}
       </button>
-
     </div>
   </div>
 </div>
 
+<!--jobb oldal (bio)-->
+<div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl h-fit">
+  <div *ngIf="selectedTrainer">
+    <img [src]="getAvatarUrl(selectedTrainer.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
+    <h3 class="text-xl font-semibold text-center">
+      {{ selectedTrainer.name }}
+    </h3>
 
-    <!-- ADMIN OLDAL -->
-    <div *ngIf="currentPage === 'admin'" class="flex items-center justify-center min-h-screen fade-in">
-      <div class="w-full max-w-4xl px-4 mx-auto">
+    <p class="mt-2 text-sm text-center text-purple-400">
+      {{ selectedTrainer.email }}
+    </p>
 
-        <h2 class="mb-4 text-4xl text-center text-white">Felhasználók</h2>
+    <div class="p-4 mt-6 text-sm text-gray-300 bg-gray-800 rounded-lg">
+      {{ selectedTrainer.bio || (selectedTrainer.name + ' edző jelenleg még nem osztotta meg...') }}
+    </div>
+  </div>
+</div>
+</div>
 
-        <div *ngFor="let u of adminUsers"
-          class="flex items-center justify-between p-3 mb-2 text-white border border-purple-500 rounded bg-gray-800/80">
 
-          <div>
-            {{u.name}} — {{u.email}}
-          </div>
-
+<!-- ADMIN OLDAL -->
+<div *ngIf="currentPage === 'admin'" class="flex items-center justify-center min-h-screen fade-in">
+  <div class="w-full max-w-4xl px-4 mx-auto">
+    <h2 class="mb-4 text-4xl text-center text-white">Aktív fiókok</h2>
+      <div *ngFor="let u of adminUsers" class="flex items-center justify-between p-3 mb-2 text-white border border-purple-500 rounded bg-gray-800/80">
+        <div>
+          {{u.name}} — {{u.email}}
+        </div>
           <div class="flex gap-2" >
-
             <select #roleSel class="p-1 text-white bg-gray-600 rounded">
-
               <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600">Felhasználó</option>
               <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600">Edző</option>
               <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600">Admin</option>
-
             </select>
 
             <button type="button" class="px-2 py-1 bg-purple-500 rounded" (click)="changeUserRole(u.id, roleSel.value)">
@@ -662,11 +653,10 @@
               Törlés
             </button>
 
-
           </div>
-        </div>
       </div>
-    </div>
+  </div>
+</div>
 
     <!--booking pop up full-->
     <div *ngIf="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center fade-in">

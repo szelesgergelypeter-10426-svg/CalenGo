@@ -112,6 +112,41 @@ db.serialize(() => {
     WHERE status!='törölve'
   `);
 
+  ///trainer bio
+  db.run(`
+  CREATE TABLE IF NOT EXISTS trainer_bio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trainerId INTEGER UNIQUE,
+    bio TEXT
+  )
+`);
+
+});
+
+/// trainer bio lekérése
+app.get('/api/trainer-bio/:trainerId', (req, res) => {
+  db.get(
+    `SELECT bio FROM trainer_bio WHERE trainerId=?`,
+    [req.params.trainerId],
+    (err, row) => {
+      res.json(row || { bio: '' });
+    }
+  );
+});
+
+///trainer bio mentés,update (ne törlődjön ha ment)
+app.put('/api/trainer-bio/:trainerId', (req, res) => {
+  const { bio } = req.body;
+
+  db.run(`
+    INSERT INTO trainer_bio (trainerId, bio)
+    VALUES (?, ?)
+    ON CONFLICT(trainerId)
+    DO UPDATE SET bio=excluded.bio
+  `,
+    [req.params.trainerId, bio],
+    () => res.json({ success: true })
+  );
 });
 
 
@@ -505,8 +540,9 @@ app.put('/api/trainer-booking-status/:id', (req, res) => {
 
 ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
 app.get('/api/trainers', (req, res) => {
-  db.all(
-    `SELECT id, name, avatar FROM users WHERE role='trainer'`,
+  db.all(`SELECT u.id, u.name, u.avatar, u.email, tb.bio
+    FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
+    WHERE u.role='trainer'`,
     (err, rows) => {
       if (err) {
         console.error(err);
