@@ -3,8 +3,8 @@
 }
 
 ::ng-deep html, ::ng-deep body {
-  scroll-behavior: smooth;
-  background: radial-gradient(circle at top, rgba(99, 102, 241, 0.12), #0f172a 72%);
+  scroll-behavior:smooth;
+  background: radial-gradient(circle at top, rgba(201, 13, 226, 0.12), #3e024d 60%);
 }
 
 .toast {

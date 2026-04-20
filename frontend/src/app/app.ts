@@ -7,6 +7,7 @@ import { ChangeDetectorRef } from '@angular/core'; ///ez kell a sikeres foglalá
 import { registerLocaleData } from '@angular/common';///magyar dátumok
 import localeHu from '@angular/common/locales/hu';///magyar dátumok
 import { LOCALE_ID } from '@angular/core';///magyar dátumok
+import { single } from 'rxjs';
 
 registerLocaleData(localeHu);
 @Component({
@@ -545,7 +546,25 @@ prices = [
     monthly: '6000 Ft', 
     single: '1500 Ft',
     description: 'Kedvezményes ár nyugdíjasok számára.'
-  }
+  },
+];
+//EDZŐI ÁRAK
+trainerprices = [
+  { 
+    trainerCategory: 'Diák', 
+    singleTime: '5000 Ft',
+    trainerPriceDescription: 'Kedvezményes személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
+  },
+  { 
+    trainerCategory: 'Felnőtt', 
+    singleTime: '7500 Ft',
+    trainerPriceDescription: 'Személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
+  },
+  { 
+    trainerCategory: 'Nyugdíjas', 
+    singleTime: '5000 Ft',
+    trainerPriceDescription: 'Kedvezményes személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
+  },
 ];
 
   scrollToPrices() {
@@ -834,17 +853,17 @@ isPastDate(day: number): boolean {
 
   return checkDate < today;
 }
-///árak legördülő menü
+/// ÁRAK legördülő menü
 openedPriceIndex: number | null = null;
+openedTrainerPriceIndex: number | null = null;
 
-togglePrice(i: number) {
-  if (this.openedPriceIndex === i) {
-    this.openedPriceIndex = null;
-  } else {
-    this.openedPriceIndex = i;
-  }
+togglePrice(index: number) {
+  this.openedPriceIndex = this.openedPriceIndex === index ? null : index;
 }
 
+toggleTrainerPrice(index: number) {
+  this.openedTrainerPriceIndex = this.openedTrainerPriceIndex === index ? null : index;
+}
 ///trainerek legördülő bio a main pagen
 openedTrainer: number | null = null;
 
