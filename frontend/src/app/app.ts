@@ -50,6 +50,19 @@ export class AppComponent {
   loginPassword: string = '';
   trainerBio: string = '';
   selectedTrainer: any = null;
+
+  ///edzők típusai
+  selectedSpecialty: string = '';
+
+  trainerSpecialties: string[] = [
+    'Kardió edző',
+    'Erőnléti edző',
+    'Testépítő edző',
+    'Rehabilitációs edző',
+    'Crossfit edző'
+  ];
+
+
   
   constructor(
     private api: ApiService,
@@ -113,15 +126,20 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   showPassword = false;
   
   ///PROFIL BETOLTESE + MENTÉS
-  loadProfile(){
+loadProfile(){
   if(!this.currentUserId) return;
 
   this.api.getProfile(this.currentUserId)
-    .subscribe(p => {
+  .subscribe(p => {
     this.profile = p;
-    this.profile.password = '';
+
+    this.selectedSpecialty =
+  p.specialty && p.specialty.trim() !== ''
+    ? p.specialty
+    : 'Személyi edző';
+
     this.cd.detectChanges();
-    });
+  });
 
     ///a trainer profilon mutassa a bio-t
     if (this.currentUserRole === 'trainer') {
@@ -130,6 +148,39 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
       }
   }
   
+  ///EDZŐ SPECIALITY betöltés
+loadspecialty() {
+  const saved = localStorage.getItem('trainerSpecialty');
+  if (saved) {
+    this.selectedSpecialty = saved;
+  }}
+
+///EDZŐ SPECIALITY MENTÉS  
+saveSpecialty() {
+  if (!this.currentUserId) return;
+
+  this.api.updateProfile(this.currentUserId, {
+    name: this.profile.name,
+    email: this.profile.email,
+    password: this.profile.password,
+    avatar: this.profile.avatar,
+    specialty: this.selectedSpecialty || 'Személyi edző'
+  }).subscribe({
+    next: () => {
+  this.showToast("Edző típus mentve!");
+
+  this.selectedSpecialty =
+    this.selectedSpecialty || 'Személyi edző';
+
+  this.loadProfile();
+  this.loadTrainers();
+} ,
+    error: () => {
+      this.showToast("Mentési hiba", "error");
+    }
+  });
+}
+
   ///STÁTUSZ OSZTÁLY
 statusClass(s: string) {
   return {
@@ -213,6 +264,7 @@ saveProfile() {
 
         // TRAINER
         else if (user.role === 'trainer') {
+          this.loadProfile();
           this.generateWeek();
           this.generateTimeSlots();
           this.loadTrainerBookingsView();
@@ -552,17 +604,20 @@ prices = [
 trainerprices = [
   { 
     trainerCategory: 'Diák', 
-    singleTime: '5000 Ft',
+    singleTime: '5000Ft',
+    monthly: '11000 Ft', 
     trainerPriceDescription: 'Kedvezményes személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
   },
   { 
     trainerCategory: 'Felnőtt', 
-    singleTime: '7500 Ft',
+    singleTime: '7500Ft',
+    monthly: '17500 Ft', 
     trainerPriceDescription: 'Személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
   },
   { 
     trainerCategory: 'Nyugdíjas', 
-    singleTime: '5000 Ft',
+    singleTime: '4000Ft',
+    monthly: '10000 Ft', 
     trainerPriceDescription: 'Kedvezményes személyreszabott edzésprogram és teljes körű hozzáférés az edzőterem eszközeihez.'
   },
 ];
@@ -750,7 +805,6 @@ bookingLoading = false;
 
 
   //FOGLALT NAPOK LETILTASA
-  
   loadTrainerBookings(trainerId: number) {
     this.api.getTrainerBookings(trainerId)
       .subscribe((rows: any[]) => {
@@ -931,6 +985,15 @@ loadTrainers() {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
   }
+
+///edzők típusai
+specialties = [
+  'Kardió edző',
+  'Erőnléti edző',
+  'Testépítő edző',
+  'Funkcionális edző',
+  'Rehabilitációs edző'
+];
 
 ///hónap navigáció
 prevMonth() {

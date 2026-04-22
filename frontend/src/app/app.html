@@ -13,22 +13,22 @@
       </button>
 
       <button (click)="scrollToRegister()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
+        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-user-plus">
 
       </button>
 
       <button (click)="scrollToTrainers()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-dumbbell">
 
       </button>
 
       <button (click)="scrollToPrices()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
+        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-tags">
 
       </button>
 
       <button (click)="scrollToContact()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
+        class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-phone">
 
       </button>
     </div>
@@ -40,25 +40,25 @@
     <div class="flex items-center gap-3" *ngIf="currentUserRole">
       <!-- TRAINER IDŐPONTJAI -->
       <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
-        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-calendar-check">
 
       </button>
 
       <!-- USER IDŐPONTJAI -->
       <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')"
-        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-calendar-check">
 
       </button>
 
       <!-- USER: edzők -->
       <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('trainers')"
-        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-dumbbell">
 
       </button>
 
       <!-- ADMIN -->
       <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
-        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-800 hover:scale-105 bg-gray-600/80 fa-solid fa-users">
+        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-users">
 
       </button>
 
@@ -81,21 +81,17 @@
     <!-- LOGIN PANEL -->
     <section class="flex items-center justify-center min-h-screen text-center bg-center">
 
-      <div class="w-full max-w-md p-8 border border-purple-500/40 shadow-2xl 
-              bg-white/5 backdrop-blur-xl rounded-3xl
-              transition-all duration-300">
+      <div class="w-full max-w-md p-8 transition-all duration-300 border shadow-2xl border-purple-500/40 bg-white/5 backdrop-blur-xl rounded-3xl">
 
-        <h2 class="mb-8 text-4xl font-bold text-white tracking-wide">
+        <h2 class="mb-8 text-4xl font-bold tracking-wide text-white">
           Bejelentkezés
         </h2>
 
         <div class="space-y-4">
 
-          <input #logineEmail class="w-full p-3 text-white bg-black/30 border border-white/10 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Email">
+          <input #logineEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
 
-          <input #LoginPassword type="password" class="w-full p-3 text-white bg-black/30 border border-white/10 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Jelszó">
+          <input #LoginPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
 
         </div>
 
@@ -107,7 +103,7 @@
           Belépés
         </button>
 
-        <p class="mt-6 text-purple-600 font-bold">
+        <p class="mt-6 font-bold text-purple-600">
           Nincs még fiókod?
         </p>
 
@@ -122,24 +118,19 @@
     <!-- REGISTER -->
     <section id="registerSection" class="flex items-center justify-center min-h-screen text-center bg-center bg-cover">
 
-      <div class="w-full max-w-md p-8 border border-purple-500/40 shadow-2xl 
-              bg-white/5 backdrop-blur-xl rounded-3xl
-              transition-all duration-300">
+      <div class="w-full max-w-md p-8 transition-all duration-300 border shadow-2xl border-purple-500/40 bg-white/5 backdrop-blur-xl rounded-3xl">
 
-        <h2 class="mb-8 text-4xl font-bold text-white tracking-wide">
+        <h2 class="mb-8 text-4xl font-bold tracking-wide text-white">
           Regisztráció
         </h2>
 
         <div class="space-y-4">
 
-          <input #regName class="w-full p-3 text-white bg-black/30 border border-white/10 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Név">
+          <input #regName class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Név">
 
-          <input #regEmail class="w-full p-3 text-white bg-black/30 border border-white/10 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Email">
+          <input #regEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
 
-          <input #regPassword type="password" class="w-full p-3 text-white bg-black/30 border border-white/10 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-purple-500 transition" placeholder="Jelszó">
+          <input #regPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
 
         </div>
 
@@ -160,12 +151,12 @@
 
       <div class="w-full max-w-6xl px-4">
 
-        <h2 class="mb-14 text-4xl font-bold text-white tracking-wide">
-          Válassz edzőink közül
+        <h2 class="text-4xl font-bold tracking-wide text-white mb-14">
+          Válassz edzőink közül!
         </h2>
 
         <!-- GRID -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 
           <!-- CARD -->
           <div *ngFor="let t of trainers; let i = index" class="transition-all duration-300">
@@ -176,22 +167,21 @@
                  transition-all duration-300 hover:scale-[1.03]">
 
               <!-- HEADER -->
-              <div class="p-5 rounded-2xl transition">
+              <div class="p-5 transition rounded-2xl">
 
-                <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 w-28 h-28 rounded-full
-                     border-4 border-purple-500 shadow-lg">
+                <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-500 rounded-full shadow-lg w-28 h-28">
 
                 <h3 class="text-xl font-semibold text-white">
                   {{ t.name }}
                 </h3>
 
-                <p class="text-sm text-purple-300 mt-1">
-                  {{ t.specialty || 'Személyi edző' }}
+                <p class="mt-1 text-sm text-purple-300">
+                  {{ t.specialty  }}
                 </p>
 
                 <p class="mt-3 text-xs text-gray-400">
                   Kattints a részletekért
-                  <span class="ml-1 inline-block transition-transform duration-300"
+                  <span class="inline-block ml-1 transition-transform duration-300"
                     [ngClass]="openedTrainer === i ? 'rotate-180' : ''">
                     ▼
                   </span>
@@ -201,9 +191,7 @@
               <div class="overflow-hidden transition-all duration-500 ease-in-out" [ngClass]="openedTrainer === i
               ? 'max-h-96 opacity-100 mt-5'
               : 'max-h-0 opacity-0 mt-0'">
-                <div class="p-5 text-sm text-gray-200
-                        bg-white/5 backdrop-blur-xl
-                        border border-white/10 rounded-2xl">
+                <div class="p-5 text-sm text-gray-200 border bg-white/5 backdrop-blur-xl border-white/10 rounded-2xl">
                   {{ getTrainerBioText(t) }}
                 </div>
               </div>
@@ -217,27 +205,30 @@
       <div class="w-full max-w-6xl px-4 mx-auto">
 
         <!-- FEJLÉC SOR -->
-        <div class="flex justify-between items-center mb-10">
+        <div class="flex items-center justify-between mb-10">
           <h2 class="w-1/2 text-4xl font-bold text-center">Áraink</h2>
           <h2 class="w-1/2 text-4xl font-bold text-center">Személyes edzések</h2>
         </div>
 
         <!-- KÉT OSZLOP -->
-        <div class="flex flex-row gap-8 justify-center items-start">
+        <div class="flex flex-row items-start justify-center gap-8">
 
           <!-- BAL OLDAL -->
-          <div
-            class="w-1/2 p-4 transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20">
+          <div class="w-1/2 p-4 transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20">
 
             <div *ngFor="let p of prices; let i = index" (click)="togglePrice(i)"
-              class="p-4 text-center transition duration-300 rounded-lg cursor-pointer transform hover:scale-105 hover:bg-purple-800/50">
+              class="p-4 text-center transition duration-300 transform rounded-lg cursor-pointer hover:scale-105 hover:bg-purple-800/50">
 
               <h3 class="mb-2 text-xl font-semibold">{{ p.category }}</h3>
               <p>Havi bérlet: <span class="font-bold">{{ p.monthly }}</span></p>
               <p>Egyszeri alkalom: <span class="font-bold">{{ p.single }}</span></p>
-
-              <div class="overflow-hidden transition-all duration-500 ease-in-out"
-                [ngClass]="openedPriceIndex === i ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'">
+                <p class="mt-3 text-xs text-gray-400">
+                  Kattints a részletekért
+                  <span class="inline-block ml-1 transition-transform duration-300"
+                    [ngClass]="openedTrainer === i ? 'rotate-180' : ''">
+                    ▼
+                  </span></p>
+              <div class="overflow-hidden transition-all duration-500 ease-in-out" [ngClass]="openedPriceIndex === i ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'">
 
                 <div class="pt-3 text-sm text-gray-300 border-t border-gray-600">
                   {{ p.description }}
@@ -251,11 +242,17 @@
             class="w-1/2 p-4 transition-all duration-300 border shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl border-white/20">
 
             <div *ngFor="let p of trainerprices; let i = index" (click)="toggleTrainerPrice(i)"
-              class="p-4 text-center transition duration-300 rounded-lg cursor-pointer transform hover:scale-105 hover:bg-purple-800/50">
+              class="p-4 text-center transition duration-300 transform rounded-lg cursor-pointer hover:scale-105 hover:bg-purple-800/50">
 
               <h3 class="mb-2 text-xl font-semibold">{{ p.trainerCategory }}</h3>
-              <p>1 Óra: <span class="font-bold">{{ p.singleTime }}</span></p>
-
+              <p>1 alkalom: <span class="font-bold">{{ p.singleTime }}</span></p>
+              <p>1 hónap: <span class="font-bold">{{ p.monthly }}</span></p>
+              <p class="mt-3 text-xs text-gray-400">
+                  Kattints a részletekért
+                  <span class="inline-block ml-1 transition-transform duration-300"
+                    [ngClass]="openedTrainer === i ? 'rotate-180' : ''">
+                    ▼
+                  </span></p>
               <div class="overflow-hidden transition-all duration-500 ease-in-out"
                 [ngClass]="openedTrainerPriceIndex === i ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'">
 
@@ -298,8 +295,8 @@
 
             <div class="w-full h-64 mb-6 overflow-hidden shadow-lg rounded-2xl">
               <iframe width="100%" height="100%" style="border:0" loading="lazy"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu">
-              </iframe>
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5474.7047342078295!2d21.09537489817204!3d46.679046045381845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1776889361385!5m2!1shu!2shu" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>>
+              
             </div>
 
             <!-- KAPCSOLATI ADATOK -->
@@ -336,7 +333,7 @@
               <a href="https://www.instagram.com/calen.go/" target="_blank"
                 class="inline-flex items-center px-4 py-2 space-x-2 transition-all duration-300 bg-purple-600 rounded-full shadow-lg bg-linear-to-r hover:scale-105 hover:shadow-purple-500/25">
                 <img src="assets/instagram.png" class="w-6 h-6" alt="Instagram" />
-                <span class="text-white font-bold">@calen.go</span>
+                <span class="font-bold text-white">@calen.go</span>
               </a>
             </div>
           </div>
@@ -347,8 +344,7 @@
               <div class="flex items-center justify-center w-8 h-8 bg-purple-400 rounded-full">
                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clip-rule="evenodd" />
+                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
               </div>
               <span class="text-gray-300">Modern edzőterem felszereltséggel</span>
@@ -414,7 +410,7 @@
               Foglalj időpontot még ma, és kezd el az egészséges életmód felé vezető utat!
             </p>
             <button type="button" (click)="showPage('login')"
-              class="w-full px-6 py-3 font-bold text-white transition-all duration-300 bg-purple-600 cursor-pointer shadow-lg bg-linear-to-r rounded-2xl hover:shadow-purple-500/25 hover:scale-105 ">
+              class="w-full px-6 py-3 font-bold text-white transition-all duration-300 bg-purple-600 shadow-lg cursor-pointer bg-linear-to-r rounded-2xl hover:shadow-purple-500/25 hover:scale-105 ">
               Időpont foglalás
             </button>
           </div>
@@ -457,18 +453,18 @@
 
   <!-- TRAINER FOGLALÁSOK TÁBLÁZAT -->
   <div *ngIf="currentPage === 'trainer' && currentUserRole === 'trainer'" class="p-6 mx-auto max-w-7xl fade-in">
-    <h2 class="mb-6 text-3xl font-bold text-center text-white">
-      Heti <span class="text-purple-500">foglalások</span>
+    <h2 class="p-4 mb-6 space-x-3 text-4xl font-bold text-center text-white border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10 font-italic">
+      Heti foglalások
     </h2>
     <!-- WEEK NAV -->
     <div class="flex justify-between mb-4 ">
       <button type="button" (click)="prevWeek()"
-        class="px-4 py-2 text-white bg-gray-700 rounded hover:bg-purple-800 hover:scale-105">
+        class="px-6 py-3 font-semibold text-white transition-all duration-200 bg-purple-600 shadow-lg rounded-xl hover:bg-purple-700 hover:scale-105 active:scale-95">
         ← Előző hét
       </button>
 
       <button type="button" (click)="nextWeek()"
-        class="px-4 py-2 text-white bg-gray-700 rounded hover:bg-purple-800 hover:scale-105">
+        class="px-6 py-3 font-semibold text-white transition-all duration-200 bg-purple-600 shadow-lg rounded-xl hover:bg-purple-700 hover:scale-105 active:scale-95">
         Következő hét →
       </button>
     </div>
@@ -497,10 +493,7 @@
                 [ngClass]="
                   getBookingFor(d, slot) ? getBookingColor(getBookingFor(d, slot)): 'bg-gray-700'"
                 (click)="openBooking(getBookingFor(d, slot))">
-                <!-- {{ getBookingFor(d, slot)?.name || 'Szabad' }}
-                   EBBE A RÉSZBE RAKJUK MAJD BELE HOGY AZ ADOTT KOCKÁK STÁTUSZA MILYEN VAGY AMIT MAJD KITALÁLUNK
-                   + A STÁTUSZJELZŐKET ÁTÍRNI, ÁTFOGALMAZNI MAGYARRA / AHOGY JOBBAN KINÉZ
-                   -->
+                
               </div>
             </td>
           </tr>
@@ -510,7 +503,7 @@
   </div>
 
   <!--FIÓKOM PAGE-->
-  <div *ngIf="currentPage==='account'" class="flex items-center justify-center fade-in overflow-hidden">
+  <div *ngIf="currentPage==='account'" class="flex items-center justify-center mt-6 overflow-hidden fade-in">
     <div class="w-full max-w-md p-8 text-white shadow-xl rounded-2xl bg-gray-800/80">
 
       <h2 class="mb-6 text-2xl font-bold text-center">
@@ -538,8 +531,30 @@
         </textarea>
       </div>
 
+      <!--edző szakterülete, csak nála jelenik meg-->
+      <div *ngIf="currentUserRole === 'trainer'" class="mt-4">
+        <label class="block mb-2 text-sm text-gray-300">
+          Edző szakterülete
+        </label>
+
+        <select [(ngModel)]="selectedSpecialty"
+          class="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+
+          <option *ngFor="let s of trainerSpecialties" [value]="s">
+            {{ s }}
+          </option>
+
+        </select>
+
+        <button type="button"
+          (click)="saveSpecialty()"
+          class="w-full py-3 mt-6 text-white font-semibold bg-purple-600 rounded-xl hover:bg-purple-500 hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-purple-500/30">
+          Típus mentése
+        </button>
+      </div>
+
       <button type="button" (click)="saveProfile()"
-        class="w-full p-3 font-bold text-white bg-purple-600 rounded-lg hover:scale-105 hover:bg-purple-500">
+        class="w-full py-3 mt-6 text-white font-semibold bg-purple-600 rounded-xl hover:bg-purple-500 hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-purple-500/30">
         Mentés
       </button>
     </div>
@@ -548,8 +563,8 @@
 
   <!-- TRAINERS PAGE-->
   <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="max-w-6xl px-4 mx-auto fade-in">
-    <h2 class="mb-8 text-3xl font-bold text-center text-white ">
-      Válassz <span class="text-purple-500">edzőink</span> közül!
+    <h2 class="mt-6 mb-8 text-3xl font-bold text-center text-white">
+      Válassz edzőink közül!
     </h2>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       <div *ngFor="let t of trainers"
@@ -568,7 +583,7 @@
 
         <br>
         <span class="inline-block px-3 py-1 mb-4 text-sm text-purple-400 rounded-full bg-purple-600/20">
-          {{ t.specialty || 'személyi edző' }}
+          {{ t.specialty  }}
         </span>
       </div>
     </div>
@@ -600,11 +615,11 @@
         Delete
       </button>
     </div>
-    <h2 class="mb-8 text-3xl font-extrabold text-center text-white">
-      Idő<span class="text-purple-500">pontjaim</span>
+    <h2 class="mt-6 mb-8 text-3xl font-extrabold text-center text-white">
+      Időp ontjaim
     </h2>
 
-    <div *ngIf="bookings.length === 0" class="italic text-center text-gray-400">
+    <div *ngIf="bookings.length === 0" class="p-4 space-x-3 text-center text-white border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10 font-italic">
       Jelenleg nincs foglalásod.
     </div>
 
@@ -639,7 +654,7 @@
 
   <!--IDŐPONTFOGLALÁS USERKÉNT-->
   <div *ngIf="currentPage === 'booking'"
-    class="grid items-start grid-cols-1 gap-12 mx-auto max-w-7xl lg:grid-cols-2 fade-in">
+    class="grid items-start grid-cols-1 gap-12 mx-auto mt-6 max-w-7xl lg:grid-cols-2 fade-in">
     <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl w-150">
       <div class="flex items-center justify-between mb-6">
         <button (click)="prevMonth()" class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700"><!-- BAL NYÍL -->
@@ -677,7 +692,7 @@
         </button>
       </div>
 
-      <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
+      <div class="p-6 mt-3 text-white bg-gray-900 border-2 border-gray-800 shadow-xl rounded-2xl">
         <h3 class="mb-6 text-xl font-semibold">
           Elérhető időpontok
         </h3>
@@ -746,7 +761,7 @@
         </p>
 
         <div class="p-4 mt-6 text-sm text-gray-300 bg-gray-800 rounded-lg">
-          {{ selectedTrainer.bio || (selectedTrainer.name + ' edző jelenleg még nem osztotta meg...') }}
+          {{ selectedTrainer.bio  || 'Edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.' }}
         </div>
       </div>
     </div>
@@ -756,7 +771,7 @@
   <!-- ADMIN OLDAL -->
   <div *ngIf="currentPage === 'admin'" class="flex items-center justify-center min-h-screen fade-in">
     <div class="w-full max-w-4xl px-4 mx-auto">
-      <h2 class="mb-4 text-4xl text-center text-white">Aktív fiókok</h2>
+      <h2 class="p-4 mb-6 space-x-3 text-4xl font-bold text-center text-white border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10 font-italic">Aktív fiókok</h2>
       <div *ngFor="let u of adminUsers"
         class="flex items-center justify-between p-3 mb-2 text-white border border-purple-500 rounded bg-gray-800/80">
         <div>
@@ -764,9 +779,9 @@
         </div>
         <div class="flex gap-2">
           <select #roleSel class="p-1 text-white bg-gray-600 rounded">
-            <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600">Felhasználó</option>
-            <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600">Edző</option>
-            <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600">Admin</option>
+            <option value="user" [selected]="u.role==='user'" class="text-white bg-gray-600 hover:bg-purple-300" >Felhasználó</option>
+            <option value="trainer" [selected]="u.role==='trainer'" class="text-white bg-gray-600 hover:bg-purple-300">Edző</option>
+            <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600 hover:bg-purple-300">Admin</option>
           </select>
 
           <button type="button" class="px-2 py-1 bg-purple-500 rounded" (click)="changeUserRole(u.id, roleSel.value)">
@@ -800,7 +815,7 @@
 
       </div>
 
-      <!-- BUTTONS -->
+      <!-- gomb -->
       <div class="flex justify-between gap-2 mt-6">
 
         <button (click)="updateBookingStatus('elfogadva')"
@@ -823,38 +838,62 @@
   </div>
 </div>
 <!--SIKERES FOGLALÁS PAGE-->
-<div *ngIf="currentPage === 'booking-success'"
-  class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 overflow-auto bg-gray-900">
+<div *ngIf="currentPage === 'booking-success' "
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-linear-to-br from-purple-900 via-purple-800 to-white">
 
-  <h1 class="mb-4 text-4xl font-bold text-green-600">
-    ✅ Köszönjük!
-  </h1>
+  <div class="w-full max-w-2xl p-8 text-center shadow-2xl bg-white/10 backdrop-blur-xl rounded-3xl">
 
-  <p class="max-w-xl mb-8 text-lg text-center text-gray-700">
-    Időpontját sikeresen rögzítettük.
-    Várjuk szeretettel az edzésen!
-  </p>
+    <!-- pipaikon -->
+    <div class="flex items-center justify-center w-20 h-20 mx-auto mb-6 bg-green-500 rounded-full shadow-lg ">
+      <span class="text-3xl text-white">✓</span>
+    </div>
 
-  <div class="w-full max-w-3xl overflow-hidden shadow-lg h-96 rounded-2xl">
+    <!-- TITLE -->
+    <h1 class="mb-4 text-3xl font-bold text-white md:text-4xl">
+      Sikeres foglalás!
+    </h1>
 
-    <iframe width="100%" height="100%" frameborder="0" style="border:0"
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1401441.52757856!2d19.879118113526754!3d46.6822413682646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1771714316489!5m2!1shu!2shu"
-      allowfullscreen loading="lazy">
-    </iframe>
+    <!-- TEXT -->
+    <p class="max-w-md mx-auto mb-8 text-lg text-gray-300 ">
+      Az időpontod rögzítve lett.
+      Várunk szeretettel az edzésen
+    </p>
+
+    <!-- MAP CARD -->
+    <div class="overflow-hidden border shadow-xl rounded-2xl border-white/10">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5474.7047342078295!2d21.09537489817204!3d46.679046045381845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1776889361385!5m2!1shu!2shu" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="flex flex-col gap-4 mt-8 md:flex-row md:justify-center">
+
+      <button (click)="showPage('trainers')"
+        class="px-6 py-3 font-semibold text-white transition-all duration-200 bg-purple-600 shadow-lg rounded-xl hover:bg-purple-700 hover:scale-105 active:scale-95">
+        Edzők megtekintése
+      </button>
+
+      <button (click)="showPage('bookings')"
+        class="px-6 py-3 font-semibold text-white transition-all duration-200 bg-purple-600 shadow-lg rounded-xl hover:bg-purple-700 hover:scale-105 active:scale-95">
+        Saját foglalásaim
+      </button>
+
+    </div>
+
   </div>
-  <button (click)="showPage('trainers')"
-    class="px-6 py-3 mt-8 text-white transition-transform bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 active:scale-95">
-    Vissza az edzőkhöz
-  </button>
 </div>
 
 <!----------------------------FIÓK-------------------------------
 
     calengo accounts
+    Fő calengoo google account: 
+
+    projectcalengo@gmail.com
+    CalenGoAMG
 
     ----------------------------WEBOLDALON-------------------
     admin@calengo.com
     admin123
+
 
     kormoska007@gmail.com
     szelygod
