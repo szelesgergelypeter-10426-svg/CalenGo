@@ -401,6 +401,7 @@
       });
   });
 
+
   //foglalas lekeres trainernek / trainer sajat foglalas nezet
   app.get('/api/trainer-bookings/:trainerId', (req, res) => {
     db.all(
@@ -437,7 +438,7 @@
 
   //minden user lekerese
   app.get('/api/users', (req, res) => {
-    db.all(`SELECT id, name, email, role FROM users`,
+    db.all(`SELECT id, name, email, role FROM users ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'trainer' THEN 2 WHEN 'user' THEN 3 ELSE 4 END, name ASC`,
       (err, rows) => res.json(rows)
     );
   });

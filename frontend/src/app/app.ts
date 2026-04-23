@@ -310,11 +310,15 @@ saveProfile() {
       next: () => {
         this.registerLoading = false;
         this.showToast('Sikeres regisztráció');
+
         this.showPage('login');
       },
-      error: () => {
-        this.registerLoading = false;
-        this.showToast('Regisztráció sikertelen', 'error');
+      error: (err) => {
+        if (err.status === 409) {
+          this.showToast('Ez az email már regisztrálva van', 'error');
+        } else {
+          this.showToast('Regisztráció sikertelen', 'error');
+        }
       }
     });
     }
@@ -784,11 +788,20 @@ bookingLoading = false;
   
 
   //ADMIN ADATOK BETOLTESE
-  
+
   loadAdminData() {
-    this.api.getUsers().subscribe(u => this.adminUsers = u);
-    this.api.getAllBookings().subscribe((b: any[]) => this.adminBookings = b);
-    this.api.getAuditLog().subscribe(l => this.auditLogs = l);
+  this.api.getUsers().subscribe(u => {
+    this.adminUsers = u;
+    this.cd.detectChanges();
+  });
+
+  this.api.getAllBookings().subscribe((b: any[]) => {
+    this.adminBookings = b;
+  });
+
+  this.api.getAuditLog().subscribe(l => {
+    this.auditLogs = l;
+  });
   }
 
 
@@ -806,6 +819,7 @@ bookingLoading = false;
     next: () => {
       this.showToast('Felhasználó törölve');
       this.loadAdminData();
+      this.cd.detectChanges();
     },
     error: () => {
       this.showToast('Törlés hiba', 'error');
