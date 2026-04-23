@@ -29,14 +29,17 @@
 
       <button (click)="scrollToContact()"
         class="items-center px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-phone">
-
       </button>
+
+
+
     </div>
     <!-- TOAST -->
     <div *ngIf="toastMessage"
       class="fixed z-50 px-6 py-3 text-white transform -translate-x-1/2 rounded-lg shadow-lg toast top-6 left-1/2"
       [ngClass]="{'bg-green-600': toastType==='success', 'bg-red-600': toastType==='error'}"> {{ toastMessage }}
     </div>
+
     <div class="flex items-center gap-3" *ngIf="currentUserRole">
       <!-- TRAINER IDŐPONTJAI -->
       <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')"
@@ -51,7 +54,7 @@
       </button>
 
       <!-- USER: edzők -->
-      <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('trainers')"
+      <button type="button" *ngIf="currentUserRole==='user'" (click)="openTrainerSelectForAdmin()"
         class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-dumbbell">
 
       </button>
@@ -59,7 +62,12 @@
       <!-- ADMIN -->
       <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')"
         class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 hover:scale-[1.02] bg-gray-600/80 fa-solid fa-users">
+      </button>
 
+      <!--admin trainer booking nezet-->
+      <button *ngIf="currentUserRole==='admin'"
+        (click)="showPage('trainers')"
+        class="px-6 py-3 text-white rounded navbtn hover:bg-purple-500 bg-gray-600/80 fa-solid fa-dumbbell">
       </button>
 
       <!--FIÓKOM-->
@@ -152,7 +160,7 @@
       <div class="w-full max-w-6xl px-4">
 
         <h2 class="text-4xl font-bold tracking-wide text-white mb-14">
-          Válassz edzőink közül!
+          Professzionális edzőink!
         </h2>
 
         <!-- GRID -->
@@ -562,12 +570,12 @@
 
 
   <!-- TRAINERS PAGE-->
-  <div *ngIf="currentPage === 'trainers' && currentUserRole === 'user'" class="max-w-6xl px-4 mx-auto fade-in">
+  <div *ngIf="currentPage === 'trainers' && (currentUserRole === 'user' || currentUserRole === 'admin')" class="max-w-6xl px-4 mx-auto fade-in">
     <h2 class="mt-6 mb-8 text-3xl font-bold text-center text-white">
       Válassz edzőink közül!
     </h2>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-      <div *ngFor="let t of trainers"
+      <div *ngFor="let t of trainers" 
         class="p-6 text-center transition duration-300 transform bg-gray-900 shadow-lg rounded-2xl hover:scale-105">
         <img [src]="getAvatarUrl(t.avatar)" class="mx-auto mb-4 border-4 border-purple-600 rounded-full w-28 h-28">
 
@@ -588,6 +596,71 @@
       </div>
     </div>
   </div>
+
+
+  <!-- admin, edző időpontjai view -->
+<div *ngIf="currentPage === 'admin-trainer-view'" class="p-6 mx-auto max-w-7xl fade-in">
+
+  <h2 class="mb-6 text-3xl font-bold text-center text-white">
+    {{ selectedTrainer?.name }} foglalásai
+  </h2>
+
+
+  <!-- WEEK NAV -->
+  <div class="flex justify-between mb-4">
+    <button (click)="prevWeek()" class="px-4 py-2 bg-purple-600 rounded">←</button>
+    <button (click)="nextWeek()" class="px-4 py-2 bg-purple-600 rounded">→</button>
+  </div>
+
+  <div class="overflow-auto">
+    <table class="w-full border border-purple-500">
+      <thead>
+        <tr>
+          <th class="p-2 bg-gray-800">Idő</th>
+          <th *ngFor="let d of weekDays" class="p-2 bg-gray-800">
+            {{ d | date:'EEE MM.dd' }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let slot of timeSlots">
+
+          <td class="p-2 text-center bg-gray-800">
+            {{ slot }}
+          </td>
+
+          <td *ngFor="let d of weekDays" class="p-1">
+            <div
+              class="flex items-center justify-center h-12 text-xs text-white rounded cursor-pointer"
+              [ngClass]="getBookingFor(d, slot) ? getBookingColor(getBookingFor(d, slot)) : 'bg-gray-700'"
+              (click)="openBooking(getBookingFor(d, slot))">
+                <div *ngIf="getBookingFor(d, slot) as b" class="flex flex-col items-center">
+                  <span>megnéz</span>
+
+                  <div *ngIf="currentUserRole === 'admin'" class="flex gap-1 mt-1">
+                    <button 
+                      class="px-1 text-xs bg-green-600 rounded"
+                      (click)="trainerSetStatus(b.id, 'elfogadva')">
+                      elfogad
+                    </button>
+
+                    <button 
+                      class="px-1 text-xs bg-red-600 rounded"
+                      (click)="trainerSetStatus(b.id, 'elutasítva')">
+                      elutasit
+                    </button>
+                  </div>
+                </div>
+
+            </div>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
   <!-- IDŐPONT FOGLALÁS -->
   <div *ngIf="currentPage === 'bookings' && currentUserRole === 'user'" class="max-w-4xl px-4 mx-auto fade-in">

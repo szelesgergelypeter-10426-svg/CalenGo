@@ -25,7 +25,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success' = 'login';
+  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'admin-trainer-view'  |'trainer' | 'admin' | 'account' | 'booking-success'  = 'login';
   currentUserRole: string | null = null;
   currentUserId: number | null = null;
   takenTimes: string[] = [];
@@ -92,7 +92,7 @@ selectDay(day: number) {
     }
 }
 
-showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success') {
+showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success' | 'admin-trainer-view') {
   this.bookingSuccess = false;
   this.currentPage = page;
 
@@ -374,12 +374,26 @@ cancelEdit() {
 
   this.selectedTrainer = this.trainers.find(t => t.id === id);
   this.selectedTrainerId = id;
+
+  if (this.currentUserRole === 'admin') {
+
+    this.generateWeek();
+    this.generateTimeSlots();
+    this.loadTrainerBookingsViewForAdmin(id);
+    this.trainerBookings = []; 
+
+    this.showPage('admin-trainer-view');
+    return;
+  }
+
+  // user esetén
   this.selectedDate = null;
   this.selectedTime = null;
   this.takenTimes = [];
   this.availableTimes = this.trainerSchedule;
+
   this.showPage('booking');
-  }
+}
 
   ///NAPTÁR
   selectedDate: string | null = null;
@@ -417,7 +431,18 @@ monthNames = [
   const m = String(now.getMinutes()).padStart(2, '0');
   const s = String(now.getSeconds()).padStart(2, '0');
   this.currentTime = `${h}:${m}:${s}`;
-}
+  }
+
+  ///edzők naptára betöltése adminnál
+loadTrainerBookingsViewForAdmin(trainerId: number) {
+  this.api.getTrainerBookings(trainerId)
+    .subscribe((b: any[]) => {
+      console.log("BOOKINGS API:", b);
+      this.trainerBookings = b;
+      this.cd.detectChanges();
+    });
+  }
+
 
   generateCalendar() {
     this.calendarDays = [];
@@ -558,6 +583,11 @@ prevWeek() {
 
   this.selectedBooking = booking;
   }
+
+  openTrainerSelectForAdmin() {
+  this.selectedTrainer = null;
+  this.showPage('trainers');
+}
 
 
   ///kattintás nyitas
