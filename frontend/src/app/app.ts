@@ -52,6 +52,11 @@ export class AppComponent {
   ///edzők típusai
   selectedSpecialty: string = '';
 
+  ///a DUPLIKACIO elkerulese erdekeben a regisztraciohoz kulon valtozok
+  registerName: string = '';
+  registerEmail: string = '';
+  registerPassword: string = '';
+
   trainerSpecialties: string[] = [
     'Kardió edző',
     'Erőnléti edző',
@@ -286,7 +291,11 @@ saveProfile() {
     
 // USER REGISZTARACIO
   registerLoading = false;
-  registerUser(name: string, email: string, password: string) {
+  registerUser() {
+
+  const name = this.registerName;
+  const email = this.registerEmail;
+  const password = this.registerPassword;
 
     if (this.registerLoading) return;
   this.registerLoading = true;
@@ -313,6 +322,9 @@ saveProfile() {
     .subscribe({
       next: () => {
         this.registerLoading = false;
+          this.registerName = '';
+          this.registerEmail = '';
+          this.registerPassword = '';
         this.showToast('Sikeres regisztráció');
 
         this.showPage('login');
