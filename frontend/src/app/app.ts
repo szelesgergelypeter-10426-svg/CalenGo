@@ -200,8 +200,13 @@ saveProfile() {
   return;
   }
   if (!confirm('Biztosan módosítod az adatokat?')) return;
-  this.api.updateProfile(this.currentUserId!, this.profile)
-    .subscribe({next: () => {
+  this.api.updateProfile(this.currentUserId!, {
+    name: this.profile.name,
+    email: this.profile.email,
+    password: this.profile.password,
+    avatar: this.profile.avatar,
+    specialty: this.selectedSpecialty || 'Személyi edző'
+    }).subscribe({next: () => {
       this.showToast('Profil frissítve');
       this.loadProfile();
       if (this.currentUserRole === 'trainer') {
@@ -478,8 +483,14 @@ updateBookingStatus(status: 'elfogadva' | 'elutasítva') {
     .subscribe({
       next: () => {
         this.showToast('Státusz frissítve');
+        this.selectedBooking.status = status; ///vizuálisan frissítse a státuszt
+          const idx = this.trainerBookings.findIndex(b => b.id === this.selectedBooking.id);
+          if (idx !== -1) {
+            this.trainerBookings[idx].status = status;
+          }
         this.loadTrainerBookingsView();
         this.closeBookingModal();
+        this.cd.detectChanges();
       },
       error: () => {
         this.showToast('Hiba', 'error');
