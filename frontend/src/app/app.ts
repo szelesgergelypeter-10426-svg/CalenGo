@@ -45,12 +45,10 @@ export class AppComponent {
   selectedBooking: any = null;
   showBookingModal = false;
   trainers: any[] = [];
-  currentTime: string = ''
   loginEmail: string = '';
   loginPassword: string = '';
   trainerBio: string = '';
   selectedTrainer: any = null;
-
   ///edzők típusai
   selectedSpecialty: string = '';
 
@@ -333,6 +331,7 @@ saveProfile() {
   this.editingId = b.id;
   this.editDate = b.date;
   this.editTime = b.time;
+  this.editTime = b.time.slice(0,5);
 }
 
 ///SMOOTH LEGORDULESEK /REGISZTRACIO,EDZOK,ÁRAK,ELERHETOSEG,
@@ -368,6 +367,8 @@ saveEdit(id: number) {
     .subscribe({
       next: () => {
         this.showToast('Időpont módosítva');
+        this.selectedBooking.date = this.editDate;
+        this.selectedBooking.time = this.editTime;
         this.editingId = null;
         this.loadTrainerBookingsView();
       },
@@ -427,22 +428,14 @@ monthNames = [
   this.generateTimeSlots();
   this.generateWeek();
   this.loadTrainers(); 
-  this.updateClock(); // azonnal mutassa az aktuális időt
-  this.intervalId = setInterval(() => this.updateClock(), 1000); /// meghivja az updateclockot masodpercenkent.
+  
   }
 
   ngOnDestroy() {
   clearInterval(this.intervalId); ///ez akkor fut le amikor elhagyjuk az oldalt, vagy ujratoltjuk hogy ne fusson allandoan es ne nyiljon  meg a hatterben minden ujratoltesnel.
   }
 
-  updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  this.currentTime = `${h}:${m}:${s}`;
-  }
-
+  
   ///edzők naptára betöltése adminnál
 loadTrainerBookingsViewForAdmin(trainerId: number) {
   this.api.getTrainerBookings(trainerId)

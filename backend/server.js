@@ -404,37 +404,62 @@
 
   //foglalas lekeres trainernek / trainer sajat foglalas nezet
   app.get('/api/trainer-bookings/:trainerId', (req, res) => {
-    db.all(
-      `SELECT * FROM bookings WHERE trainerId=?`,
-      [req.params.trainerId],
-      (_, rows) => res.json(rows)
-    );
-  });
+  db.all(
+    `SELECT 
+        b.*, 
+        u.name as userName,
+        u.email as userEmail
+     FROM bookings b
+     JOIN users u ON b.userId = u.id
+     WHERE b.trainerId=?`,
+    [req.params.trainerId],
+    (_, rows) => res.json(rows)
+  );
+});
 
 
-  //ADMIN MODOSITAS - ADMIN-AL
-  app.put('/api/booking/:id', (req, res) => {
+  //BOOKING UPDATE - IDŐPONT MÓDOSÍTÁS TRAINER ÁLTAL
+app.put('/api/booking/:id', (req, res) => {
 
-    const { id } = req.params;
-    const { date, time } = req.body;
+  const { id } = req.params;
+  const { date, time } = req.body;
 
-    db.run(`
-      UPDATE bookings
-      SET date = ?, time = ?
-      WHERE id = ?
+  // lekérjük az aktuális bookingot
+  db.get(`SELECT trainerId FROM bookings WHERE id=?`, [id], (err, row) => {
+
+    if (!row) {
+      return res.status(404).json({ error: 'Nincs ilyen foglalás' });
+    }
+
+    // ELLENORIZZUK HOGY AZ UJ IDŐPONTRA NINCSEN MÁR FOGLALÁS
+    db.get(`
+      SELECT id FROM bookings
+      WHERE trainerId = ?
+      AND date = ?
+      AND time = ?
+      AND id != ?
+      AND status != 'törölve'
     `,
+    [row.trainerId, date, time, id],
+    (err, existing) => {
+
+      if (existing) {
+        return res.status(409).json({
+          error: 'Ez az időpont már foglalt'
+        });
+      }
+
+      db.run(`
+        UPDATE bookings
+        SET date = ?, time = ?
+        WHERE id = ?
+      `,
       [date, time, id],
-      function (err) {
-
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: err.message });
-        }
-
-        res.json({ success: true });
-      });
-
+      () => res.json({ success: true })
+      );
+    });
   });
+});
 
   //minden user lekerese
   app.get('/api/users', (req, res) => {
