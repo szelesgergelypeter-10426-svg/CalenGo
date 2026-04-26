@@ -904,13 +904,16 @@ bookingLoading = false;
   }
 
   //TRAINER BOOKING VIEW
-  loadTrainerBookingsView() {
-
+loadTrainerBookingsView() {
   if (!this.currentUserId) return;
 
   this.api.getTrainerBookings(this.currentUserId)
-    .subscribe((b: any[]) => this.trainerBookings = b);
-  }
+    .subscribe((b: any[]) => {
+      this.trainerBookings = b;
+
+      this.cd.detectChanges();
+    });
+}
 
   //TRAINER BOOKING VIEW STATUS CHANGE --jó api bekötve
   trainerSetStatus(id: number, status: string) {

@@ -95,22 +95,19 @@
           Bejelentkezés
         </h2>
 
-        <div class="space-y-4">
+        <form (ngSubmit)="loginUser(logineEmail.value, LoginPassword.value)">
+          <div class="space-y-4">
 
-          <input #logineEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
+            <input #logineEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
 
-          <input #LoginPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
+            <input #LoginPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
 
-        </div>
+          </div>
 
-        <button type="button" class="w-full py-3 mt-6 text-white font-semibold
-             bg-purple-600 rounded-xl
-             hover:bg-purple-500 hover:scale-[1.02]
-             transition-all duration-300 shadow-lg shadow-purple-500/30"
-          (click)="loginUser(logineEmail.value, LoginPassword.value)">
-          Belépés
-        </button>
-
+          <button type="submit" class="w-full py-3 mt-6 text-white font-semibold bg-purple-600 rounded-xl hover:bg-purple-500 hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-purple-500/30" >
+            Belépés
+          </button>
+        </form>
         <p class="mt-6 font-bold text-purple-600">
           Nincs még fiókod?
         </p>
@@ -131,23 +128,24 @@
         <h2 class="mb-8 text-4xl font-bold tracking-wide text-white">
           Regisztráció
         </h2>
+        <form (ngSubmit)="registerUser(regName.value, regEmail.value, regPassword.value)">
+          <div class="space-y-4">
 
-        <div class="space-y-4">
+            <input #regName class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Név">
 
-          <input #regName class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Név">
+            <input #regEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
 
-          <input #regEmail class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Email">
+            <input #regPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
 
-          <input #regPassword type="password" class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Jelszó">
+          </div>
 
-        </div>
-
-        <button (click)="registerUser(regName.value, regEmail.value, regPassword.value)" class="w-full py-3 mt-6 text-white font-semibold
-             bg-purple-600 rounded-xl
-             hover:bg-purple-500 hover:scale-[1.02]
-             transition-all duration-300 shadow-lg shadow-purple-500/30">
-          Fiók létrehozása
-        </button>
+          <button type="submit" class="w-full py-3 mt-6 text-white font-semibold
+              bg-purple-600 rounded-xl
+              hover:bg-purple-500 hover:scale-[1.02]
+              transition-all duration-300 shadow-lg shadow-purple-500/30">
+            Fiók létrehozása
+          </button>
+        </form>
 
       </div>
     </section>
@@ -722,7 +720,7 @@
   <!--IDŐPONTFOGLALÁS USERKÉNT-->
   <div *ngIf="currentPage === 'booking'"
     class="grid items-start grid-cols-1 gap-12 mx-auto mt-6 max-w-7xl lg:grid-cols-2 fade-in">
-    <div class="w-full p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
+    <div class="w-full p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl"> 
       <div class="flex items-center justify-between mb-6">
         <button (click)="prevMonth()" class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700"><!-- BAL NYÍL -->
           ←
@@ -828,7 +826,7 @@
         </p>
 
         <div class="p-4 mt-6 text-sm text-gray-300 bg-gray-800 rounded-lg">
-          {{ selectedTrainer.bio  || 'Edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.' }}
+          {{ selectedTrainer.bio  || ' ' + selectedTrainer.name + ' jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.' }}
         </div>
       </div>
     </div>
