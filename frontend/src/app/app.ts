@@ -227,6 +227,7 @@ saveProfile() {
   setTimeout(() => {
     this.toastMessage = '';
     this.toastType = '';
+    this.cd.detectChanges();
   }, 3000);
   }
 

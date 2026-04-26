@@ -302,7 +302,7 @@
             <h3 class="mb-6 text-2xl font-semibold text-center">Találj meg minket</h3>
 
             <div class="w-full h-64 mb-6 overflow-hidden shadow-lg rounded-2xl">
-              <iframe width="100%" height="100%" style="border:0" loading="lazy"
+              <iframe class="w-full h-64 rounded-2xl" width="100%" height="100%" style="border:0" loading="lazy"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5474.7047342078295!2d21.09537489817204!3d46.679046045381845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1776889361385!5m2!1shu!2shu" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>>
               
             </div>
@@ -491,7 +491,7 @@
         <tbody>
           <tr *ngFor="let slot of timeSlots">
             <!-- IDŐ -->
-            <td class="p-2 font-semibold text-center text-white bg-gray-800 ">
+            <td class="p-2 font-semibold text-center text-white bg-gray-800">
               {{ slot }}
             </td>
             <!-- CEELLÁK -->
@@ -722,7 +722,7 @@
   <!--IDŐPONTFOGLALÁS USERKÉNT-->
   <div *ngIf="currentPage === 'booking'"
     class="grid items-start grid-cols-1 gap-12 mx-auto mt-6 max-w-7xl lg:grid-cols-2 fade-in">
-    <div class="p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl w-150">
+    <div class="w-full p-6 text-white bg-gray-900 border border-gray-800 shadow-xl rounded-2xl">
       <div class="flex items-center justify-between mb-6">
         <button (click)="prevMonth()" class="p-2 transition bg-gray-800 rounded-lg hover:bg-gray-700"><!-- BAL NYÍL -->
           ←
@@ -840,7 +840,7 @@
     <div class="w-full max-w-4xl px-4 mx-auto">
       <h2 class="p-4 mb-6 space-x-3 text-4xl font-bold text-center text-white border bg-white/5 backdrop-blur-lg rounded-2xl border-white/10 font-italic">Aktív fiókok</h2>
       <div *ngFor="let u of adminUsers"
-        class="flex items-center justify-between p-3 mb-2 text-white border border-purple-500 rounded bg-gray-800/80">
+         class="flex flex-col gap-3 p-3 mb-3 text-white border border-purple-500 rounded bg-gray-800/80 md:flex-row md:items-center md:justify-between">
         <div>
           {{u.name}} — {{u.email}}
         </div>
@@ -927,8 +927,9 @@
     </p>
 
     <!-- MAP CARD -->
-    <div class="overflow-hidden border shadow-xl rounded-2xl border-white/10">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5474.7047342078295!2d21.09537489817204!3d46.679046045381845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1776889361385!5m2!1shu!2shu" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div class="w-full overflow-hidden rounded-2xl border border-white/10 shadow-xl">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5474.7047342078295!2d21.09537489817204!3d46.679046045381845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4745d5c5cfb8fb69%3A0xbee2b082b315148e!2sRoyal%20Fitness%20edz%C5%91terem!5e0!3m2!1shu!2shu!4v1776889361385!5m2!1shu!2shu"
+      class="w-full h-56 sm:h-72 md:h-96 lg:h-400px" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
 
     <!-- BUTTONS -->
