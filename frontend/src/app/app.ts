@@ -7,7 +7,6 @@ import { ChangeDetectorRef } from '@angular/core'; ///ez kell a sikeres foglalá
 import { registerLocaleData } from '@angular/common';///magyar dátumok
 import localeHu from '@angular/common/locales/hu';///magyar dátumok
 import { LOCALE_ID } from '@angular/core';///magyar dátumok
-import { single } from 'rxjs';
 
 registerLocaleData(localeHu);
 @Component({
@@ -151,12 +150,6 @@ loadProfile(){
       }
   }
   
-  ///EDZŐ SPECIALITY betöltés
-loadspecialty() {
-  const saved = localStorage.getItem('trainerSpecialty');
-  if (saved) {
-    this.selectedSpecialty = saved;
-  }}
 
 ///EDZŐ SPECIALITY MENTÉS  
 saveSpecialty() {
@@ -196,7 +189,6 @@ statusClass(s: string) {
   
   //PROFIL MENTÉSE
 saveProfile() {
-    console.log("MENTÉS ELŐTT:", this.profile);
   ///EMAIL VALIDÁCIÓ
   if (!this.isValidEmail(this.profile.email)) {
   this.showToast('Hibás email formátum', 'error');
@@ -385,7 +377,6 @@ saveEdit(id: number) {
         this.loadTrainerBookingsView();
       },
       error: () => this.showToast('Hiba','error')
-      
 });}
 
 
@@ -432,10 +423,9 @@ monthNames = [
 
   calendarDays: (number | null)[] = [];
 
-  intervalId: any; ///elmenti z interval id t hogy ne fusson tovabb ha kilepünk az oldalrol
 
   ngOnInit() {
-  this.bookingSuccess = false;
+  
   this.generateCalendar();
   this.generateTimeSlots();
   this.generateWeek();
@@ -443,16 +433,12 @@ monthNames = [
   
   }
 
-  ngOnDestroy() {
-  clearInterval(this.intervalId); ///ez akkor fut le amikor elhagyjuk az oldalt, vagy ujratoltjuk hogy ne fusson allandoan es ne nyiljon  meg a hatterben minden ujratoltesnel.
-  }
 
   
   ///edzők naptára betöltése adminnál
 loadTrainerBookingsViewForAdmin(trainerId: number) {
   this.api.getTrainerBookings(trainerId)
     .subscribe((b: any[]) => {
-      console.log("BOOKINGS API:", b);
       this.trainerBookings = b;
       this.cd.detectChanges();
     });
@@ -873,7 +859,6 @@ bookingLoading = false;
         this.takenTimes = rows
         .filter(b => b.date === this.selectedDate && b.status !== 'törölve')
           .map(b => b.time);
-        console.log("FOGLALT IDŐK:", this.takenTimes);
         });
   }
 
@@ -1013,7 +998,6 @@ loadTrainers() {
   this.api.getTrainers().subscribe({
     next: (list: any[]) => {
       this.trainers = list;
-      console.log('Trainers betöltve:', this.trainers);
 
       this.cd.detectChanges(); 
     },
@@ -1050,14 +1034,6 @@ loadTrainers() {
   return re.test(email);
   }
 
-///edzők típusai
-specialties = [
-  'Kardió edző',
-  'Erőnléti edző',
-  'Testépítő edző',
-  'Funkcionális edző',
-  'Rehabilitációs edző'
-];
 
 ///hónap navigáció
 prevMonth() {

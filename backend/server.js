@@ -365,8 +365,7 @@
               console.log("nincsen email az adott id hez:", trainerId);
             }
             res.json({ success: true });
-          });
-          
+          }); 
       });
   });
 
