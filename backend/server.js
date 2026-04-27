@@ -21,7 +21,6 @@
     message: { error: 'Túl sok próbálkozás, várj 15 percet' }
   });
 
-
   ///EMAIL KÜLDŐ SETUP
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -48,16 +47,11 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  ///////
-  ///ADATBÁZIS FELTÖLTÉSE/TÁBLÁK FELTÖLTÉSE/ADATOK FRISSÍTÉSE
-  ///////
-
   db.serialize(() => {
 
     ///alap admin user +jelszava le hashelve a biztonsag kedveert
     db.get(`SELECT * FROM users WHERE email = ?`, ['admin@calengo.com'], async (err, user) => {
     if (!user) {const hash = await bcrypt.hash('admin123', 10);
-
       db.run(
         `INSERT INTO users (name, email, password, role)
         VALUES (?, ?, ?, 'admin')`,
@@ -96,7 +90,6 @@
       date TEXT,
       time TEXT,
       status TEXT DEFAULT 'folyamatban')`);
-
 
     ///EGYEDI FOGLALÁS, 1IDŐPONTHOZ CSAK 1 FOGLALÁS LEHETSÉGES
     db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_booking
@@ -325,15 +318,12 @@
 
   //BOOKING UPDATE - IDŐPONT MÓDOSÍTÁS TRAINER ÁLTAL
   app.put('/api/booking/:id', (req, res) => {
-
     const { id } = req.params;
     const { date, time } = req.body;
-
     // lekérjük az aktuális bookingot
     db.get(`SELECT trainerId FROM bookings WHERE id=?`, [id], (err, row) => {
       if (!row) {
         return res.status(404).json({ error: 'Nincs ilyen foglalás' });}
-
       // ELLENORIZZUK HOGY AZ UJ IDŐPONTRA NINCSEN MÁR FOGLALÁS
       db.get(`SELECT id FROM bookings
         WHERE trainerId = ?
@@ -346,8 +336,7 @@
         if (existing) {
           return res.status(409).json({
             error: 'Ez az időpont már foglalt'
-          });
-        }
+          }); }
         db.run(`UPDATE bookings
           SET date = ?, time = ?
           WHERE id = ?`,
@@ -397,8 +386,7 @@
       'elfogadva': 'Elfogadva',
       'elutasítva': 'Elutasítva',
       'törölve': 'Törölve'
-    }[status] || status;
-      }
+    }[status] || status; }
     db.get(`SELECT u.email, u.name as userName, b.date, b.time
       FROM bookings b
       JOIN users u ON b.userId=u.id
@@ -449,8 +437,7 @@
       (err, rows) => {
         if (err) {
           console.error(err);
-          return res.status(500).json({ error: err.message });
-        }
+          return res.status(500).json({ error: err.message }); }
         res.json(rows);
       }
     );

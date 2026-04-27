@@ -58,7 +58,6 @@ export class ApiService {
   return this.http.put(this.base + '/profile/' + id, data);
   }
 
-
   updateBooking(id: number, date: string, time: string) {
   return this.http.put(`${this.base}/booking/${id}`, { date, time });
   }

@@ -6,19 +6,19 @@
     </h1>
     <div *ngIf="currentPage === 'login'" class="flex flex-wrap items-center gap-3 ml-6 text-white md:ml-10">
       <button (click)="scrollToTop()"
-        class="px-6 py-3 text-white transition-all rounded navbtn hover:bg-purple-500 cursor-pointer hover:scale-105 bg-gray-600/80 fa-solid fa-right-to-bracket">
+        class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-right-to-bracket">
       </button>
       <button (click)="scrollToRegister()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn cursor-pointer hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
+        class="items-center px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-user-plus">
       </button>
       <button (click)="scrollToTrainers()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn cursor-pointer hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+        class="items-center px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
       </button>
       <button (click)="scrollToPrices()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn cursor-pointer hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
+        class="items-center px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-tags">
       </button>
       <button (click)="scrollToContact()"
-        class="items-center px-6 py-3 text-white transition-all rounded navbtn cursor-pointer hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
+        class="items-center px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-phone">
       </button>
     </div>
     <!-- TOAST -->
@@ -28,25 +28,25 @@
     </div>
     <div class="flex items-center gap-3" *ngIf="currentUserRole">
       <!-- TRAINER IDŐPONTJAI -->
-      <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+      <button type="button" *ngIf="currentUserRole==='trainer'" (click)="showPage('trainer')" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
       </button>
       <!-- USER IDŐPONTJAI -->
-      <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
+      <button type="button" *ngIf="currentUserRole==='user'" (click)="showPage('bookings')" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-calendar-check">
       </button>
       <!-- USER: edzők -->
-      <button type="button" *ngIf="currentUserRole==='user'" (click)="openTrainerSelectForAdmin()" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
+      <button type="button" *ngIf="currentUserRole==='user'" (click)="openTrainerSelectForAdmin()" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-dumbbell">
       </button>
       <!-- ADMIN -->
-      <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-users">
+      <button type="button" *ngIf="currentUserRole==='admin'" (click)="showPage('admin')" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-users">
       </button>
       <!--admin trainer booking nezet-->
-      <button *ngIf="currentUserRole==='admin'" (click)="showPage('trainers')" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 bg-gray-600/80 fa-solid fa-dumbbell">
+      <button *ngIf="currentUserRole==='admin'" (click)="showPage('trainers')" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 bg-gray-600/80 fa-solid fa-dumbbell">
       </button>
       <!--FIÓKOM-->
-      <button type="button" (click)="loadProfile(); showPage('account')" class="px-6 py-3 cursor-pointer text-white transition-all rounded navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-user">
+      <button type="button" (click)="loadProfile(); showPage('account')" class="px-6 py-3 text-white transition-all rounded cursor-pointer navbtn hover:bg-purple-500 hover:scale-105 bg-gray-600/80 fa-solid fa-user">
       </button>
       <!--KIJELENTKEZÉS-->
-      <button type="button" (click)="logoutConfirm()" class="px-6 py-3 cursor-pointer text-white transition-all bg-red-600 rounded hover:scale-105 navbtn fa-solid fa-right-from-bracket">
+      <button type="button" (click)="logoutConfirm()" class="px-6 py-3 text-white transition-all bg-red-600 rounded cursor-pointer hover:scale-105 navbtn fa-solid fa-right-from-bracket">
       </button>
     </div>
   </div>
@@ -450,12 +450,12 @@
       </div>
       <!-- NAPOK -->
       <div class="grid grid-cols-7 gap-2">
-        <button type="button" *ngFor="let day of calendarDays" [disabled]="!day || isPastDate(day)"
-          (click)="day && !isPastDate(day) && selectDay(day)"
-          [class.bg-gradient-to-br]="selectedDate?.endsWith('-' + day)" [class.opacity-40]="day && isPastDate(day)"
-          [class.cursor-not-allowed]="day && isPastDate(day)"
-          class="text-sm font-medium transition-all duration-200 bg-gray-800 rounded-lg h-11 hover:bg-gray-700 disabled:bg-transparent disabled:cursor-default hover:scale-105 active:scale-95">
-          {{ day }}
+        <button type="button" *ngFor="let day of calendarDays" [disabled]="!day || isPastDate(day)" (click)="day && !isPastDate(day) && selectDay(day)" [ngClass]="{
+          'bg-purple-600 text-white shadow-lg shadow-purple-600/30': isSelectedDay(day),
+          'opacity-40': day && isPastDate(day),
+          'cursor-not-allowed': day && isPastDate(day),
+          'bg-gray-800 text-white hover:bg-gray-700': !isSelectedDay(day)}" class="text-sm font-medium transition-all duration-200 rounded-lg h-11 hover:scale-105 active:scale-95">
+              {{ day }}
         </button>
       </div>
       <div class="p-6 mt-3 text-white bg-gray-900 border-2 border-gray-800 shadow-xl rounded-2xl">
@@ -534,10 +534,10 @@
             <option value="admin" [selected]="u.role==='admin'" class="text-white bg-gray-600 hover:bg-purple-300">Admin
             </option>
           </select>
-          <button type="button" class="px-2 py-1 cursor-pointer transition-all bg-purple-500 rounded hover:scale-105" (click)="changeUserRole(u.id, roleSel.value)">
+          <button type="button" class="px-2 py-1 transition-all bg-purple-500 rounded cursor-pointer hover:scale-105" (click)="changeUserRole(u.id, roleSel.value)">
             Mentés
           </button>
-          <button type="button" class="px-2 py-1 cursor-pointer transition-all bg-red-700 rounded hover:scale-105" (click)="adminDeleteUser(u.id)">
+          <button type="button" class="px-2 py-1 transition-all bg-red-700 rounded cursor-pointer hover:scale-105" (click)="adminDeleteUser(u.id)">
             Törlés
           </button>
         </div>
@@ -623,10 +623,10 @@
           </button>
         </ng-container>
         <ng-container *ngIf="editingId === selectedBooking?.id">
-          <button (click)="saveEdit(selectedBooking.id)" class="flex-1 py-2 cursor-pointer transition-all bg-green-600 rounded hover:bg-green-700 hover:scale-105">
+          <button (click)="saveEdit(selectedBooking.id)" class="flex-1 py-2 transition-all bg-green-600 rounded cursor-pointer hover:bg-green-700 hover:scale-105">
             Mentés
           </button>
-          <button (click)="cancelEdit()" class="flex-1 py-2 cursor-pointer transition-all bg-gray-600 rounded hover:bg-gray-500 hover:scale-105">
+          <button (click)="cancelEdit()" class="flex-1 py-2 transition-all bg-gray-600 rounded cursor-pointer hover:bg-gray-500 hover:scale-105">
             Mégse
           </button>
         </ng-container>

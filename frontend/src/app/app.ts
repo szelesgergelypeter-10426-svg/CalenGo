@@ -784,14 +784,31 @@ bookingLoading = false;
       error: () => {
         this.showToast('Törlés hiba', 'error');
       }
-
     });
+  }
 
+  ///nap kockák is legyenek színesaek
+  getDayClass(day: number | null): string {
+    if (!day) return '';
+    const m = String(this.currentMonth + 1).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    const dateStr = `${this.currentYear}-${m}-${d}`;
+
+    if (this.selectedDate === dateStr) {return 'bg-green-600 text-white';}
+    if (this.isPastDate(day)) {return 'bg-gray-600 text-gray-300';}
+      return 'bg-gray-800 hover:bg-gray-700 text-white';
+  }
+
+  ///nap kiválasztása
+  isSelectedDay(day: number | null): boolean {
+    if (!day || !this.selectedDate) return false;
+      const m = String(this.currentMonth + 1).padStart(2, '0');
+      const d = String(day).padStart(2, '0');
+      const dateStr = `${this.currentYear}-${m}-${d}`;
+      return this.selectedDate === dateStr;
   }
   
-
   //ADMIN ADATOK BETOLTESE
-
   loadAdminData() {
   this.api.getUsers().subscribe(u => {
     this.adminUsers = u;
@@ -802,8 +819,7 @@ bookingLoading = false;
     this.auditLogs = l;
   });
   }
-
-
+  
   //ADMIN FOGLALAS TÖRLÉSE
   deleteBooking(id: number) {
   this.api.deleteBooking(id)
