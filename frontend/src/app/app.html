@@ -876,7 +876,7 @@
       </h3>
 
       <div *ngIf="selectedBooking" class="space-y-2 text-sm">
-        <p><b>Név:</b> {{ selectedBooking.name }}</p>
+        <p><b>Név:</b> {{ selectedBooking.userName }}</p>
         <p><b>Email:</b> {{ selectedBooking.email }}</p>
         
         <ng-container *ngIf="editingId !== selectedBooking.id">
