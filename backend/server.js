@@ -492,16 +492,6 @@ app.put('/api/booking/:id', (req, res) => {
     );
 
   });
-  //ADMIN BOOKING
-  app.get('/api/all-bookings-grouped', (req, res) => {
-    db.all(`
-      SELECT b.*, u.name as userName, t.name as trainerName
-      FROM bookings b
-      JOIN users u ON b.userId=u.id
-      JOIN users t ON b.trainerId=t.id
-      ORDER BY trainerName, date, time
-    `, (e, r) => res.json(r))
-  })
 
   // TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
   app.put('/api/trainer-booking-status/:id', (req, res) => {

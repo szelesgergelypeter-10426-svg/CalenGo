@@ -798,10 +798,6 @@ bookingLoading = false;
     this.cd.detectChanges();
   });
 
-  this.api.getAllBookings().subscribe((b: any[]) => {
-    this.adminBookings = b;
-  });
-
   this.api.getAuditLog().subscribe(l => {
     this.auditLogs = l;
   });

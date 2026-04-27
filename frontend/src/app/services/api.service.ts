@@ -50,10 +50,6 @@ export class ApiService {
   return this.http.delete(this.base + '/bookings/' + id);
   }
 
-  getAllBookings() {
-    return this.http.get<any[]>(this.base + '/all-bookings-grouped');
-  }
-
   getProfile(id: number) {
   return this.http.get<any>(this.base + '/profile/' + id);
   }
