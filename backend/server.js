@@ -52,8 +52,7 @@
     ///alap admin user +jelszava le hashelve a biztonsag kedveert
     db.get(`SELECT * FROM users WHERE email = ?`, ['admin@calengo.com'], async (err, user) => {
     if (!user) {const hash = await bcrypt.hash('admin123', 10);
-      db.run(
-        `INSERT INTO users (name, email, password, role)
+      db.run(`INSERT INTO users (name, email, password, role)
         VALUES (?, ?, ?, 'admin')`,
         ['Admin', 'admin@calengo.com', hash]
       );
@@ -69,8 +68,10 @@
     ///speciality letrehozasa
     db.run(`ALTER TABLE users ADD COLUMN specialty TEXT DEFAULT 'Személyi edző'`, () => {});
 
-    db.run(`
-    CREATE TABLE IF NOT EXISTS audit_log (
+    ///unique account
+    db.run(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_users_email ON users(email)`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS audit_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
       action TEXT,
@@ -131,8 +132,7 @@
       const { name, email, password } = req.body;
       const hash = await bcrypt.hash(password, 10);
 
-      db.run(
-        `INSERT INTO users (name,email,password,role) VALUES (?,?,?,'user')`,
+      db.run(`INSERT INTO users (name,email,password,role,specialty) VALUES (?,?,?,'user','Személyi edző')`,
         [name, email, hash],
         function (err) {
           if (err) {
@@ -148,8 +148,7 @@
   app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUKODJONA AZ AWAIT A BCRYPT OSSZEHASONLITASHOZ
     const { email, password } = req.body;
     if (!email || !password) {return res.status(400).json({ error: 'Hiányzó adatok' });}
-    db.get(
-      `SELECT * FROM users WHERE email = ?`,
+    db.get(`SELECT * FROM users WHERE email = ?`,
       [email],
       async (err, user) => {
         if (!user) {return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });}

@@ -64,14 +64,12 @@ export class AppComponent {
     'Crossfit edző'
   ];
 
-
-  
   constructor(
     private api: ApiService,
     private cd: ChangeDetectorRef ) {} ///kenyszeriti az angulart hogy frissitse a viewet amikor pl a sikeres foglalas utan a sikeres foglalas page nek kell megjenenie
     
     scrollToTop() {
-  window.scrollTo({
+    window.scrollTo({
     top: 0,
     behavior: 'smooth'
   });
@@ -83,10 +81,8 @@ selectDay(day: number) {
     this.showToast('Nem foglalhatsz múltbeli időpontra', 'error');
     return;
     }
-
     const m = String(this.currentMonth + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
-
     this.selectedDate = `${this.currentYear}-${m}-${d}`;
 
     if (this.selectedTrainerId) {
@@ -98,10 +94,7 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   this.bookingSuccess = false;
   this.currentPage = page;
 
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, 0);
-
+  setTimeout(() => {window.scrollTo({ top: 0, behavior: 'auto' });}, 0);
   if (page === 'trainers') {
     this.loadTrainers();
   }
@@ -121,14 +114,13 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   ///LOGOUT MEGERŐSÍTÉS
   logoutConfirm(){
   if(confirm("Biztos ki szeretnél jelentkezni?")){
-    this.logout();
-  }
+    this.logout();}
   }
   ///PASSWORD INPUT VISIBLE
   showPassword = false;
   
   ///PROFIL BETOLTESE + MENTÉS
-loadProfile(){
+  loadProfile(){
   if(!this.currentUserId) return;
 
   this.api.getProfile(this.currentUserId)
@@ -136,20 +128,18 @@ loadProfile(){
     this.profile = p;
 
     this.selectedSpecialty =
-  p.specialty && p.specialty.trim() !== ''
-    ? p.specialty
-    : 'Személyi edző';
+      p.specialty && p.specialty.trim() !== ''
+      ? p.specialty
+      : 'Személyi edző';
 
     this.cd.detectChanges();
   });
-
     ///a trainer profilon mutassa a bio-t
     if (this.currentUserRole === 'trainer') {
       this.api.getTrainerBio(this.currentUserId!)
         .subscribe(res => {this.trainerBio = res.bio || '';});
       }
   }
-  
 
 ///EDZŐ SPECIALITY MENTÉS  
 saveSpecialty() {
@@ -204,11 +194,8 @@ saveProfile() {
     }).subscribe({next: () => {
       this.showToast('Profil frissítve');
       this.loadProfile();
-      if (this.currentUserRole === 'trainer') {
-        this.api.updateTrainerBio(this.currentUserId!, this.trainerBio)
-        .subscribe();}
+      if (this.currentUserRole === 'trainer') {this.api.updateTrainerBio(this.currentUserId!, this.trainerBio).subscribe();}
       },
-
       error: () => {
         this.showToast('Mentés hiba', 'error');
       }
@@ -226,28 +213,18 @@ saveProfile() {
   }, 3000);
   }
 
-
-  // =====================
-  // AUTH — BACKEND
-  // =====================
-
   loginUser(email: string, password: string) {
   if (!email || !password) {
     this.showToast('Email és jelszó megadása kötelező', 'error');
     return;
   }
 
-  this.api.login(email, password)
-    .subscribe({
-
+  this.api.login(email, password).subscribe({
       next: (user: any) => {
-
         this.currentUserRole = user.role;
         this.currentUserId = user.id;
-
         this.showToast('Sikeres bejelentkezés');
 
-        // Clear login form
         this.loginEmail = '';
         this.loginPassword = '';
 
@@ -271,13 +248,10 @@ saveProfile() {
           this.loadTrainerBookingsView();
           this.showPage('trainer');
         }
-
       },
-
       error: () => {
         this.showToast('Hibás belépés', 'error');
       }
-
     });
   }
     
@@ -290,25 +264,25 @@ saveProfile() {
   const password = this.registerPassword;
 
     if (this.registerLoading) return;
-  this.registerLoading = true;
+      this.registerLoading = true;
   
-  if (!name || !email || !password) {
-  this.showToast("Minden mező kötelező", "error");
-  this.registerLoading = false;
-  return;
-  }
+      if (!name || !email || !password) {
+      this.showToast("Minden mező kötelező", "error");
+      this.registerLoading = false;
+      return;
+      }
 
-  if (!this.isValidEmail(email)) {
-    alert("Hibás email formátum");
-    this.registerLoading = false;
-    return;
-  }
+      if (!this.isValidEmail(email)) {
+        alert("Hibás email formátum");
+        this.registerLoading = false;
+        return;
+      }
 
-  if (password.length < 8) {
-    alert("A jelszó túl rövid");
-    this.registerLoading = false;
-    return;
-  }
+      if (password.length < 8) {
+        alert("A jelszó túl rövid");
+        this.registerLoading = false;
+        return;
+      }
 
   this.api.register(name, email, password)
     .subscribe({
@@ -318,7 +292,6 @@ saveProfile() {
           this.registerEmail = '';
           this.registerPassword = '';
         this.showToast('Sikeres regisztráció');
-
         this.showPage('login');
       },
       error: (err) => {
@@ -330,21 +303,17 @@ saveProfile() {
       }
     });
     }
-
     startEdit(b:any) {
-  this.editingId = b.id;
-  this.editDate = b.date;
-  this.editTime = b.time;
-  this.editTime = b.time.slice(0,5);
-}
+      this.editingId = b.id;
+      this.editDate = b.date;
+      this.editTime = b.time;
+      this.editTime = b.time.slice(0,5);
+      }
 
 ///SMOOTH LEGORDULESEK /REGISZTRACIO,EDZOK,ÁRAK,ELERHETOSEG,
 scrollToRegister() {
   const el = document.getElementById('registerSection');
-  if (el) {
-    el.scrollIntoView({
-      behavior: 'smooth'
-    });
+  if (el) {el.scrollIntoView({behavior: 'smooth'});
   }
 }
 
@@ -353,15 +322,12 @@ scrollToTrainers() {
   el?.scrollIntoView({ behavior: 'smooth' });
 }
 
-
-
 scrollToContact() {
   const el = document.getElementById('contactSection');
   el?.scrollIntoView({ behavior: 'smooth' });
 }
 
 saveEdit(id: number) {
-
   if (!this.editDate || !this.editTime) {
     this.showToast('Hiányzó adat','error');
     return;
@@ -369,35 +335,25 @@ saveEdit(id: number) {
 
   this.api.updateBooking(id, this.editDate, this.editTime)
     .subscribe({
-      next: () => {
-        this.showToast('Időpont módosítva');
-        this.selectedBooking.date = this.editDate;
-        this.selectedBooking.time = this.editTime;
-        this.editingId = null;
-        this.loadTrainerBookingsView();
+      next: () => {this.showToast('Időpont módosítva');
+            this.selectedBooking.date = this.editDate;
+            this.selectedBooking.time = this.editTime;
+            this.editingId = null;
+            this.loadTrainerBookingsView();
       },
       error: () => this.showToast('Hiba','error')
 });}
 
+cancelEdit() {this.editingId = null;}
+  selectTrainer(id: number) {this.selectedTrainer = this.trainers.find(t => t.id === id);
+        this.selectedTrainerId = id;
 
-
-cancelEdit() {
-  this.editingId = null;}
-
-  selectTrainer(id: number) {
-
-  this.selectedTrainer = this.trainers.find(t => t.id === id);
-  this.selectedTrainerId = id;
-
-  if (this.currentUserRole === 'admin') {
-
-    this.generateWeek();
-    this.generateTimeSlots();
-    this.loadTrainerBookingsViewForAdmin(id);
-    this.trainerBookings = []; 
-
-    this.showPage('admin-trainer-view');
-    return;
+  if (this.currentUserRole === 'admin') {this.generateWeek();
+        this.generateTimeSlots();
+        this.loadTrainerBookingsViewForAdmin(id);
+        this.trainerBookings = []; 
+        this.showPage('admin-trainer-view');
+        return;
   }
 
   // user esetén
@@ -405,49 +361,38 @@ cancelEdit() {
   this.selectedTime = null;
   this.takenTimes = [];
   this.availableTimes = this.trainerSchedule;
-
   this.showPage('booking');
 }
 
   ///NAPTÁR
   selectedDate: string | null = null;
   selectedTime: string | null = null;
-
   currentYear = new Date().getFullYear();
   currentMonth = new Date().getMonth();
 
 monthNames = [
   'Január', 'Február', 'Március', 'Április', 'Május', 'Június',
   'Július', 'Augusztus', 'Szeptember', 'Október', 'November', 'December'
-];
-
+] ;
   calendarDays: (number | null)[] = [];
 
-
   ngOnInit() {
-  
   this.generateCalendar();
   this.generateTimeSlots();
   this.generateWeek();
   this.loadTrainers(); 
-  
   }
 
-
-  
   ///edzők naptára betöltése adminnál
-loadTrainerBookingsViewForAdmin(trainerId: number) {
-  this.api.getTrainerBookings(trainerId)
-    .subscribe((b: any[]) => {
-      this.trainerBookings = b;
-      this.cd.detectChanges();
-    });
-  }
+  loadTrainerBookingsViewForAdmin(trainerId: number) {this.api.getTrainerBookings(trainerId)
+      .subscribe((b: any[]) => {
+        this.trainerBookings = b;
+        this.cd.detectChanges();
+      });
+    }
 
 
-  generateCalendar() {
-    this.calendarDays = [];
-
+  generateCalendar() {this.calendarDays = [];
     const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
     const daysInMonth = new Date(
       this.currentYear,
@@ -456,7 +401,6 @@ loadTrainerBookingsViewForAdmin(trainerId: number) {
     ).getDate();
 
     const offset = firstDay === 0 ? 6 : firstDay - 1;
-
     for (let i = 0; i < offset; i++) {
       this.calendarDays.push(null);
     }
@@ -468,72 +412,56 @@ loadTrainerBookingsViewForAdmin(trainerId: number) {
 
 
   ///acccept/reject pop up gomb
-updateBookingStatus(status: 'elfogadva' | 'elutasítva') {
-  if (!this.selectedBooking) return;
+  updateBookingStatus(status: 'elfogadva' | 'elutasítva') {
+    if (!this.selectedBooking) return;
 
-  this.api.setBookingStatus(this.selectedBooking.id, status)
-    .subscribe({
-      next: () => {
-        this.showToast('Státusz frissítve');
-        this.selectedBooking.status = status; ///vizuálisan frissítse a státuszt
-          const idx = this.trainerBookings.findIndex(b => b.id === this.selectedBooking.id);
-          if (idx !== -1) {
-            this.trainerBookings[idx].status = status;
-          }
-        this.loadTrainerBookingsView();
-        this.closeBookingModal();
-        this.cd.detectChanges();
-      },
-      error: () => {
-        this.showToast('Hiba', 'error');
-      }
-    });
-}
+    this.api.setBookingStatus(this.selectedBooking.id, status).subscribe({next: () => {this.showToast('Státusz frissítve');
+          this.selectedBooking.status = status; ///vizuálisan frissítse a státuszt
+            const idx = this.trainerBookings.findIndex(b => b.id === this.selectedBooking.id);
+            if (idx !== -1) {
+              this.trainerBookings[idx].status = status;
+            }
+          this.loadTrainerBookingsView();
+          this.closeBookingModal();
+          this.cd.detectChanges();
+        },
+        error: () => {this.showToast('Hiba', 'error');}
+      });
+  }
   
   ///IDŐPONTOK GENERÁLÁSA
-  generateTimeSlots() {
-  this.timeSlots = [];
+  generateTimeSlots() {this.timeSlots = [];
 
-  for (let h = 7; h <= 20; h++) {
-    const start = String(h).padStart(2,'0') + ':00';
+  for (let h = 7; h <= 20; h++) {const start = String(h).padStart(2,'0') + ':00';
     const end = String(h+1).padStart(2,'0') + ':00';
     this.timeSlots.push(`${start}-${end}`);
   }
   }
 
   ///HETI NAPTÁR GENERÁLÁSA
-  generateWeek() {
-    const today = new Date(); 
+  generateWeek() {const today = new Date(); 
     const monday = new Date(today);
-
     monday.setDate(today.getDate() - today.getDay() + 1 + this.weekOffset * 7);
-
     this.weekDays = [];
 
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday);
+    for (let i = 0; i < 7; i++) {const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       this.weekDays.push(d);
     }
   }
 
-  
-
   ///lapozás a hetek között
-  nextWeek() {
-  this.weekOffset++;
+  nextWeek() {this.weekOffset++;
   this.generateWeek();
   this.loadTrainerBookingsView(); 
-}
+  }
 
-prevWeek() {
-  this.weekOffset--;
-  this.generateWeek();
-  this.loadTrainerBookingsView();
-}
+  prevWeek() {this.weekOffset--;
+    this.generateWeek();
+    this.loadTrainerBookingsView();
+  }
   ///booking keresése
-  getBookingFor(day: Date, slot: string) {
-  const dateStr = day.toISOString().slice(0,10);
+  getBookingFor(day: Date, slot: string) {const dateStr = day.toISOString().slice(0,10);
   const startTime = slot.split('-')[0];
 
   return this.trainerBookings.find(b =>
@@ -560,19 +488,16 @@ prevWeek() {
   
 
   ///booking nslot generalas
-  getBookingForSlot(day: Date, time: string) {
-  const dateStr = day.toISOString().slice(0,10);
-
+  getBookingForSlot(day: Date, time: string) {const dateStr = day.toISOString().slice(0,10);
   return this.trainerBookings.find(b =>
-    b.date === dateStr &&
-    b.time === time &&
-    b.trainerId === this.currentUserId
-  );
+        b.date === dateStr &&
+        b.time === time &&
+        b.trainerId === this.currentUserId
+      );
   }
 
   ///kockak szinezese
-  getSlotClass(day: Date, time: string) {
-  const b = this.getBookingForSlot(day, time);
+  getSlotClass(day: Date, time: string) {const b = this.getBookingForSlot(day, time);
 
   if (!b) return 'bg-gray-800 hover:bg-gray-700';
 
@@ -594,8 +519,7 @@ prevWeek() {
   openTrainerSelectForAdmin() {
   this.selectedTrainer = null;
   this.showPage('trainers');
-}
-
+  }
 
   ///kattintás nyitas
   openBooking(b: any) {
@@ -604,9 +528,8 @@ prevWeek() {
     this.showBookingModal = true;
   }
   ///kattintas zaras
-  closeBookingModal() {
-    this.showBookingModal = false;
-    this.selectedBooking = null;
+  closeBookingModal() {this.showBookingModal = false;
+        this.selectedBooking = null;
   }
   
   // EDZŐ IDŐPONTOK
@@ -659,8 +582,7 @@ trainerprices = [
   },
 ];
 
-  scrollToPrices() {
-    const el = document.getElementById('prices');
+  scrollToPrices() {const el = document.getElementById('prices');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
@@ -677,86 +599,56 @@ trainerprices = [
     this.selectedTime = null;
   }
 
-  selectTime(time: string) {
-    if (this.isPastTime(time)) {
+  selectTime(time: string) {if (this.isPastTime(time)) {
     this.showToast('Ez az időpont már elmúlt', 'error');
     return;
     }
     this.selectedTime = time;
   }
-
-
-
-  // =====================
-  // BOOKINGS 
-  // =====================
-
     
-bookingLoading = false;
+  bookingLoading = false;
 
   bookAppointment() {
 
-  if (!this.selectedDate || !this.selectedTime) {
-    this.showToast('Válassz dátumot és időt','error');
-    return;
-  }
+  if (!this.selectedDate || !this.selectedTime) {this.showToast('Válassz dátumot és időt','error');
+    return;}
 
-  if (!this.bookingEmail || !this.isValidEmail(this.bookingEmail)) {
-    this.showToast('Hibás email formátum','error');
-    return;
-  }
+  if (!this.bookingEmail || !this.isValidEmail(this.bookingEmail)) {this.showToast('Hibás email formátum','error');
+    return;}
 
   if (this.bookingLoading) return;
 
   this.bookingLoading = true;
 
-  this.api.createBooking({
-    userId: this.currentUserId!,
-    trainerId: this.selectedTrainerId!,
-    date: this.selectedDate!,
-    time: this.selectedTime!.split('-')[0],
-    email: this.bookingEmail
-  })
-  .subscribe({
+  this.api.createBooking({userId: this.currentUserId!,
+        trainerId: this.selectedTrainerId!,
+        date: this.selectedDate!,
+        time: this.selectedTime!.split('-')[0],
+        email: this.bookingEmail
+      }).subscribe({
 
     next: (res:any) => {
-
       this.bookingLoading = false;
-
       if (res?.success) {
-
         this.selectedDate = null;
         this.selectedTime = null;
         this.bookingEmail = '';
-
-        
         this.showPage('booking-success');
-
         this.cd.detectChanges(); /// itt forcoljuk az angulart hogy frissitse a viewt
 
-        
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'auto' });
         }, 50);
         }
-      else{
-            this.showToast('Foglalás sikertelen','error');
-          }
+      else{this.showToast('Foglalás sikertelen','error');}},
 
-        },
-
-    error: () => {
-      this.bookingLoading = false;
-      this.showToast('Foglalás sikertelen','error');
-    }
-
+        error: () => {this.bookingLoading = false;
+          this.showToast('Foglalás sikertelen','error');}
   });
-
 }
 
   loadMyBookings() {
   if (!this.currentUserId) return;
-
   this.api.getMyBookings(this.currentUserId)
     .subscribe((rows: any) => {
       this.bookings = rows.map((r: any) => ({
@@ -770,12 +662,8 @@ bookingLoading = false;
   }
 
   cancelBookingBackend(id: number) {
-
   if (!confirm('Biztos törlöd?')) return;
-
-  this.api.deleteBooking(id)
-    .subscribe({
-
+  this.api.deleteBooking(id).subscribe({
       next: () => {
         this.showToast('Foglalás törölve');
         this.loadMyBookings();
@@ -809,27 +697,18 @@ bookingLoading = false;
   }
   
   //ADMIN ADATOK BETOLTESE
-  loadAdminData() {
-  this.api.getUsers().subscribe(u => {
+  loadAdminData() {this.api.getUsers().subscribe(u => {
     this.adminUsers = u;
     this.cd.detectChanges();
   });
+  this.api.getAuditLog().subscribe(l => {this.auditLogs = l;});
+  }
 
-  this.api.getAuditLog().subscribe(l => {
-    this.auditLogs = l;
-  });
-  }
-  
   //ADMIN FOGLALAS TÖRLÉSE
-  deleteBooking(id: number) {
-  this.api.deleteBooking(id)
-    .subscribe(() => this.loadAdminData());
-  }
+  deleteBooking(id: number) {this.api.deleteBooking(id).subscribe(() => this.loadAdminData());}
  //ADMIN USER TORLESE
   adminDeleteUser(id: number) {
-
   if (!confirm("Biztosan törlöd a felhasználót?")) return;
-
   this.api.deleteUser(id).subscribe({
     next: () => {
       this.showToast('Felhasználó törölve');
@@ -852,177 +731,134 @@ bookingLoading = false;
   ///PROFILKÉP MŰKÖDÉSE
   getAvatarUrl(path: string | null): string {
   if (!path) return 'assets/default.png';
-
   const base = path.startsWith('http')
     ? path
     : 'http://localhost:3000' + path;
 
-
   return base + '?t=' + new Date().getTime();
   }
 
-
-
   //FOGLALT NAPOK LETILTASA
   loadTrainerBookings(trainerId: number) {
-    this.api.getTrainerBookings(trainerId)
-      .subscribe((rows: any[]) => {
-
+    this.api.getTrainerBookings(trainerId).subscribe((rows: any[]) => {
         this.takenTimes = rows
         .filter(b => b.date === this.selectedDate && b.status !== 'törölve')
           .map(b => b.time);
         });
   }
 
-  
   ///ADMIN ROLE CHANGE
   changeUserRole(userId: number, role: string) {
-
   this.api.updateUserRole(userId, role)
     .subscribe({
-
-      next: () => {
-        this.showToast('Szerepkör frissítve');
-        this.loadAdminData();
-      },
-
+                next: () => {
+                  this.showToast('Szerepkör frissítve');
+                  this.loadAdminData();
+                },
       error: () => {
         this.showToast('Mentési hiba', 'error');
       }
-
     });
   }
 
   //ADMIN FOGALÁS FRISSÍTÉS
   adminUpdateBooking(id: number, date: string, time: string) {
-
-  this.api.updateBooking(id, date, time)
-    .subscribe({
-
+  this.api.updateBooking(id, date, time).subscribe({
       next: () => {
         this.showToast('Foglalás frissítve');
         this.loadAdminData();
       },
-
       error: () => {
         this.showToast('Update hiba', 'error');
       }
-
     });
-
   }
 
-  //TRAINER BOOKING VIEW
-loadTrainerBookingsView() {
-  if (!this.currentUserId) return;
-
-  this.api.getTrainerBookings(this.currentUserId)
-    .subscribe((b: any[]) => {
-      this.trainerBookings = b;
-
-      this.cd.detectChanges();
-    });
-}
+    //TRAINER BOOKING VIEW
+  loadTrainerBookingsView() {
+    if (!this.currentUserId) return;
+    this.api.getTrainerBookings(this.currentUserId)
+      .subscribe((b: any[]) => {
+        this.trainerBookings = b;
+        this.cd.detectChanges();
+      });
+  }
 
   //TRAINER BOOKING VIEW STATUS CHANGE --jó api bekötve
   trainerSetStatus(id: number, status: string) {
-
-  this.api.setBookingStatus(id, status)
-  .subscribe({
-
+  this.api.setBookingStatus(id, status).subscribe({
       next: () => {
         this.showToast('Státusz módosítva');
         this.loadTrainerBookingsView();
       },
-
       error: () => {
         this.showToast('Hiba', 'error');
       }
-
     });
-
   }
   
-  ///LOGIN UTANI OLDAL IRANYITAS
-goMyBookings() {
-  if (this.currentUserRole === 'trainer') {
-    this.loadTrainerBookingsView();
-    this.currentPage = 'trainer';
-  } else if (this.currentUserRole === 'user') {
-    this.loadMyBookings();
-    this.currentPage = 'bookings';
-}}
+    ///LOGIN UTANI OLDAL IRANYITAS
+  goMyBookings() {if (this.currentUserRole === 'trainer') {
+          this.loadTrainerBookingsView();
+          this.currentPage = 'trainer';
+        } else if (this.currentUserRole === 'user') {
+          this.loadMyBookings();
+          this.currentPage = 'bookings';
+      }}
 
-/// MÚLTBELI IDŐPONTOK LETILTÁSA
-isPastDate(day: number): boolean {
-  const today = new Date();
+  /// MÚLTBELI IDŐPONTOK LETILTÁSA
+  isPastDate(day: number): boolean {
+    const today = new Date();
+    const checkDate = new Date(
+      this.currentYear,
+      this.currentMonth,
+      day
+    );
+    today.setHours(0,0,0,0);
+    checkDate.setHours(0,0,0,0);
 
-  const checkDate = new Date(
-    this.currentYear,
-    this.currentMonth,
-    day
-  );
-  
-  today.setHours(0,0,0,0);
-  checkDate.setHours(0,0,0,0);
+    return checkDate < today;
+  }
+  /// ÁRAK legördülő menü
+  openedPriceIndex: number | null = null;
+  openedTrainerPriceIndex: number | null = null;
 
-  return checkDate < today;
-}
-/// ÁRAK legördülő menü
-openedPriceIndex: number | null = null;
-openedTrainerPriceIndex: number | null = null;
+  togglePrice(index: number) {this.openedPriceIndex = this.openedPriceIndex === index ? null : index;}
 
-togglePrice(index: number) {
-  this.openedPriceIndex = this.openedPriceIndex === index ? null : index;
-}
+  toggleTrainerPrice(index: number) {this.openedTrainerPriceIndex = this.openedTrainerPriceIndex === index ? null : index;}
 
-toggleTrainerPrice(index: number) {
-  this.openedTrainerPriceIndex = this.openedTrainerPriceIndex === index ? null : index;
-}
-///trainerek legördülő bio a main pagen
-openedTrainer: number | null = null;
+  ///trainerek legördülő bio a main pagen
+  openedTrainer: number | null = null;
+  toggleTrainer(i: number) {this.openedTrainer = this.openedTrainer === i ? null : i;}
 
-toggleTrainer(i: number) {
-  this.openedTrainer = this.openedTrainer === i ? null : i;
-}
+  getTrainerBioText(t: any): string {if (!t.bio || t.bio.trim() === '') {return `${t.name} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;}
+    return t.bio;
+  }
 
-getTrainerBioText(t: any): string {
-  if (!t.bio || t.bio.trim() === '') {return `${t.name} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;}
-  return t.bio;
-}
+  ///múltbeli dátum (óra szerint) tiltás
+  isPastTime(time: string): boolean {
+    if (!this.selectedDate) return false;
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0,10);
+    if (this.selectedDate !== todayStr) return false;
+      const currentHour = now.getHours();
+      const slotHour = parseInt(time.split(':')[0]);
 
-///múltbeli dátum (óra szerint) tiltás
-isPastTime(time: string): boolean {
-  if (!this.selectedDate) return false;
-
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0,10);
-
-  if (this.selectedDate !== todayStr) return false;
-
-  const currentHour = now.getHours();
-  const slotHour = parseInt(time.split(':')[0]);
-
-  return slotHour <= currentHour;
-}
-
-loadTrainers() {
-  this.api.getTrainers().subscribe({
-    next: (list: any[]) => {
-      this.trainers = list;
-
-      this.cd.detectChanges(); 
-    },
-    error: (err) => {
-      console.error('Hiba a tréner lista betöltésénél', err);
+      return slotHour <= currentHour;
     }
-  });
-}
+
+  loadTrainers() {
+    this.api.getTrainers().subscribe({
+      next: (list: any[]) => {
+        this.trainers = list;
+        this.cd.detectChanges(); 
+      },
+      error: (err) => {console.error('Hiba a tréner lista betöltésénél', err);}
+    });
+  }
 
   onDateSelected() {
-  if (this.selectedTrainerId !== null) {
-    this.loadTrainerBookings(this.selectedTrainerId);
-  }
+  if (this.selectedTrainerId !== null) {this.loadTrainerBookings(this.selectedTrainerId);}
   }
 
  //STÁTUSZ SZÖVEG
@@ -1047,38 +883,30 @@ loadTrainers() {
   }
 
 
-///hónap navigáció
-prevMonth() {
-  const now = new Date();
+  ///hónap navigáció
+  prevMonth() {
+    const now = new Date();
+      ///ne lehessen visszalepni multbeli honapokra
+    if (this.currentYear === now.getFullYear() && this.currentMonth === now.getMonth()
+    ) {this.showToast('Nem léphetsz vissza múltbeli hónapra', 'error');
+      return;
+    }
 
-    ///ne lehessen visszalepni multbeli honapokra
-  if (
-    this.currentYear === now.getFullYear() &&
-    this.currentMonth === now.getMonth()
-  ) {
-    this.showToast('Nem léphetsz vissza múltbeli hónapra', 'error');
-    return;
+    this.currentMonth--;
+    if (this.currentMonth < 0) {this.currentMonth = 11;
+      this.currentYear--;
+    }
+
+    this.generateCalendar();
+    this.resetSelection();
   }
-
-  this.currentMonth--;
-
-  if (this.currentMonth < 0) {
-    this.currentMonth = 11;
-    this.currentYear--;
-  }
-
-  this.generateCalendar();
-  this.resetSelection();
-}
 
 nextMonth() {
   this.currentMonth++;
-
   if (this.currentMonth > 11) {
     this.currentMonth = 0;
     this.currentYear++;
   }
-
   this.generateCalendar();
   this.resetSelection();
 }
