@@ -1,3 +1,6 @@
+ER diagram elérhetősége: 
+https://app.diagrams.net/#G1xkjxwqnKtu_uqzFfcw0OIehpiQ5fTYuN#%7B"pageId"%3A"gfofSnnv9jnTDDnU3vIG"%7D
+
 # Teszt fiókok login
 ----------------------------FIÓK-------------------------------
    -----------------------WEBOLDALON-------------------
