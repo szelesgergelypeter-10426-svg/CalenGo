@@ -858,9 +858,25 @@ trainerprices = [
   openedTrainer: number | null = null;
   toggleTrainer(i: number) {this.openedTrainer = this.openedTrainer === i ? null : i;}
 
-  getTrainerBioText(t: any): string {if (!t.bio || t.bio.trim() === '') {return `${t.name} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;}
-    return t.bio;
+  getTrainerBioText(t: any): string {
+  // HTML tag-ek eltávolítása a bio-ból
+  const cleanBio = (text: string): string => {
+    if (!text) return '';
+    return text
+      .replace(/<[^>]*>/g, '') // HTML tag-ek eltávolítása
+      .replace(/[&<>]/g, (match) => {
+        if (match === '&') return '&amp;';
+        if (match === '<') return '&lt;';
+        if (match === '>') return '&gt;';
+        return match;
+      });
+  };
+  
+  if (!t.bio || t.bio.trim() === '') {
+    return `${cleanBio(t.name)} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;
   }
+  return cleanBio(t.bio);
+}
 
   ///múltbeli dátum (óra szerint) tiltás
   isPastTime(time: string): boolean {

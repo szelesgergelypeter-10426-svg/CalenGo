@@ -11,10 +11,32 @@
   const nodemailer = require('nodemailer');
   const jwt = require('jsonwebtoken');
   const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
-
+  const xss = require('xss');
   app.use(express.json());
   app.use(cors());
   app.use(helmet());
+
+  app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-src https://www.google.com;");
+  next();
+  });
+
+  // XSS védelem - bejövő adatok tisztítása
+function sanitizeInput(req, res, next) {
+  if (req.body) {
+    Object.keys(req.body).forEach(key => {
+      if (typeof req.body[key] === 'string') {
+        req.body[key] = xss(req.body[key].trim());
+      }
+    });
+  }
+  next();
+}
+  app.use(sanitizeInput);
+
 
   // AUTHENTICATION MIDDLEWARE
 function authenticateToken(req, res, next) {
@@ -151,24 +173,41 @@ function authorizeAdmin(req, res, next) {
 
   ///trainer bio mentés,update (ne törlődjön ha ment)
   app.put('/api/trainer-bio/:trainerId', authenticateToken, (req, res) => {
-  // Csak a saját bio-ját módosíthatja a trainer
   if (req.user.id !== parseInt(req.params.trainerId) && req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Csak a saját bio-dat módosíthatod' });
   }
-  const { bio } = req.body;
+  
+  let { bio } = req.body;
+  
+  // Bio validáció
+  if (bio && bio.length > 500) {
+    return res.status(400).json({ error: 'A bio túl hosszú (max 500 karakter)' });
+  }
+  
+  // Tiltott karakterek szűrése a bio-ból
+  if (bio) {
+    bio = bio.replace(/[<>]/g, ''); // < és > karakterek eltávolítása
+  }
+  
   db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
-    [req.params.trainerId, bio],
+    [req.params.trainerId, bio || ''],
     () => res.json({ success: true })
   );
 });
 
   ///REGISZTRÁCIÓ
   app.post('/api/register',
-    [
-      body('name').isLength({ min: 2 }),
-      body('email').isEmail(),
-      body('password').isLength({ min: 8 })
-    ],
+  [
+    body('name').isLength({ min: 2, max: 100 }).trim().escape(),
+    body('email').isEmail().normalizeEmail(),
+    body('password').isLength({ min: 8 }).isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 0
+    })
+  ],
     async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {return res.status(400).json({ errors: errors.array() });}
@@ -563,7 +602,18 @@ function authorizeAdmin(req, res, next) {
 
   //UPDATE PROFILE
   app.put('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, async (req, res) => {
-  const { name, email, password, avatar, specialty } = req.body;
+  let { name, email, password, avatar, specialty } = req.body;
+  
+  // Extra validációk
+  if (name && (name.length < 2 || name.length > 100)) {
+    return res.status(400).json({ error: 'A név 2-100 karakter között lehet' });
+  }
+  if (email && !isValidEmail(email)) {
+    return res.status(400).json({ error: 'Érvénytelen email formátum' });
+  }
+  if (specialty && specialty.length > 50) {
+    return res.status(400).json({ error: 'A szakterület túl hosszú' });
+  }
   db.get(`SELECT password, avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
     let finalAvatar = avatar || user.avatar;
     let finalPassword = user.password;

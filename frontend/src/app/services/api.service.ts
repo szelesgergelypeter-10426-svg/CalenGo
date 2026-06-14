@@ -7,6 +7,8 @@ export class ApiService {
   
   constructor(private http: HttpClient) {}
 
+
+  
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -82,4 +84,23 @@ export class ApiService {
   updateTrainerBio(id: number, bio: string) {
     return this.http.put(this.base + '/trainer-bio/' + id, { bio }, { headers: this.getHeaders() });
   }
+}
+
+export interface SafeUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  specialty?: string;
+}
+
+export interface SafeBooking {
+  id: number;
+  userId: number;
+  trainerId: number;
+  date: string;
+  time: string;
+  status: string;
+  email?: string;
 }
