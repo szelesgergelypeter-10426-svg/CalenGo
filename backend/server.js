@@ -9,10 +9,49 @@
   const rateLimit = require('express-rate-limit');
   const { body, validationResult } = require('express-validator');
   const nodemailer = require('nodemailer');
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
   app.use(express.json());
   app.use(cors());
   app.use(helmet());
+
+  // AUTHENTICATION MIDDLEWARE
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Hozzáférés megtagadva - token szükséges' });
+  }
+  
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Érvénytelen vagy lejárt token' });
+    }
+    req.user = user;
+    next();
+  });
+}
+
+// AUTHORIZATION MIDDLEWARE - Csak saját vagy admin adatokat módosíthat
+function authorizeSelfOrAdmin(req, res, next) {
+  const requestedUserId = parseInt(req.params.id);
+  if (req.user.role === 'admin' || req.user.id === requestedUserId) {
+    next();
+  } else {
+    res.status(403).json({ error: 'Nincs jogosultságod ehhez a művelethez' });
+  }
+}
+
+// AUTHORIZATION MIDDLEWARE - Csak admin
+function authorizeAdmin(req, res, next) {
+  if (req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ error: 'Admin jogosultság szükséges' });
+  }
+}
 
   ///REQUEST LIMITER
   const authLimiter = rateLimit({
@@ -103,21 +142,25 @@
   });
 
   /// trainer bio lekérése
-  app.get('/api/trainer-bio/:trainerId', (req, res) => {
-    db.get(`SELECT bio FROM trainer_bio WHERE trainerId=?`,
-      [req.params.trainerId],
-      (err, row) => { res.json(row || { bio: '' });}
-    );
-  });
+  app.get('/api/trainer-bio/:trainerId', authenticateToken, (req, res) => {
+  db.get(`SELECT bio FROM trainer_bio WHERE trainerId=?`,
+    [req.params.trainerId],
+    (err, row) => { res.json(row || { bio: '' });}
+  );
+});
 
   ///trainer bio mentés,update (ne törlődjön ha ment)
-  app.put('/api/trainer-bio/:trainerId', (req, res) => {
-    const { bio } = req.body;
-    db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
-      [req.params.trainerId, bio],
-      () => res.json({ success: true })
-    );
-  });
+  app.put('/api/trainer-bio/:trainerId', authenticateToken, (req, res) => {
+  // Csak a saját bio-ját módosíthatja a trainer
+  if (req.user.id !== parseInt(req.params.trainerId) && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Csak a saját bio-dat módosíthatod' });
+  }
+  const { bio } = req.body;
+  db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
+    [req.params.trainerId, bio],
+    () => res.json({ success: true })
+  );
+});
 
   ///REGISZTRÁCIÓ
   app.post('/api/register',
@@ -145,31 +188,53 @@
     });
 
   ///BEJELENTKEZÉS
-  app.post('/api/login', authLimiter, async (req, res) => { ///ASYNC KELL HOGY MUKODJONA AZ AWAIT A BCRYPT OSSZEHASONLITASHOZ
-    const { email, password } = req.body;
-    if (!email || !password) {return res.status(400).json({ error: 'Hiányzó adatok' });}
-    db.get(`SELECT * FROM users WHERE email = ?`,
-      [email],
-      async (err, user) => {
-        if (!user) {return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });}
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) {return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });}
-        res.json({
-          id: user.id,
-          name: user.name,
-          role: user.role
-        });
+  app.post('/api/login', authLimiter, async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Hiányzó adatok' });
+  }
+  
+  db.get(`SELECT * FROM users WHERE email = ?`,
+    [email],
+    async (err, user) => {
+      if (err || !user) {
+        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
-    );
-  });
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) {
+        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
+      }
+      
+      // JWT TOKEN GENERÁLÁS
+      const token = jwt.sign(
+        { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role 
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        success: true,
+        token: token,
+        id: user.id,
+        name: user.name,
+        role: user.role
+      });
+    }
+  );
+});
 
   /// IDŐPONT FOGLALÁS
-  app.post('/api/book', authLimiter, (req, res) => {
-    const { userId, trainerId, date, time, email } = req.body;
-    console.log("BOOK REQ:", req.body);
-    if (!userId || !trainerId || !date || !time) {return res.status(400).json({ error: 'Hiányzó adatok' });}
-    ///EMAIL VALIDÁLÁS HOGY JÓ E A FORMÁTUM
-    if (!email || !isValidEmail(email)) {return res.status(400).json({ error: 'Hibás email formátum' });}
+  app.post('/api/book', authenticateToken, authLimiter, (req, res) => {
+  const { trainerId, date, time, email } = req.body;
+  const userId = req.user.id;  // TOKENBŐL VESSZÜK, NEM A BODY-BÓL!
+  console.log("BOOK REQ:", { userId, trainerId, date, time, email });
+  if (!userId || !trainerId || !date || !time) {return res.status(400).json({ error: 'Hiányzó adatok' });}
+  ///EMAIL VALIDÁLÁS HOGY JÓ E A FORMÁTUM
+  if (!email || !isValidEmail(email)) {return res.status(400).json({ error: 'Hibás email formátum' });}
 
     /// VAN E MÁR FOGLÁS ERRE AZ IDŐPONTRA
     db.get(`SELECT id FROM bookings WHERE trainerId = ?
@@ -280,30 +345,40 @@
   });
 
   ///A USER ÖSSZES FOGLALÁSÁNAK LEKÉRDEZÉSE
-  app.get('/api/my-bookings/:userId', (req, res) => {
-    db.all(`SELECT b.*, t.name as trainerName
-      FROM bookings b
-      JOIN users t ON b.trainerId = t.id
-      WHERE b.userId = ?`,
-      [req.params.userId],
-      (_, rows) => res.json(rows));
-  });
+  app.get('/api/my-bookings/:userId', authenticateToken, (req, res) => {
+  // Ellenőrizzük, hogy a saját foglalásait kéri-e
+  if (req.user.id !== parseInt(req.params.userId) && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Csak a saját foglalásaidat tekintheted meg' });
+  }
+  
+  db.all(`SELECT b.*, t.name as trainerName
+    FROM bookings b
+    JOIN users t ON b.trainerId = t.id
+    WHERE b.userId = ?`,
+    [req.params.userId],
+    (_, rows) => res.json(rows));
+});
 
   ///foglalas torlese
-  app.delete('/api/bookings/:id', (req, res) => {
-    db.get(`SELECT userId FROM bookings WHERE id=?`,
-      [req.params.id],
-      (_, row) => {
-        db.run(`DELETE FROM bookings WHERE id=?`,
-          [req.params.id],
-          () => {if (row) logAction(row.userId, 'BOOKING_DELETE', req.params.id);
-            res.json({ success: true });
-          });
-      });
+  app.delete('/api/bookings/:id', authenticateToken, (req, res) => {
+  db.get(`SELECT userId FROM bookings WHERE id=?`, [req.params.id], (_, row) => {
+    if (!row) return res.status(404).json({ error: 'Nincs ilyen foglalás' });
+    if (row.userId !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'trainer') {
+      return res.status(403).json({ error: 'Nincs jogosultságod törölni ezt a foglalást' });
+    }
+    db.run(`DELETE FROM bookings WHERE id=?`, [req.params.id], () => {
+      logAction(req.user.id, 'BOOKING_DELETE', req.params.id);
+      res.json({ success: true });
+    });
   });
+});
 
   //foglalas lekeres trainernek / trainer sajat foglalas nezet
-  app.get('/api/trainer-bookings/:trainerId', (req, res) => {
+  app.get('/api/trainer-bookings/:trainerId', authenticateToken, (req, res) => {
+  if (req.user.id !== parseInt(req.params.trainerId) && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Csak a saját foglalásaidat tekintheted meg' });
+  }
+  
   db.all(`SELECT 
         b.*, 
         u.name as userName,
@@ -313,16 +388,20 @@
      WHERE b.trainerId=?`,
     [req.params.trainerId],
     (_, rows) => res.json(rows));
-  });
-
+});
   //BOOKING UPDATE - IDŐPONT MÓDOSÍTÁS TRAINER ÁLTAL
-  app.put('/api/booking/:id', (req, res) => {
-    const { id } = req.params;
-    const { date, time } = req.body;
-    // lekérjük az aktuális bookingot
-    db.get(`SELECT trainerId FROM bookings WHERE id=?`, [id], (err, row) => {
-      if (!row) {
-        return res.status(404).json({ error: 'Nincs ilyen foglalás' });}
+  app.put('/api/booking/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const { date, time } = req.body;
+  // lekérjük az aktuális bookingot
+  db.get(`SELECT trainerId FROM bookings WHERE id=?`, [id], (err, row) => {
+    if (!row) {
+      return res.status(404).json({ error: 'Nincs ilyen foglalás' });
+    }
+    // Csak a saját bookingját módosíthatja a trainer
+    if (row.trainerId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Nincs jogosultságod módosítani' });
+    }
       // ELLENORIZZUK HOGY AZ UJ IDŐPONTRA NINCSEN MÁR FOGLALÁS
       db.get(`SELECT id FROM bookings
         WHERE trainerId = ?
@@ -347,33 +426,44 @@
     });
 
   //minden user lekerese
-  app.get('/api/users', (req, res) => {
-    db.all(`SELECT id, name, email, role FROM users ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'trainer' THEN 2 WHEN 'user' THEN 3 ELSE 4 END, name ASC`,
-      (err, rows) => res.json(rows)
-    );
-  });
+  app.get('/api/users', authenticateToken, authorizeAdmin, (req, res) => {
+  db.all(`SELECT id, name, email, role FROM users ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'trainer' THEN 2 WHEN 'user' THEN 3 ELSE 4 END, name ASC`,
+    (err, rows) => res.json(rows)
+  );
+});
 
   // ROLE MÓDOSÍTÁS — ADMIN
-  app.put('/api/user-role/:id', (req, res) => {
-    const { id } = req.params;
-    const { role } = req.body;
-
-    if (!['user', 'trainer', 'admin'].includes(role)) {return res.status(400).json({ error: 'Érvénytelen szerepkör' });}
-    db.run(
-      `UPDATE users SET role = ? WHERE id = ?`,
-      [role, id],
-      function (err) {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({ success: true });
+  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
+  
+  if (!['user', 'trainer', 'admin'].includes(role)) {
+    return res.status(400).json({ error: 'Érvénytelen szerepkör' });
+  }
+  
+  db.run(`UPDATE users SET role = ? WHERE id = ?`,
+    [role, id],
+    function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
       }
-    );
-  });
+      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`);
+      res.json({ success: true });
+    }
+  );
+});
 
   // TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
-  app.put('/api/trainer-booking-status/:id', (req, res) => {
+    // TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
+  app.put('/api/trainer-booking-status/:id', authenticateToken, (req, res) => {
+  // Csak a saját bookingjait módosíthatja a trainer vagy admin
+  db.get(`SELECT trainerId FROM bookings WHERE id=?`, [req.params.id], (err, booking) => {
+    if (!booking) return res.status(404).json({ error: 'Nincs ilyen foglalás' });
+    if (booking.trainerId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Nincs jogosultságod státuszt módosítani' });
+    }
+    
     const { status } = req.body;
     function translateStatus(status) { ///STATUSZ FORDÍTÁS A MAGYARRA
     return {
@@ -408,72 +498,84 @@
                       <tr> <td><b>Státusz:</b> </td> <td>${translateStatus(status)}</td></tr>
                       <tr><td><b>Dátum:</b></td><td>${row.date}</td></tr>
                       <tr><td><b>Idő:</b></td><td>${row.time}</td></tr>
-                    </table>
+                    追赶
                     <p>Várunk szeretettel!</p>
                   </td>
                 </tr>
               </table>
-            </td></tr>
-            </table>`
+            </td>
+          </table>
+          </table>`
           );
         } else {
           console.log("Nincs email ehhez a bookinghoz");
         }
+        
+        // EZ VOLT A HIÁNYZÓ ZÁRÓ KAPCSOS ZÁRÓJEL!
+        db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
+          [status, req.params.id],
+          () => res.json({ success: true })
+        );
       }
     );
+  });
+});
 
-    db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
-      [status, req.params.id],
+  ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
+  app.get('/api/trainers', authenticateToken, (req, res) => {
+  db.all(`SELECT u.id, u.name, u.avatar, u.email, u.specialty, tb.bio
+    FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
+    WHERE u.role='trainer'`,
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(rows);
+    }
+  );
+});
+  //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
+  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, (req, res) => {
+  const id = req.params.id;
+  // Ne törölje saját magát
+  if (parseInt(id) === req.user.id) {
+    return res.status(400).json({ error: 'Nem törölheted saját magad' });
+  }
+  db.run(`DELETE FROM bookings WHERE userId = ?`, [id], () => {
+    db.run(`DELETE FROM users WHERE id = ?`, [id], function (err) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      }
+      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`);
+      res.json({ success: true });
+    });
+  });
+});
+  //GET MY PROFILE
+  app.get('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, (req, res) => {
+  db.get(`SELECT id,name,email,avatar,specialty FROM users WHERE id=?`,
+    [req.params.id],
+    (_, row) => res.json(row)
+  );
+});
+
+  //UPDATE PROFILE
+  app.put('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, async (req, res) => {
+  const { name, email, password, avatar, specialty } = req.body;
+  db.get(`SELECT password, avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
+    let finalAvatar = avatar || user.avatar;
+    let finalPassword = user.password;
+    if (password && password.trim() !== '') {
+      finalPassword = await bcrypt.hash(password, 10);
+    }
+    db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
+      [name, email, finalPassword, finalAvatar, specialty, req.params.id],
       () => res.json({ success: true })
     );
   });
-
-  ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
-  app.get('/api/trainers', (req, res) => {
-    db.all(`SELECT u.id, u.name, u.avatar, u.email, u.specialty, tb.bio
-      FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
-      WHERE u.role='trainer'`,
-      (err, rows) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: err.message }); }
-        res.json(rows);
-      }
-    );
-  });
-  //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
-  app.delete('/api/users/:id', (req, res) => {
-    const id = req.params.id;
-    db.run(`DELETE FROM bookings WHERE userId = ?`, [id], () => {
-      db.run(`DELETE FROM users WHERE id = ?`, [id], function (err) {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: err.message }); }
-        res.json({ success: true });
-      });
-    });
-  });
-  //GET MY PROFILE
-  app.get('/api/profile/:id', (req, res) => {
-    db.get(`SELECT id,name,email,avatar,specialty FROM users WHERE id=?`,
-      [req.params.id],
-      (_, row) => res.json(row)
-    );
-  });
-
-  //UPDATE PROFILE
-  app.put('/api/profile/:id', async (req, res) => {
-    const { name, email, password, avatar, specialty } = req.body;
-    db.get(`SELECT password, avatar FROM users WHERE id=?`, [req.params.id], async (err, user) => {
-      let finalAvatar = avatar || user.avatar;
-      let finalPassword = user.password;
-      if (password && password.trim() !== '') {finalPassword = await bcrypt.hash(password, 10); }
-      db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
-        [name, email, finalPassword, finalAvatar, specialty, req.params.id],
-        () => res.json({ success: true })
-      );
-    });
-  });
+});
 
   ///LOGIN HELPER
   function logAction(userId, action, details = '') {
@@ -483,9 +585,9 @@
   }
 
   ///LOG LISTÁZÓ API
-  app.get('/api/audit', (req, res) => {
-    db.all(`SELECT a.*, u.email FROM audit_log a LEFT JOIN users u ON a.userId=u.id ORDER BY a.id DESC`, (e, r) => res.json(r));
-  });
+  app.get('/api/audit', authenticateToken, authorizeAdmin, (req, res) => {
+  db.all(`SELECT a.*, u.email FROM audit_log a LEFT JOIN users u ON a.userId=u.id ORDER BY a.id DESC`, (e, r) => res.json(r));
+});
 
   ///GLOBAL ERROR KEZELŐ
   app.use((err, req, res, next) => {

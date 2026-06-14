@@ -101,6 +101,9 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
 }
   ///LOGOUT
   logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('userRole');
   this.currentUserRole = null;
   this.currentUserId = null;
   this.profile = { name:'', email:'', password:'', avatar:'' };
@@ -109,7 +112,7 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   this.adminUsers = [];
   this.adminBookings = [];
   this.showPage('login');
-  }
+}
   
   ///LOGOUT MEGERŐSÍTÉS
   logoutConfirm(){
@@ -220,40 +223,37 @@ saveProfile() {
   }
 
   this.api.login(email, password).subscribe({
-      next: (user: any) => {
-        this.currentUserRole = user.role;
-        this.currentUserId = user.id;
-        this.showToast('Sikeres bejelentkezés');
-
-        this.loginEmail = '';
-        this.loginPassword = '';
-
-        // USER
-        if (user.role === 'user') {
-          this.loadMyBookings();
-          this.showPage('trainers');
-        }
-
-        // ADMIN
-        else if (user.role === 'admin') {
-          this.loadAdminData();
-          this.showPage('admin');
-        }
-
-        // TRAINER
-        else if (user.role === 'trainer') {
-          this.loadProfile();
-          this.generateWeek();
-          this.generateTimeSlots();
-          this.loadTrainerBookingsView();
-          this.showPage('trainer');
-        }
-      },
-      error: () => {
-        this.showToast('Hibás belépés', 'error');
+    next: (response: any) => {
+      // Token mentése localStorage-ba
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userId', response.id.toString());
+        localStorage.setItem('userRole', response.role);
       }
-    });
-  }
+      
+      this.currentUserRole = response.role;
+      this.currentUserId = response.id;
+      this.showToast('Sikeres bejelentkezés');
+
+      if (response.role === 'user') {
+        this.loadMyBookings();
+        this.showPage('trainers');
+      } else if (response.role === 'admin') {
+        this.loadAdminData();
+        this.showPage('admin');
+      } else if (response.role === 'trainer') {
+        this.loadProfile();
+        this.generateWeek();
+        this.generateTimeSlots();
+        this.loadTrainerBookingsView();
+        this.showPage('trainer');
+      }
+    },
+    error: () => {
+      this.showToast('Hibás belépés', 'error');
+    }
+  });
+}
     
 // USER REGISZTARACIO
   registerLoading = false;
@@ -380,8 +380,32 @@ monthNames = [
   this.generateCalendar();
   this.generateTimeSlots();
   this.generateWeek();
-  this.loadTrainers(); 
+  this.loadTrainers();
+  
+  // Auto-login ellenőrzés
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
+  
+  if (token && userId && userRole) {
+    this.currentUserId = parseInt(userId);
+    this.currentUserRole = userRole;
+    
+    if (userRole === 'user') {
+      this.loadMyBookings();
+      this.showPage('trainers');
+    } else if (userRole === 'admin') {
+      this.loadAdminData();
+      this.showPage('admin');
+    } else if (userRole === 'trainer') {
+      this.loadProfile();
+      this.generateWeek();
+      this.generateTimeSlots();
+      this.loadTrainerBookingsView();
+      this.showPage('trainer');
+    }
   }
+}
 
   ///edzők naptára betöltése adminnál
   loadTrainerBookingsViewForAdmin(trainerId: number) {this.api.getTrainerBookings(trainerId)
@@ -609,7 +633,10 @@ trainerprices = [
   bookingLoading = false;
 
   bookAppointment() {
-
+  if (!this.currentUserId) {
+    this.showToast('Nem vagy bejelentkezve', 'error');
+    return;
+  }
   if (!this.selectedDate || !this.selectedTime) {this.showToast('Válassz dátumot és időt','error');
     return;}
 
