@@ -13,8 +13,41 @@
   const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
   const xss = require('xss');
   app.use(express.json());
-  app.use(cors());
   app.use(helmet());
+
+  // HTTPS kényszerítés (production)
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, 'https://' + req.headers.host + req.url);
+    }
+  }
+  next();
+});
+
+  // CORS beállítások - csak a megbízható origin-öknek enged
+const allowedOrigins = [
+  'http://localhost:4200',     // Angular fejlesztői szerver
+  'http://127.0.0.1:4200',
+  'https://yourdomain.com'     // Éles domain (cseréld ki a sajátodra)
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Fejlesztéshez engedjük a null origin-t (pl. Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
+    }
+  },
+  credentials: true,  // Cookie-k és auth headerek engedélyezése
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
   app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
