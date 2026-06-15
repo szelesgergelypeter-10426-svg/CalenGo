@@ -17,10 +17,6 @@
   app.use(express.json());
   app.use(helmet());
 
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  });
 
   // HTTPS kényszerítés (production)
 app.use((req, res, next) => {
@@ -698,15 +694,17 @@ const registerLimiter = rateLimit({
   db.all(`SELECT a.*, u.email FROM audit_log a LEFT JOIN users u ON a.userId=u.id ORDER BY a.id DESC`, (e, r) => res.json(r));
 });
 
-  ///GLOBAL ERROR KEZELŐ
-  app.use((err, req, res, next) => {
-    console.error('GLOBAL ERROR:', err);
-    res.status(500).json({ error: 'Server error' });
-  });
+ ///GLOBAL ERROR KEZELŐ
+app.use((err, req, res, next) => {
+  console.error('GLOBAL ERROR:', err);
+  res.status(500).json({ error: 'Server error' });
+});
 
-  app.get('/', (req, res) => {
-    res.send('CalenGo backend running');
-  });
-  app.listen(3000, () => {
-    console.log('Server running on port 3000');
-  });
+app.get('/', (req, res) => {
+  res.send('CalenGo backend running');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -3,11 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private base = 'http://localhost:3000/api';
+  private base = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : `${window.location.protocol}//${window.location.hostname}/api`;
   
   constructor(private http: HttpClient) {}
-
-
   
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
