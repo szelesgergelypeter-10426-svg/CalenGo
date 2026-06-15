@@ -139,6 +139,12 @@ const registerLimiter = rateLimit({
   message: { error: 'Túl sok regisztrációs próbálkozás, várj 1 órát' }
 });
 
+const criticalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 perc
+  max: 10, // max 10 kérés
+  message: { error: 'Túl sok kritikus művelet, várj 15 percet' }
+});
+
   ///EMAIL KÜLDŐ SETUP
   const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
@@ -172,6 +178,8 @@ const registerLimiter = rateLimit({
   }
 
   db.serialize(() => {
+
+    db.run(`ALTER TABLE audit_log ADD COLUMN ip TEXT`, () => {});
 
     ///alap admin user +jelszava le hashelve a biztonsag kedveert
     db.get(`SELECT * FROM users WHERE email = ?`, ['admin@calengo.com'], async (err, user) => {
@@ -254,9 +262,11 @@ const registerLimiter = rateLimit({
   
   db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
     [req.params.trainerId, bio || ''],
-    () => res.json({ success: true })
+    () => {
+      logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`);
+      res.json({ success: true });
+    }
   );
-});
 
   ///REGISZTRÁCIÓ
   app.post('/api/register', registerLimiter, [
@@ -298,10 +308,12 @@ const registerLimiter = rateLimit({
     [email],
     async (err, user) => {
       if (err || !user) {
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       
@@ -315,6 +327,7 @@ const registerLimiter = rateLimit({
         JWT_SECRET,
         { expiresIn: '24h' }
       );
+      logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`);
       
       res.json({
         success: true,
@@ -357,6 +370,7 @@ const registerLimiter = rateLimit({
       if (err) {console.error(err);
         return res.status(500).json({ error: err.message });
       }
+       logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`);
 
     db.get("SELECT name FROM users WHERE id = ?",
     [trainerId],
@@ -533,7 +547,7 @@ const registerLimiter = rateLimit({
 });
 
   // ROLE MÓDOSÍTÁS — ADMIN
-  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
+  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, writeLimiter, criticalLimiter, (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
   
@@ -636,7 +650,7 @@ const registerLimiter = rateLimit({
   );
 });
   //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
-  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
+  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, criticalLimiter, (req, res) => {
   const id = req.params.id;
   // Ne törölje saját magát
   if (parseInt(id) === req.user.id) {
@@ -683,16 +697,19 @@ const registerLimiter = rateLimit({
     }
     db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
       [name, email, finalPassword, finalAvatar, specialty, req.params.id],
-      () => res.json({ success: true })
-    );
+      () => {
+        logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`);
+        res.json({ success: true });
+          }
+        );
   });
 });
 
   ///LOGIN HELPER
-  function logAction(userId, action, details = '') {
-    db.run(`INSERT INTO audit_log (userId, action, details, createdAt) VALUES (?, ?, ?, datetime('now'))`,
-      [userId, action, details]
-    );
+  function logAction(userId, action, details = '', ip = null) {
+  db.run(`INSERT INTO audit_log (userId, action, details, createdAt, ip) VALUES (?, ?, ?, datetime('now'), ?)`,
+    [userId, action, details, ip]
+  );
   }
 
   ///LOG LISTÁZÓ API
