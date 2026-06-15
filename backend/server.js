@@ -149,15 +149,21 @@ const registerLimiter = rateLimit({
   });
 
   function sendMail(to, subject, html) {
-    transporter.sendMail({
-      from: 'Gym Booking',
-      to,
-      subject,
-      html
-    }, (err) => {
-      if (err) console.log('MAIL ERROR:', err);
-      else console.log('MAIL SENT:', to);
-    });
+  // Ne küldjünk emailt fejlesztésben (opcionális)
+  if (process.env.NODE_ENV === 'development' && !process.env.EMAIL_TEST_MODE) {
+    console.log('DEV: Email not sent (would have been sent to:', to, ')');
+    return;
+  }
+  
+  transporter.sendMail({
+    from: `"CalenGo" <${process.env.EMAIL_USER}>`,  // Hitelesített feladó
+    to,
+    subject,
+    html
+  }, (err) => {
+    if (err) console.log('MAIL ERROR:', err);
+    else console.log('MAIL SENT:', to);
+  });
   }
   ///EMAIL KIKÜLDÉSE 240SOR
   ///EMAIL VALIDÁLÁS
