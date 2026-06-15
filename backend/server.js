@@ -115,6 +115,27 @@ function authorizeAdmin(req, res, next) {
     message: { error: 'Túl sok próbálkozás, várj 15 percet' }
   });
 
+  /// ÁLTALÁNOS API LIMITER (GET kérésekre)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, ///15 perc
+  max: 100, ///MAX 100 kérés
+  message: { error: 'Túl sok kérés, várj 15 percet' }
+});
+
+/// MÓDOSÍTÓ MŰVELETEK LIMITER (POST, PUT, DELETE)
+const writeLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, ///5 perc
+  max: 30, ///MAX 30 kérés
+  message: { error: 'Túl sok módosítási kérés, várj 5 percet' }
+});
+
+/// REGISZTRÁCIÓ LIMITER (erősebb korlát)
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, ///1 óra
+  max: 5, ///MAX 5 regisztráció IP-nként
+  message: { error: 'Túl sok regisztrációs próbálkozás, várj 1 órát' }
+});
+
   ///EMAIL KÜLDŐ SETUP
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -197,7 +218,7 @@ function authorizeAdmin(req, res, next) {
   });
 
   /// trainer bio lekérése
-  app.get('/api/trainer-bio/:trainerId', authenticateToken, (req, res) => {
+  app.get('/api/trainer-bio/:trainerId', authenticateToken, apiLimiter, (req, res) => {
   db.get(`SELECT bio FROM trainer_bio WHERE trainerId=?`,
     [req.params.trainerId],
     (err, row) => { res.json(row || { bio: '' });}
@@ -205,7 +226,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   ///trainer bio mentés,update (ne törlődjön ha ment)
-  app.put('/api/trainer-bio/:trainerId', authenticateToken, (req, res) => {
+  app.put('/api/trainer-bio/:trainerId', authenticateToken, writeLimiter, (req, res) => {
   if (req.user.id !== parseInt(req.params.trainerId) && req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Csak a saját bio-dat módosíthatod' });
   }
@@ -229,19 +250,17 @@ function authorizeAdmin(req, res, next) {
 });
 
   ///REGISZTRÁCIÓ
-  app.post('/api/register',
-  [
-    body('name').isLength({ min: 2, max: 100 }).trim().escape(),
-    body('email').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 8 }).isStrongPassword({
-      minLength: 8,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 0
-    })
-  ],
-    async (req, res) => {
+  app.post('/api/register', registerLimiter, [
+  body('name').isLength({ min: 2, max: 100 }).trim().escape(),
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 8 }).isStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 0
+  })
+], async (req, res) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {return res.status(400).json({ errors: errors.array() });}
       const { name, email, password } = req.body;
@@ -300,7 +319,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   /// IDŐPONT FOGLALÁS
-  app.post('/api/book', authenticateToken, authLimiter, (req, res) => {
+  app.post('/api/book', authenticateToken, writeLimiter, (req, res) => {
   const { trainerId, date, time, email } = req.body;
   const userId = req.user.id;  // TOKENBŐL VESSZÜK, NEM A BODY-BÓL!
   console.log("BOOK REQ:", { userId, trainerId, date, time, email });
@@ -417,7 +436,7 @@ function authorizeAdmin(req, res, next) {
   });
 
   ///A USER ÖSSZES FOGLALÁSÁNAK LEKÉRDEZÉSE
-  app.get('/api/my-bookings/:userId', authenticateToken, (req, res) => {
+  app.get('/api/my-bookings/:userId', authenticateToken, apiLimiter, (req, res) => {
   // Ellenőrizzük, hogy a saját foglalásait kéri-e
   if (req.user.id !== parseInt(req.params.userId) && req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Csak a saját foglalásaidat tekintheted meg' });
@@ -432,7 +451,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   ///foglalas torlese
-  app.delete('/api/bookings/:id', authenticateToken, (req, res) => {
+  app.delete('/api/bookings/:id', authenticateToken, writeLimiter, (req, res) => {
   db.get(`SELECT userId FROM bookings WHERE id=?`, [req.params.id], (_, row) => {
     if (!row) return res.status(404).json({ error: 'Nincs ilyen foglalás' });
     if (row.userId !== req.user.id && req.user.role !== 'admin' && req.user.role !== 'trainer') {
@@ -446,7 +465,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   //foglalas lekeres trainernek / trainer sajat foglalas nezet
-  app.get('/api/trainer-bookings/:trainerId', authenticateToken, (req, res) => {
+  app.get('/api/trainer-bookings/:trainerId', authenticateToken, apiLimiter, (req, res) => {
   if (req.user.id !== parseInt(req.params.trainerId) && req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Csak a saját foglalásaidat tekintheted meg' });
   }
@@ -462,7 +481,7 @@ function authorizeAdmin(req, res, next) {
     (_, rows) => res.json(rows));
 });
   //BOOKING UPDATE - IDŐPONT MÓDOSÍTÁS TRAINER ÁLTAL
-  app.put('/api/booking/:id', authenticateToken, (req, res) => {
+  app.put('/api/booking/:id', authenticateToken, writeLimiter, (req, res) => {
   const { id } = req.params;
   const { date, time } = req.body;
   // lekérjük az aktuális bookingot
@@ -498,14 +517,14 @@ function authorizeAdmin(req, res, next) {
     });
 
   //minden user lekerese
-  app.get('/api/users', authenticateToken, authorizeAdmin, (req, res) => {
+  app.get('/api/users', authenticateToken, authorizeAdmin, apiLimiter, (req, res) => {
   db.all(`SELECT id, name, email, role FROM users ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'trainer' THEN 2 WHEN 'user' THEN 3 ELSE 4 END, name ASC`,
     (err, rows) => res.json(rows)
   );
 });
 
   // ROLE MÓDOSÍTÁS — ADMIN
-  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, (req, res) => {
+  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
   
@@ -528,7 +547,7 @@ function authorizeAdmin(req, res, next) {
 
   // TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
     // TRAINER APPROVE / REJECT / APPROVE EMAIL KÜLDÉS
-  app.put('/api/trainer-booking-status/:id', authenticateToken, (req, res) => {
+  app.put('/api/trainer-booking-status/:id', authenticateToken, writeLimiter, (req, res) => {
   // Csak a saját bookingjait módosíthatja a trainer vagy admin
   db.get(`SELECT trainerId FROM bookings WHERE id=?`, [req.params.id], (err, booking) => {
     if (!booking) return res.status(404).json({ error: 'Nincs ilyen foglalás' });
@@ -594,7 +613,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
-  app.get('/api/trainers', authenticateToken, (req, res) => {
+  app.get('/api/trainers', authenticateToken, apiLimiter, (req, res) => {
   db.all(`SELECT u.id, u.name, u.avatar, u.email, u.specialty, tb.bio
     FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
     WHERE u.role='trainer'`,
@@ -608,7 +627,7 @@ function authorizeAdmin(req, res, next) {
   );
 });
   //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
-  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, (req, res) => {
+  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
   const id = req.params.id;
   // Ne törölje saját magát
   if (parseInt(id) === req.user.id) {
@@ -626,7 +645,7 @@ function authorizeAdmin(req, res, next) {
   });
 });
   //GET MY PROFILE
-  app.get('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, (req, res) => {
+  app.get('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, apiLimiter, (req, res) => {
   db.get(`SELECT id,name,email,avatar,specialty FROM users WHERE id=?`,
     [req.params.id],
     (_, row) => res.json(row)
@@ -634,7 +653,7 @@ function authorizeAdmin(req, res, next) {
 });
 
   //UPDATE PROFILE
-  app.put('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, async (req, res) => {
+  app.put('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, writeLimiter, async (req, res) => {
   let { name, email, password, avatar, specialty } = req.body;
   
   // Extra validációk
@@ -668,7 +687,7 @@ function authorizeAdmin(req, res, next) {
   }
 
   ///LOG LISTÁZÓ API
-  app.get('/api/audit', authenticateToken, authorizeAdmin, (req, res) => {
+  app.get('/api/audit', authenticateToken, authorizeAdmin, apiLimiter, (req, res) => {
   db.all(`SELECT a.*, u.email FROM audit_log a LEFT JOIN users u ON a.userId=u.id ORDER BY a.id DESC`, (e, r) => res.json(r));
 });
 
