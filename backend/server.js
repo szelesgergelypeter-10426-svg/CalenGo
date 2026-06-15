@@ -14,6 +14,7 @@
   const jwt = require('jsonwebtoken');
   const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
   const xss = require('xss');
+  app.set('trust proxy', true);
   app.use(express.json());
   app.use(helmet());
 
@@ -177,6 +178,13 @@ const criticalLimiter = rateLimit({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
+  ///LOGIN HELPER
+  function logAction(userId, action, details = '', ip = null) {
+  db.run(`INSERT INTO audit_log (userId, action, details, createdAt, ip) VALUES (?, ?, ?, datetime('now'), ?)`,
+    [userId, action, details, ip]
+  );
+  }
+
   db.serialize(() => {
 
     db.run(`ALTER TABLE audit_log ADD COLUMN ip TEXT`, () => {});
@@ -260,13 +268,15 @@ const criticalLimiter = rateLimit({
     bio = bio.replace(/[<>]/g, ''); // < és > karakterek eltávolítása
   }
   
-  db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
+    db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
     [req.params.trainerId, bio || ''],
     () => {
-      logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`);
+      logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`, req.ip);
       res.json({ success: true });
     }
   );
+});  
+  
 
   ///REGISZTRÁCIÓ
   app.post('/api/register', registerLimiter, [
@@ -292,7 +302,7 @@ const criticalLimiter = rateLimit({
             if (err.message.includes('UNIQUE')) {return res.status(409).json({ error: 'A megadott email már használt' }); }///409 CONFLICT ERROR
             return res.status(500).json(err); ///500 SERVER ERROR
           }
-          logAction(this.lastID, 'REGISTER', email);
+          logAction(this.lastID, 'REGISTER', email, req.ip);
           res.json({ success: true });
         });
     });
@@ -308,12 +318,12 @@ const criticalLimiter = rateLimit({
     [email],
     async (err, user) => {
       if (err || !user) {
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`);
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`);
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       
@@ -370,7 +380,7 @@ const criticalLimiter = rateLimit({
       if (err) {console.error(err);
         return res.status(500).json({ error: err.message });
       }
-       logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`);
+       logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`, req.ip);
 
     db.get("SELECT name FROM users WHERE id = ?",
     [trainerId],
@@ -481,7 +491,7 @@ const criticalLimiter = rateLimit({
       return res.status(403).json({ error: 'Nincs jogosultságod törölni ezt a foglalást' });
     }
     db.run(`DELETE FROM bookings WHERE id=?`, [req.params.id], () => {
-      logAction(req.user.id, 'BOOKING_DELETE', req.params.id);
+      logAction(req.user.id, 'BOOKING_DELETE', req.params.id, req.ip);
       res.json({ success: true });
     });
   });
@@ -529,11 +539,12 @@ const criticalLimiter = rateLimit({
           return res.status(409).json({
             error: 'Ez az időpont már foglalt'
           }); }
-        db.run(`UPDATE bookings
-          SET date = ?, time = ?
-          WHERE id = ?`,
-        [date, time, id],
-        () => res.json({ success: true })
+        db.run(`UPDATE bookings SET date = ?, time = ? WHERE id = ?`,
+            [date, time, id],
+            () => {
+              logAction(req.user.id, 'BOOKING_UPDATE', `Booking ${id} changed to ${date} ${time}`, req.ip);
+              res.json({ success: true });
+            }
           );
         });
       });
@@ -562,7 +573,7 @@ const criticalLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`);
+      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`, req.ip);
       res.json({ success: true });
     }
   );
@@ -628,7 +639,10 @@ const criticalLimiter = rateLimit({
         // EZ VOLT A HIÁNYZÓ ZÁRÓ KAPCSOS ZÁRÓJEL!
         db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
           [status, req.params.id],
-          () => res.json({ success: true })
+          () => {
+            logAction(req.user.id, 'STATUS_CHANGE', `Booking ${req.params.id} status: ${status}`, req.ip);
+            res.json({ success: true });
+          }
         );
       }
     );
@@ -662,7 +676,7 @@ const criticalLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`);
+      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`, req.ip);
       res.json({ success: true });
     });
   });
@@ -698,19 +712,13 @@ const criticalLimiter = rateLimit({
     db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
       [name, email, finalPassword, finalAvatar, specialty, req.params.id],
       () => {
-        logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`);
+        logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`, req.ip);
         res.json({ success: true });
           }
         );
   });
 });
-
-  ///LOGIN HELPER
-  function logAction(userId, action, details = '', ip = null) {
-  db.run(`INSERT INTO audit_log (userId, action, details, createdAt, ip) VALUES (?, ?, ?, datetime('now'), ?)`,
-    [userId, action, details, ip]
-  );
-  }
+  
 
   ///LOG LISTÁZÓ API
   app.get('/api/audit', authenticateToken, authorizeAdmin, apiLimiter, (req, res) => {
