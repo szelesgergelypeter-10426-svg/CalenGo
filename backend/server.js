@@ -1,8 +1,10 @@
   const express = require('express');
   const cors = require('cors');
   const sqlite3 = require('sqlite3').verbose();
-  const db = new sqlite3.Database('./CalenGo.db');
+  const DB_PATH = process.env.DB_PATH || './CalenGo.db';
+  const db = new sqlite3.Database(DB_PATH);
   const app = express();
+  const BASE_URL = process.env.BASE_URL || 'http://localhost:4200';
   const bcrypt = require('bcrypt');
   require('dotenv').config();
   const helmet = require('helmet');
@@ -14,6 +16,11 @@
   const xss = require('xss');
   app.use(express.json());
   app.use(helmet());
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  });
 
   // HTTPS kényszerítés (production)
 app.use((req, res, next) => {
@@ -138,11 +145,11 @@ const registerLimiter = rateLimit({
 
   ///EMAIL KÜLDŐ SETUP
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'ProjectCalenGo@gmail.com',
-      pass: process.env.MAIL_PASS
-    }
+  service: process.env.EMAIL_SERVICE || 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'ProjectCalenGo@gmail.com',
+    pass: process.env.EMAIL_PASS
+  }
   });
 
   function sendMail(to, subject, html) {
