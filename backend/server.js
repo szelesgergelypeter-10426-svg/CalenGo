@@ -14,13 +14,10 @@
   const jwt = require('jsonwebtoken');
   const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
   const xss = require('xss');
+  app.set('trust proxy', true);
   app.use(express.json());
   app.use(helmet());
 
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  });
 
   // HTTPS kényszerítés (production)
 app.use((req, res, next) => {
@@ -143,6 +140,12 @@ const registerLimiter = rateLimit({
   message: { error: 'Túl sok regisztrációs próbálkozás, várj 1 órát' }
 });
 
+const criticalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 perc
+  max: 10, // max 10 kérés
+  message: { error: 'Túl sok kritikus művelet, várj 15 percet' }
+});
+
   ///EMAIL KÜLDŐ SETUP
   const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
@@ -153,15 +156,21 @@ const registerLimiter = rateLimit({
   });
 
   function sendMail(to, subject, html) {
-    transporter.sendMail({
-      from: 'Gym Booking',
-      to,
-      subject,
-      html
-    }, (err) => {
-      if (err) console.log('MAIL ERROR:', err);
-      else console.log('MAIL SENT:', to);
-    });
+  // Ne küldjünk emailt fejlesztésben (opcionális)
+  if (process.env.NODE_ENV === 'development' && !process.env.EMAIL_TEST_MODE) {
+    console.log('DEV: Email not sent (would have been sent to:', to, ')');
+    return;
+  }
+  
+  transporter.sendMail({
+    from: `"CalenGo" <${process.env.EMAIL_USER}>`,  // Hitelesített feladó
+    to,
+    subject,
+    html
+  }, (err) => {
+    if (err) console.log('MAIL ERROR:', err);
+    else console.log('MAIL SENT:', to);
+  });
   }
   ///EMAIL KIKÜLDÉSE 240SOR
   ///EMAIL VALIDÁLÁS
@@ -169,7 +178,16 @@ const registerLimiter = rateLimit({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
+  ///LOGIN HELPER
+  function logAction(userId, action, details = '', ip = null) {
+  db.run(`INSERT INTO audit_log (userId, action, details, createdAt, ip) VALUES (?, ?, ?, datetime('now'), ?)`,
+    [userId, action, details, ip]
+  );
+  }
+
   db.serialize(() => {
+
+    db.run(`ALTER TABLE audit_log ADD COLUMN ip TEXT`, () => {});
 
     ///alap admin user +jelszava le hashelve a biztonsag kedveert
     db.get(`SELECT * FROM users WHERE email = ?`, ['admin@calengo.com'], async (err, user) => {
@@ -250,11 +268,15 @@ const registerLimiter = rateLimit({
     bio = bio.replace(/[<>]/g, ''); // < és > karakterek eltávolítása
   }
   
-  db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
+    db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
     [req.params.trainerId, bio || ''],
-    () => res.json({ success: true })
+    () => {
+      logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`, req.ip);
+      res.json({ success: true });
+    }
   );
-});
+});  
+  
 
   ///REGISZTRÁCIÓ
   app.post('/api/register', registerLimiter, [
@@ -280,7 +302,7 @@ const registerLimiter = rateLimit({
             if (err.message.includes('UNIQUE')) {return res.status(409).json({ error: 'A megadott email már használt' }); }///409 CONFLICT ERROR
             return res.status(500).json(err); ///500 SERVER ERROR
           }
-          logAction(this.lastID, 'REGISTER', email);
+          logAction(this.lastID, 'REGISTER', email, req.ip);
           res.json({ success: true });
         });
     });
@@ -296,10 +318,12 @@ const registerLimiter = rateLimit({
     [email],
     async (err, user) => {
       if (err || !user) {
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       
@@ -313,6 +337,7 @@ const registerLimiter = rateLimit({
         JWT_SECRET,
         { expiresIn: '24h' }
       );
+      logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`);
       
       res.json({
         success: true,
@@ -355,6 +380,7 @@ const registerLimiter = rateLimit({
       if (err) {console.error(err);
         return res.status(500).json({ error: err.message });
       }
+       logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`, req.ip);
 
     db.get("SELECT name FROM users WHERE id = ?",
     [trainerId],
@@ -465,7 +491,7 @@ const registerLimiter = rateLimit({
       return res.status(403).json({ error: 'Nincs jogosultságod törölni ezt a foglalást' });
     }
     db.run(`DELETE FROM bookings WHERE id=?`, [req.params.id], () => {
-      logAction(req.user.id, 'BOOKING_DELETE', req.params.id);
+      logAction(req.user.id, 'BOOKING_DELETE', req.params.id, req.ip);
       res.json({ success: true });
     });
   });
@@ -513,11 +539,12 @@ const registerLimiter = rateLimit({
           return res.status(409).json({
             error: 'Ez az időpont már foglalt'
           }); }
-        db.run(`UPDATE bookings
-          SET date = ?, time = ?
-          WHERE id = ?`,
-        [date, time, id],
-        () => res.json({ success: true })
+        db.run(`UPDATE bookings SET date = ?, time = ? WHERE id = ?`,
+            [date, time, id],
+            () => {
+              logAction(req.user.id, 'BOOKING_UPDATE', `Booking ${id} changed to ${date} ${time}`, req.ip);
+              res.json({ success: true });
+            }
           );
         });
       });
@@ -531,7 +558,7 @@ const registerLimiter = rateLimit({
 });
 
   // ROLE MÓDOSÍTÁS — ADMIN
-  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
+  app.put('/api/user-role/:id', authenticateToken, authorizeAdmin, writeLimiter, criticalLimiter, (req, res) => {
   const { id } = req.params;
   const { role } = req.body;
   
@@ -546,7 +573,7 @@ const registerLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`);
+      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`, req.ip);
       res.json({ success: true });
     }
   );
@@ -612,7 +639,10 @@ const registerLimiter = rateLimit({
         // EZ VOLT A HIÁNYZÓ ZÁRÓ KAPCSOS ZÁRÓJEL!
         db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
           [status, req.params.id],
-          () => res.json({ success: true })
+          () => {
+            logAction(req.user.id, 'STATUS_CHANGE', `Booking ${req.params.id} status: ${status}`, req.ip);
+            res.json({ success: true });
+          }
         );
       }
     );
@@ -634,7 +664,7 @@ const registerLimiter = rateLimit({
   );
 });
   //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
-  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, (req, res) => {
+  app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, criticalLimiter, (req, res) => {
   const id = req.params.id;
   // Ne törölje saját magát
   if (parseInt(id) === req.user.id) {
@@ -646,7 +676,7 @@ const registerLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`);
+      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`, req.ip);
       res.json({ success: true });
     });
   });
@@ -681,32 +711,31 @@ const registerLimiter = rateLimit({
     }
     db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
       [name, email, finalPassword, finalAvatar, specialty, req.params.id],
-      () => res.json({ success: true })
-    );
+      () => {
+        logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`, req.ip);
+        res.json({ success: true });
+          }
+        );
   });
 });
-
-  ///LOGIN HELPER
-  function logAction(userId, action, details = '') {
-    db.run(`INSERT INTO audit_log (userId, action, details, createdAt) VALUES (?, ?, ?, datetime('now'))`,
-      [userId, action, details]
-    );
-  }
+  
 
   ///LOG LISTÁZÓ API
   app.get('/api/audit', authenticateToken, authorizeAdmin, apiLimiter, (req, res) => {
   db.all(`SELECT a.*, u.email FROM audit_log a LEFT JOIN users u ON a.userId=u.id ORDER BY a.id DESC`, (e, r) => res.json(r));
 });
 
-  ///GLOBAL ERROR KEZELŐ
-  app.use((err, req, res, next) => {
-    console.error('GLOBAL ERROR:', err);
-    res.status(500).json({ error: 'Server error' });
-  });
+ ///GLOBAL ERROR KEZELŐ
+app.use((err, req, res, next) => {
+  console.error('GLOBAL ERROR:', err);
+  res.status(500).json({ error: 'Server error' });
+});
 
-  app.get('/', (req, res) => {
-    res.send('CalenGo backend running');
-  });
-  app.listen(3000, () => {
-    console.log('Server running on port 3000');
-  });
+app.get('/', (req, res) => {
+  res.send('CalenGo backend running');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

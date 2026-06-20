@@ -3,7 +3,6 @@ dist/
 build/
 .angular/
 coverage/
-.env
 *.log
 *.sqlite
 *.db

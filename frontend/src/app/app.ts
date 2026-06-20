@@ -112,7 +112,7 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   this.adminUsers = [];
   this.adminBookings = [];
   this.showPage('login');
-}
+  }
   
   ///LOGOUT MEGERŐSÍTÉS
   logoutConfirm(){
@@ -235,13 +235,21 @@ saveProfile() {
       this.currentUserId = response.id;
       this.showToast('Sikeres bejelentkezés');
 
+      this.loginEmail = '';
+      this.loginPassword = '';
+
+      // USER
       if (response.role === 'user') {
         this.loadMyBookings();
         this.showPage('trainers');
-      } else if (response.role === 'admin') {
+      }
+      // ADMIN
+      else if (response.role === 'admin') {
         this.loadAdminData();
         this.showPage('admin');
-      } else if (response.role === 'trainer') {
+      }
+      // TRAINER
+      else if (response.role === 'trainer') {
         this.loadProfile();
         this.generateWeek();
         this.generateTimeSlots();
@@ -376,7 +384,7 @@ monthNames = [
 ] ;
   calendarDays: (number | null)[] = [];
 
-  ngOnInit() {
+ ngOnInit() {
   this.generateCalendar();
   this.generateTimeSlots();
   this.generateWeek();
@@ -405,7 +413,7 @@ monthNames = [
       this.showPage('trainer');
     }
   }
-}
+  }
 
   ///edzők naptára betöltése adminnál
   loadTrainerBookingsViewForAdmin(trainerId: number) {this.api.getTrainerBookings(trainerId)
@@ -433,7 +441,6 @@ monthNames = [
       this.calendarDays.push(day);
     }
   }
-
 
   ///acccept/reject pop up gomb
   updateBookingStatus(status: 'elfogadva' | 'elutasítva') {
@@ -637,6 +644,11 @@ trainerprices = [
     this.showToast('Nem vagy bejelentkezve', 'error');
     return;
   }
+  if (!this.selectedDate || !this.selectedTime) {
+    this.showToast('Válassz dátumot és időt','error');
+    return;
+  }
+
   if (!this.selectedDate || !this.selectedTime) {this.showToast('Válassz dátumot és időt','error');
     return;}
 
@@ -858,7 +870,7 @@ trainerprices = [
   openedTrainer: number | null = null;
   toggleTrainer(i: number) {this.openedTrainer = this.openedTrainer === i ? null : i;}
 
-  getTrainerBioText(t: any): string {
+ getTrainerBioText(t: any): string {
   // HTML tag-ek eltávolítása a bio-ból
   const cleanBio = (text: string): string => {
     if (!text) return '';
@@ -876,7 +888,7 @@ trainerprices = [
     return `${cleanBio(t.name)} edző jelenleg még nem osztotta meg személyes tapasztalatait, érdeklődjön személyesen vagy vegye fel vele a kapcsolatot Emailben.`;
   }
   return cleanBio(t.bio);
-}
+  }
 
   ///múltbeli dátum (óra szerint) tiltás
   isPastTime(time: string): boolean {
