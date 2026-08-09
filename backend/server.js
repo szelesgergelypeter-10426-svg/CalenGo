@@ -20,6 +20,9 @@
   const crypto = require('crypto');
   const loginAttempts = {};
 
+  const cookieParser = require('cookie-parser');
+  app.use(cookieParser());
+
   ///random 6 szamjegyu kod a 2FA hoz
   function generateTwoFactorCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -91,8 +94,7 @@ function sanitizeInput(req, res, next) {
 
   // AUTHENTICATION MIDDLEWARE
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = req.cookies.accessToken; // 🔽 COOKIE-BÓL
   if (!token) return res.status(401).json({ error: 'Token szükséges' });
 
   isTokenRevoked(token, (revoked) => {
@@ -319,7 +321,7 @@ const criticalLimiter = rateLimit({
 
 
 app.post('/api/refresh-token', (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken; // 🔽 COOKIE-BÓL
   if (!refreshToken) return res.status(400).json({ error: 'Refresh token szükséges' });
 
   db.get(`SELECT userId, expires FROM refresh_tokens WHERE token = ?`, [refreshToken], (err, row) => {
@@ -329,15 +331,24 @@ app.post('/api/refresh-token', (req, res) => {
       return res.status(403).json({ error: 'Refresh token lejárt' });
     }
 
-    // Új access token generálása
     db.get(`SELECT id, email, role FROM users WHERE id = ?`, [row.userId], (err, user) => {
       if (err || !user) return res.status(404).json({ error: 'Felhasználó nem található' });
+      
       const newToken = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         JWT_SECRET,
         { expiresIn: '1h' }
       );
-      res.json({ token: newToken });
+
+      
+      res.cookie('accessToken', newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000
+      });
+
+      res.json({ success: true });
     });
   });
 });
@@ -470,15 +481,29 @@ app.post('/api/login', authLimiter, async (req, res) => {
       );
 
       logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
-      res.json({
-        success: true,
-        token: token,
-        refreshToken: refreshToken,
-        id: user.id,
-        name: user.name,
-        role: user.role,
-        rememberMe: rememberMe || false  // 🔽 Visszaküldjük a frontendnek
-      });
+              // Cookie-k beállítása
+        res.cookie('accessToken', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 60 * 60 * 1000 // 1 óra
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: refreshExpiryDays * 24 * 60 * 60 * 1000 // 7 vagy 30 nap
+        });
+
+        // JSON válasz (tokenek nélkül)
+        res.json({
+          success: true,
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          rememberMe: rememberMe || false
+        });
     }
   );
 });
@@ -533,17 +558,29 @@ app.post('/api/verify-2fa', authLimiter, (req, res) => {
         [user.id, refreshToken, expiresRefresh.toISOString()]
       );
 
+      res.cookie('accessToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000
+      });
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 nap (itt nincs rememberMe, de lehet bővíteni)
+      });
+
       res.json({
         success: true,
-        token: token,
-        refreshToken: refreshToken,
         id: user.id,
         name: user.name,
         role: user.role
       });
-    }
-  );
-});
+          }
+        );
+      });
 
 ///2FA ki/be kapcsolása
 app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
@@ -566,13 +603,18 @@ app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
 
 ///logout
 app.post('/api/logout', authenticateToken, (req, res) => {
-  const token = req.headers['authorization'].split(' ')[1];
+  const token = req.cookies.accessToken; // 🔽 COOKIE-BÓL
   db.run(`INSERT INTO revoked_tokens (token) VALUES (?)`, [token], (err) => {
     if (err) {
       logAction(req.user.id, 'LOGOUT_ERROR', err.message, req.ip);
       return res.status(500).json({ error: 'Logout hiba' });
     }
     db.run(`DELETE FROM refresh_tokens WHERE userId = ?`, [req.user.id]);
+    
+    // 🔽 COOKIE-K TÖRLÉSE
+    res.clearCookie('accessToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+    res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+
     logAction(req.user.id, 'LOGOUT', 'Sikeres kijelentkezés', req.ip, req.headers['user-agent'], req.originalUrl);
     res.json({ success: true });
   });
@@ -581,21 +623,22 @@ app.post('/api/logout', authenticateToken, (req, res) => {
 /// Minden eszköz kijelentkeztetése
 app.post('/api/logout-all', authenticateToken, (req, res) => {
   const userId = req.user.id;
-  const token = req.headers['authorization'].split(' ')[1];
+  const token = req.cookies.accessToken;
 
-  // 1. Az összes refresh token törlése a felhasználóhoz
   db.run(`DELETE FROM refresh_tokens WHERE userId = ?`, [userId], function(err) {
     if (err) {
       logAction(userId, 'LOGOUT_ALL_ERROR', err.message, req.ip);
       return res.status(500).json({ error: 'Hiba a kijelentkeztetés során' });
     }
 
-    // 2. Az aktuális access token feketelistára helyezése
     db.run(`INSERT INTO revoked_tokens (token) VALUES (?)`, [token], function(err) {
       if (err) {
         logAction(userId, 'LOGOUT_ALL_ERROR', err.message, req.ip);
         return res.status(500).json({ error: 'Hiba a token visszavonásakor' });
       }
+
+      res.clearCookie('accessToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+      res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
 
       logAction(userId, 'LOGOUT_ALL', 'Minden eszköz kijelentkeztetve', req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({ success: true, message: 'Minden eszközről kijelentkeztettünk.' });

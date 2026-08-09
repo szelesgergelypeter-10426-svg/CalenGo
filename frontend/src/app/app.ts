@@ -120,9 +120,6 @@ resendTwoFactorCode() {
     next: () => {},
     error: () => {}
   });
-  localStorage.removeItem('token');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('userRole');
   this.currentUserRole = null;
   this.currentUserId = null;
   this.profile = { name:'', email:'', password:'', avatar:'', twoFactorEnabled: false};
@@ -253,12 +250,6 @@ saveProfile() {
   return;
   }
 
-    // Token mentése localStorage-ba
-    if (response.token) {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userId', response.id.toString());
-      localStorage.setItem('userRole', response.role);
-    }
       
       this.currentUserRole = response.role;
       this.currentUserId = response.id;
@@ -301,10 +292,6 @@ verifyTwoFactorCode() {
 
   this.api.verifyTwoFactor(this.twoFactorUserId, this.twoFactorCode).subscribe({
     next: (response: any) => {
-      // Token mentése
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userId', response.id.toString());
-      localStorage.setItem('userRole', response.role);
       this.currentUserRole = response.role;
       this.currentUserId = response.id;
       this.twoFactorRequired = false;
@@ -493,30 +480,9 @@ monthNames = [
   this.generateWeek();
   this.loadTrainers();
   
-  // Auto-login ellenőrzés
-  const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId');
-  const userRole = localStorage.getItem('userRole');
+ 
+  }
   
-  if (token && userId && userRole) {
-    this.currentUserId = parseInt(userId);
-    this.currentUserRole = userRole;
-    
-    if (userRole === 'user') {
-      this.loadMyBookings();
-      this.showPage('trainers');
-    } else if (userRole === 'admin') {
-      this.loadAdminData();
-      this.showPage('admin');
-    } else if (userRole === 'trainer') {
-      this.loadProfile();
-      this.generateWeek();
-      this.generateTimeSlots();
-      this.loadTrainerBookingsView();
-      this.showPage('trainer');
-    }
-  }
-  }
 
   ///edzők naptára betöltése adminnál
   loadTrainerBookingsViewForAdmin(trainerId: number) {this.api.getTrainerBookings(trainerId)
