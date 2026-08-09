@@ -17,6 +17,13 @@
   app.set('trust proxy', true);
   app.use(express.json());
   app.use(helmet());
+  const crypto = require('crypto');
+  const loginAttempts = {};
+
+  ///random 6 szamjegyu kod a 2FA hoz
+  function generateTwoFactorCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
 
 
   // HTTPS kényszerítés (production)
@@ -59,6 +66,8 @@ app.use(cors({
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-src https://www.google.com;");
   next();
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  next();
   });
 
   // XSS védelem - bejövő adatok tisztítása
@@ -75,24 +84,28 @@ function sanitizeInput(req, res, next) {
   app.use(sanitizeInput);
 
 
+  function isTokenRevoked(token, callback) {
+  db.get(`SELECT id FROM revoked_tokens WHERE token = ?`, [token], (err, row) => {
+    callback(!!row);
+  });
+  }
+
   // AUTHENTICATION MIDDLEWARE
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-  
-  if (!token) {
-    return res.status(401).json({ error: 'Hozzáférés megtagadva - token szükséges' });
-  }
-  
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Érvénytelen vagy lejárt token' });
-    }
-    req.user = user;
-    next();
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Token szükséges' });
+
+  isTokenRevoked(token, (revoked) => {
+    if (revoked) return res.status(403).json({ error: 'Token visszavonva' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) return res.status(403).json({ error: 'Érvénytelen token' });
+      req.user = user;
+      next();
+    });
   });
 }
-
 // AUTHORIZATION MIDDLEWARE - Csak saját vagy admin adatokat módosíthat
 function authorizeSelfOrAdmin(req, res, next) {
   const requestedUserId = parseInt(req.params.id);
@@ -179,14 +192,37 @@ const criticalLimiter = rateLimit({
   }
 
   ///LOGIN HELPER
-  function logAction(userId, action, details = '', ip = null) {
-  db.run(`INSERT INTO audit_log (userId, action, details, createdAt, ip) VALUES (?, ?, ?, datetime('now'), ?)`,
-    [userId, action, details, ip]
+  function logAction(userId, action, details = '', ip = null, userAgent = null, endpoint = null) {
+  db.run(
+    `INSERT INTO audit_log (userId, action, details, createdAt, ip, userAgent, endpoint)
+     VALUES (?, ?, ?, datetime('now'), ?, ?, ?)`,
+    [userId, action, details, ip, userAgent, endpoint]
   );
-  }
+}
 
   db.serialize(() => {
 
+    db.run(`CREATE TABLE IF NOT EXISTS revoked_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT UNIQUE,
+      revoked_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+      // 2FA oszlopok hozzáadása a users táblához
+    db.run(`ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN DEFAULT 0`, () => {});
+    db.run(`ALTER TABLE users ADD COLUMN two_factor_code TEXT`, () => {});
+    db.run(`ALTER TABLE users ADD COLUMN two_factor_expires DATETIME`, () => {});
+    db.run(`ALTER TABLE audit_log ADD COLUMN userAgent TEXT`, () => {});
+    db.run(`ALTER TABLE audit_log ADD COLUMN endpoint TEXT`, () => {});
+
+    db.run(`CREATE TABLE IF NOT EXISTS refresh_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      token TEXT UNIQUE,
+      expires DATETIME,
+      FOREIGN KEY(userId) REFERENCES users(id)
+    )`);
+    
     db.run(`ALTER TABLE audit_log ADD COLUMN ip TEXT`, () => {});
 
     ///alap admin user +jelszava le hashelve a biztonsag kedveert
@@ -271,11 +307,39 @@ const criticalLimiter = rateLimit({
     db.run(`INSERT INTO trainer_bio (trainerId, bio) VALUES (?, ?) ON CONFLICT(trainerId) DO UPDATE SET bio=excluded.bio`,
     [req.params.trainerId, bio || ''],
     () => {
-      logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`, req.ip);
+     logAction(req.user.id, 'BIO_UPDATE', `Trainer ${req.params.trainerId} bio updated`, req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({ success: true });
     }
   );
 });  
+
+
+app.post('/api/refresh-token', (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(400).json({ error: 'Refresh token szükséges' });
+
+  db.get(`SELECT userId, expires FROM refresh_tokens WHERE token = ?`, [refreshToken], (err, row) => {
+    if (err || !row) return res.status(403).json({ error: 'Érvénytelen refresh token' });
+    if (new Date(row.expires) < new Date()) {
+      db.run(`DELETE FROM refresh_tokens WHERE token = ?`, [refreshToken]);
+      return res.status(403).json({ error: 'Refresh token lejárt' });
+    }
+
+    // Új access token generálása
+    db.get(`SELECT id, email, role FROM users WHERE id = ?`, [row.userId], (err, user) => {
+      if (err || !user) return res.status(404).json({ error: 'Felhasználó nem található' });
+      const newToken = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+      res.json({ token: newToken });
+    });
+  });
+});
+
+
+
   
 
   ///REGISZTRÁCIÓ
@@ -302,7 +366,7 @@ const criticalLimiter = rateLimit({
             if (err.message.includes('UNIQUE')) {return res.status(409).json({ error: 'A megadott email már használt' }); }///409 CONFLICT ERROR
             return res.status(500).json(err); ///500 SERVER ERROR
           }
-          logAction(this.lastID, 'REGISTER', email, req.ip);
+          logAction(this.lastID, 'REGISTER', email, req.ip, req.headers['user-agent'], req.originalUrl);
           res.json({ success: true });
         });
     });
@@ -318,36 +382,160 @@ const criticalLimiter = rateLimit({
     [email],
     async (err, user) => {
       if (err || !user) {
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
-        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
+      logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip);
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
       
-      // JWT TOKEN GENERÁLÁS
+      // 2FA ellenőrzés
+      if (user.two_factor_enabled) {
+        const code = generateTwoFactorCode();
+        const expires = new Date(Date.now() + 10 * 60 * 1000);
+        db.run(
+          `UPDATE users SET two_factor_code = ?, two_factor_expires = ? WHERE id = ?`,
+          [code, expires.toISOString(), user.id]
+        );
+        sendMail(
+          user.email,
+          "🔐 Kétfaktoros azonosítási kód",
+          `<h2>Kétfaktoros kód</h2>
+          <p>Kedves ${user.name}!</p>
+          <p>A bejelentkezéshez szükséges kódod:</p>
+          <h1 style="font-size: 32px; background: #f0f0f0; padding: 20px; text-align: center;">${code}</h1>
+          <p>A kód 10 percig érvényes.</p>
+          <p>Ha nem te próbálkoztál, hagyd figyelmen kívül ezt az üzenetet.</p>`
+        );
+        return res.json({
+          requiresTwoFactor: true,
+          userId: user.id,
+          message: 'Kétfaktoros kód elküldve az email címedre.'
+        });
+      }
+
+      // JWT token generálás (2FA nélkül)
       const token = jwt.sign(
-        { 
-          id: user.id, 
-          email: user.email, 
-          role: user.role 
-        },
+        { id: user.id, email: user.email, role: user.role },
         JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: '1h' }
       );
-      logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`);
       
+      // Refresh token generálás és mentés
+      const refreshToken = crypto.randomBytes(40).toString('hex');
+      const expiresRefresh = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      db.run(
+        `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
+        [user.id, refreshToken, expiresRefresh.toISOString()]
+      );
+
+    logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);      
       res.json({
         success: true,
         token: token,
+        refreshToken: refreshToken,
         id: user.id,
         name: user.name,
         role: user.role
       });
     }
   );
+});
+
+
+///2FA ellenőrzés
+app.post('/api/verify-2fa', authLimiter, (req, res) => {
+  const { userId, code } = req.body;
+
+  if (!userId || !code) {
+    return res.status(400).json({ error: 'Hiányzó adatok' });
+  }
+
+  db.get(
+    `SELECT id, name, email, role, two_factor_code, two_factor_expires FROM users WHERE id = ?`,
+    [userId],
+    (err, user) => {
+      if (err || !user) {
+        return res.status(404).json({ error: 'Felhasználó nem található' });
+      }
+
+      const now = new Date();
+      const expires = new Date(user.two_factor_expires);
+
+      if (user.two_factor_code !== code) {
+        logAction(userId, '2FA_FAILED', `Hibás kód: ${code}`, req.ip, req.headers['user-agent'], req.originalUrl);
+        return res.status(401).json({ error: 'Érvénytelen kód' });
+      }
+
+      if (now > expires) {
+        logAction(userId, '2FA_FAILED', 'Lejárt kód', req.ip, req.headers['user-agent'], req.originalUrl);
+        return res.status(401).json({ error: 'A kód lejárt, kérj új kódot' });
+      }
+
+      db.run(
+        `UPDATE users SET two_factor_code = NULL, two_factor_expires = NULL WHERE id = ?`,
+        [userId]
+      );
+
+      logAction(userId, '2FA_SUCCESS', 'Sikeres 2FA', req.ip, req.headers['user-agent'], req.originalUrl);
+
+      const token = jwt.sign(
+        { id: user.id, email: user.email, role: user.role },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      const refreshToken = crypto.randomBytes(40).toString('hex');
+      const expiresRefresh = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      db.run(
+        `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
+        [user.id, refreshToken, expiresRefresh.toISOString()]
+      );
+
+      res.json({
+        success: true,
+        token: token,
+        refreshToken: refreshToken,
+        id: user.id,
+        name: user.name,
+        role: user.role
+      });
+    }
+  );
+});
+
+///2FA ki/be kapcsolása
+app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
+  const { enabled } = req.body; // boolean (true/false)
+  const userId = req.user.id;
+
+  db.run(
+    `UPDATE users SET two_factor_enabled = ? WHERE id = ?`,
+    [enabled ? 1 : 0, userId],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      logAction(userId, '2FA_TOGGLE', `2FA ${enabled ? 'bekapcsolva' : 'kikapcsolva'}`, req.ip, req.headers['user-agent'], req.originalUrl);
+      res.json({ success: true, enabled });
+    }
+  );
+});
+
+
+///logout
+app.post('/api/logout', authenticateToken, (req, res) => {
+  const token = req.headers['authorization'].split(' ')[1];
+  db.run(`INSERT INTO revoked_tokens (token) VALUES (?)`, [token], (err) => {
+    if (err) {
+      logAction(req.user.id, 'LOGOUT_ERROR', err.message, req.ip);
+      return res.status(500).json({ error: 'Logout hiba' });
+    }
+    db.run(`DELETE FROM refresh_tokens WHERE userId = ?`, [req.user.id]);
+    logAction(req.user.id, 'LOGOUT', 'Sikeres kijelentkezés', req.ip, req.headers['user-agent'], req.originalUrl);
+    res.json({ success: true });
+  });
 });
 
   /// IDŐPONT FOGLALÁS
@@ -380,7 +568,7 @@ const criticalLimiter = rateLimit({
       if (err) {console.error(err);
         return res.status(500).json({ error: err.message });
       }
-       logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`, req.ip);
+     logAction(userId, 'BOOKING_CREATE', `Trainer:${trainerId} Date:${date} Time:${time}`, req.ip, req.headers['user-agent'], req.originalUrl);
 
     db.get("SELECT name FROM users WHERE id = ?",
     [trainerId],
@@ -491,7 +679,7 @@ const criticalLimiter = rateLimit({
       return res.status(403).json({ error: 'Nincs jogosultságod törölni ezt a foglalást' });
     }
     db.run(`DELETE FROM bookings WHERE id=?`, [req.params.id], () => {
-      logAction(req.user.id, 'BOOKING_DELETE', req.params.id, req.ip);
+      logAction(req.user.id, 'BOOKING_DELETE', req.params.id, req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({ success: true });
     });
   });
@@ -513,6 +701,8 @@ const criticalLimiter = rateLimit({
     [req.params.trainerId],
     (_, rows) => res.json(rows));
 });
+
+
   //BOOKING UPDATE - IDŐPONT MÓDOSÍTÁS TRAINER ÁLTAL
   app.put('/api/booking/:id', authenticateToken, writeLimiter, (req, res) => {
   const { id } = req.params;
@@ -542,7 +732,7 @@ const criticalLimiter = rateLimit({
         db.run(`UPDATE bookings SET date = ?, time = ? WHERE id = ?`,
             [date, time, id],
             () => {
-              logAction(req.user.id, 'BOOKING_UPDATE', `Booking ${id} changed to ${date} ${time}`, req.ip);
+            logAction(req.user.id, 'BOOKING_UPDATE', `Booking ${id} changed to ${date} ${time}`, req.ip, req.headers['user-agent'], req.originalUrl);
               res.json({ success: true });
             }
           );
@@ -573,7 +763,7 @@ const criticalLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`, req.ip);
+      logAction(req.user.id, 'ROLE_CHANGE', `User ${id} changed to ${role}`, req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({ success: true });
     }
   );
@@ -640,7 +830,7 @@ const criticalLimiter = rateLimit({
         db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
           [status, req.params.id],
           () => {
-            logAction(req.user.id, 'STATUS_CHANGE', `Booking ${req.params.id} status: ${status}`, req.ip);
+          logAction(req.user.id, 'STATUS_CHANGE', `Booking ${req.params.id} status: ${status}`, req.ip, req.headers['user-agent'], req.originalUrl);
             res.json({ success: true });
           }
         );
@@ -676,7 +866,7 @@ const criticalLimiter = rateLimit({
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
-      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`, req.ip);
+      logAction(req.user.id, 'USER_DELETE', `User ${id} deleted`, req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({ success: true });
     });
   });
@@ -712,7 +902,7 @@ const criticalLimiter = rateLimit({
     db.run(`UPDATE users SET name=?, email=?, password=?, avatar=?, specialty=? WHERE id=?`,
       [name, email, finalPassword, finalAvatar, specialty, req.params.id],
       () => {
-        logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`, req.ip);
+      logAction(req.user.id, 'PROFILE_UPDATE', `User ${req.params.id} updated profile`, req.ip, req.headers['user-agent'], req.originalUrl);
         res.json({ success: true });
           }
         );
@@ -734,6 +924,9 @@ app.use((err, req, res, next) => {
 app.get('/', (req, res) => {
   res.send('CalenGo backend running');
 });
+
+// 30 napnál régebbi naplók törlése indításkor
+db.run(`DELETE FROM audit_log WHERE createdAt < datetime('now', '-30 days')`);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

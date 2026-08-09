@@ -84,6 +84,18 @@ export class ApiService {
   updateTrainerBio(id: number, bio: string) {
     return this.http.put(this.base + '/trainer-bio/' + id, { bio }, { headers: this.getHeaders() });
   }
+
+  verifyTwoFactor(userId: number, code: string) {
+  return this.http.post(this.base + '/verify-2fa', { userId, code });
+}
+
+toggleTwoFactor(enabled: boolean) {
+  return this.http.post(this.base + '/toggle-2fa', { enabled }, { headers: this.getHeaders() });
+}
+
+logout() {
+  return this.http.post(this.base + '/logout', {}, { headers: this.getHeaders() });
+}
 }
 
 export interface SafeUser {
@@ -104,3 +116,5 @@ export interface SafeBooking {
   status: string;
   email?: string;
 }
+
+

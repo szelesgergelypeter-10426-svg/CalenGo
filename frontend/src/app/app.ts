@@ -24,9 +24,7 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'admin-trainer-view'  |'trainer' | 'admin' | 'account' | 'booking-success'  = 'login';
-  currentUserRole: string | null = null;
-  currentUserId: number | null = null;
+  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'admin-trainer-view' | 'trainer' | 'admin' | 'account' | 'booking-success' | '2fa-verify' = 'login';  currentUserId: number | null = null;
   takenTimes: string[] = [];
   trainerBookings: any[] = [];
   selectedTrainerId: number | null = null;
@@ -50,6 +48,7 @@ export class AppComponent {
   selectedTrainer: any = null;
   ///edzők típusai
   selectedSpecialty: string = '';
+  twoFactorRequired: boolean = false;
 
   ///a DUPLIKACIO elkerulese erdekeben a regisztraciohoz kulon valtozok
   registerName: string = '';
@@ -90,7 +89,7 @@ selectDay(day: number) {
     }
 }
 
-showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success' | 'admin-trainer-view') {
+showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'trainer' | 'admin' | 'account' | 'booking-success' | 'admin-trainer-view' | '2fa-verify') {
   this.bookingSuccess = false;
   this.currentPage = page;
 
@@ -99,8 +98,23 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
     this.loadTrainers();
   }
 }
+
+resendTwoFactorCode() {
+  // Mivel nincs külön végpont az újraküldésre, a legegyszerűbb:
+  // visszairányítjuk a login oldalra, és a felhasználó újra megadja az email/jelszót.
+  // Ekkor a login újra generál egy kódot és elküldi emailben.
+  this.showToast('Kérjük, próbálkozzon újra a bejelentkezéssel! A kód újra elküldésre kerül.', 'success');
+  this.currentPage = 'login';
+  this.twoFactorRequired = false;
+  this.twoFactorUserId = null;
+  this.twoFactorCode = '';
+}
   ///LOGOUT
   logout() {
+  this.api.logout().subscribe({
+    next: () => {},
+    error: () => {}
+  });
   localStorage.removeItem('token');
   localStorage.removeItem('userId');
   localStorage.removeItem('userRole');
@@ -223,13 +237,22 @@ saveProfile() {
   }
 
   this.api.login(email, password).subscribe({
-    next: (response: any) => {
-      // Token mentése localStorage-ba
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('userId', response.id.toString());
-        localStorage.setItem('userRole', response.role);
-      }
+  next: (response: any) => {
+    if (response.requiresTwoFactor) {
+  this.twoFactorRequired = true;
+  this.twoFactorUserId = response.userId;
+  this.currentUserId = response.userId;
+  this.showToast('Kétfaktoros kód elküldve az email címedre!', 'success');
+  this.currentPage = '2fa-verify';
+  return;
+  }
+
+    // Token mentése localStorage-ba
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('userId', response.id.toString());
+      localStorage.setItem('userRole', response.role);
+    }
       
       this.currentUserRole = response.role;
       this.currentUserId = response.id;
@@ -263,6 +286,46 @@ saveProfile() {
   });
 }
     
+  ///2FA új állapotok és metódusok
+  verifyTwoFactorCode() {
+  if (!this.twoFactorUserId || !this.twoFactorCode) {
+    this.showToast('Kérem adja meg a kódot!', 'error');
+    return;
+  }
+
+  this.api.verifyTwoFactor(this.twoFactorUserId, this.twoFactorCode).subscribe({
+    next: (response: any) => {
+      // Token mentése
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('userId', response.id.toString());
+      localStorage.setItem('userRole', response.role);
+      this.currentUserRole = response.role;
+      this.currentUserId = response.id;
+      this.twoFactorRequired = false;
+      this.twoFactorCode = '';
+      this.showToast('Sikeres bejelentkezés!', 'success');
+
+      // Irányítás a szerepkörnek megfelelő oldalra
+      // (a meglévő logika)
+    },
+    error: (err) => {
+      this.showToast(err.error?.error || 'Hibás kód!', 'error');
+    }
+  });
+}
+
+
+toggleTwoFactor(enabled: boolean) {
+  this.api.toggleTwoFactor(enabled).subscribe({
+    next: () => {
+      this.showToast(`2FA ${enabled ? 'bekapcsolva' : 'kikapcsolva'}`, 'success');
+    },
+    error: () => {
+      this.showToast('Hiba a beállítás során', 'error');
+    }
+  });
+}
+
 // USER REGISZTARACIO
   registerLoading = false;
   registerUser() {
@@ -889,6 +952,12 @@ trainerprices = [
   }
   return cleanBio(t.bio);
   }
+
+
+  ///2FA
+  twoFactorRequired: boolean = false;
+  twoFactorUserId: number | null = null;
+  twoFactorCode: string = ''; 
 
   ///múltbeli dátum (óra szerint) tiltás
   isPastTime(time: string): boolean {

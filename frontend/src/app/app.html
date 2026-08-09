@@ -352,6 +352,34 @@
       </table>
     </div>
   </div>
+<!--2FA ellenőrző oldal-->
+<!-- 2FA ELLENŐRZÉS -->
+<div *ngIf="currentPage === '2fa-verify'" class="flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-md p-8 border shadow-2xl border-purple-500/40 bg-white/5 backdrop-blur-xl rounded-3xl">
+    <h2 class="mb-8 text-4xl font-bold text-center text-white">Kétfaktoros azonosítás</h2>
+    <p class="mb-4 text-center text-gray-300">
+      Kérjük, add meg az email címedre küldött 6 jegyű kódot.
+    </p>
+    <input
+      type="text"
+      [(ngModel)]="twoFactorCode"
+      placeholder="Kód (pl. 123456)"
+      class="w-full p-3 text-white transition border bg-black/30 border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+      maxlength="6"
+    />
+    <button
+      (click)="verifyTwoFactorCode()"
+      class="w-full py-3 mt-6 font-semibold text-white transition-all duration-300 bg-purple-600 rounded-xl hover:bg-purple-500 hover:scale-[1.02] shadow-lg shadow-purple-500/30"
+    >
+      Ellenőrzés
+    </button>
+    <p class="mt-4 text-sm text-center text-purple-400">
+      Nem kaptál kódot? <span class="underline cursor-pointer" (click)="resendTwoFactorCode()">Újraküldés</span>
+    </p>
+  </div>
+</div>
+
+
   <div *ngIf="currentPage === 'trainers' && (currentUserRole === 'user' || currentUserRole === 'admin')" class="max-w-6xl px-4 mx-auto fade-in">
     <h2 class="mt-6 mb-8 text-3xl font-bold text-center text-white">
       Válassz edzőink közül!
