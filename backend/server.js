@@ -376,8 +376,9 @@ app.post('/api/refresh-token', (req, res) => {
     });
 
   ///BEJELENTKEZÉS
+///BEJELENTKEZÉS
 app.post('/api/login', authLimiter, async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;  // 🔽 rememberMe hozzáadva
   if (!email || !password) {
     return res.status(400).json({ error: 'Hiányzó adatok' });
   }
@@ -394,11 +395,11 @@ app.post('/api/login', authLimiter, async (req, res) => {
 
         if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
           sendMail(
-            'admin@calengo.com', // vagy a config-ból vedd
+            'admin@calengo.com',
             '🚨 Többszörös sikertelen bejelentkezés',
             `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
           );
-          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() }; // reset az újabb értesítés elkerülésére
+          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
         }
 
         logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
@@ -406,7 +407,6 @@ app.post('/api/login', authLimiter, async (req, res) => {
       }
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) {
-        // Sikertelen próbálkozás naplózása és számláló frissítése
         const ip = req.ip;
         if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
         loginAttempts[ip].count++;
@@ -460,9 +460,10 @@ app.post('/api/login', authLimiter, async (req, res) => {
         { expiresIn: '1h' }
       );
       
-      // Refresh token generálás és mentés
+      // 🔽 Refresh token generálás – ha rememberMe true, akkor 30 nap, különben 7 nap
       const refreshToken = crypto.randomBytes(40).toString('hex');
-      const expiresRefresh = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const refreshExpiryDays = rememberMe === true ? 30 : 7;  // 🔽 EZ A LÉNYEG
+      const expiresRefresh = new Date(Date.now() + refreshExpiryDays * 24 * 60 * 60 * 1000);
       db.run(
         `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
         [user.id, refreshToken, expiresRefresh.toISOString()]
@@ -475,7 +476,8 @@ app.post('/api/login', authLimiter, async (req, res) => {
         refreshToken: refreshToken,
         id: user.id,
         name: user.name,
-        role: user.role
+        role: user.role,
+        rememberMe: rememberMe || false  // 🔽 Visszaküldjük a frontendnek
       });
     }
   );

@@ -17,8 +17,8 @@ export class ApiService {
     });
   }
 
-  login(email: string, password: string) {
-    return this.http.post(this.base + '/login', { email, password });
+  login(email: string, password: string, rememberMe: boolean = false) {
+    return this.http.post(this.base + '/login', { email, password, rememberMe });
   }
 
   register(name: string, email: string, password: string) {
@@ -125,7 +125,3 @@ export interface SafeBooking {
   status: string;
   email?: string;
 }
-
-
-
-

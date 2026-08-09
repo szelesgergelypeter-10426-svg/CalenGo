@@ -52,6 +52,9 @@ export class AppComponent {
   selectedSpecialty: string = '';
   twoFactorRequired: boolean = false;
 
+  ///emlékezz rám
+  rememberMe: boolean = false;
+
   ///a DUPLIKACIO elkerulese erdekeben a regisztraciohoz kulon valtozok
   registerName: string = '';
   registerEmail: string = '';
@@ -233,12 +236,13 @@ saveProfile() {
   }
 
   loginUser(email: string, password: string) {
+    
   if (!email || !password) {
     this.showToast('Email és jelszó megadása kötelező', 'error');
     return;
   }
 
-  this.api.login(email, password).subscribe({
+  this.api.login(email, password, this.rememberMe).subscribe({
   next: (response: any) => {
     if (response.requiresTwoFactor) {
   this.twoFactorRequired = true;
