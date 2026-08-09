@@ -277,8 +277,9 @@ saveProfile() {
         this.showPage('trainer');
       }
     },
-    error: () => {
-      this.showToast('Hibás belépés', 'error');
+    error: (err) => {
+      const message = err.error?.error || 'Hibás belépés';
+      this.showToast(message, 'error');
     }
   });
 }

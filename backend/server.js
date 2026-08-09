@@ -221,6 +221,10 @@ const criticalLimiter = rateLimit({
     db.run(`ALTER TABLE audit_log ADD COLUMN userAgent TEXT`, () => {});
     db.run(`ALTER TABLE audit_log ADD COLUMN endpoint TEXT`, () => {});
 
+    // Account lockout mezők hozzáadása
+    db.run(`ALTER TABLE users ADD COLUMN login_attempts INTEGER DEFAULT 0`, () => {});
+    db.run(`ALTER TABLE users ADD COLUMN lockout_until DATETIME`, () => {});
+
     db.run(`CREATE TABLE IF NOT EXISTS refresh_tokens (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       userId INTEGER,
@@ -429,124 +433,157 @@ app.post('/api/refresh-token', (req, res) => {
 
   ///BEJELENTKEZÉS
 ///BEJELENTKEZÉS
+///BEJELENTKEZÉS
 app.post('/api/login', authLimiter, async (req, res) => {
-  const { email, password, rememberMe } = req.body;  // 🔽 rememberMe hozzáadva
+  const { email, password, rememberMe } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Hiányzó adatok' });
   }
-  
-  db.get(`SELECT * FROM users WHERE email = ?`,
-    [email],
-    async (err, user) => {
-      if (err || !user) {
-        // Sikertelen próbálkozás naplózása és számláló frissítése
-        const ip = req.ip;
-        if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
-        loginAttempts[ip].count++;
-        loginAttempts[ip].lastAttempt = Date.now();
 
-        if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
-          sendMail(
-            'admin@calengo.com',
-            '🚨 Többszörös sikertelen bejelentkezés',
-            `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
-          );
-          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
-        }
+  db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
+    if (err || !user) {
+      // Sikertelen próbálkozás naplózása (IP-alapú számláló továbbra is működik)
+      const ip = req.ip;
+      if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+      loginAttempts[ip].count++;
+      loginAttempts[ip].lastAttempt = Date.now();
 
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
-        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
-      }
-      const ok = await bcrypt.compare(password, user.password);
-      if (!ok) {
-        const ip = req.ip;
-        if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
-        loginAttempts[ip].count++;
-        loginAttempts[ip].lastAttempt = Date.now();
-
-        if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
-          sendMail(
-            'admin@calengo.com',
-            '🚨 Többszörös sikertelen bejelentkezés',
-            `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
-          );
-          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
-        }
-
-        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
-        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
-      }
-
-      // Sikeres login – töröljük a számlálót
-      delete loginAttempts[req.ip];
-
-      // 2FA ellenőrzés
-      if (user.two_factor_enabled) {
-        const code = generateTwoFactorCode();
-        const expires = new Date(Date.now() + 10 * 60 * 1000);
-        db.run(
-          `UPDATE users SET two_factor_code = ?, two_factor_expires = ? WHERE id = ?`,
-          [code, expires.toISOString(), user.id]
+      if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
+        sendMail(
+          'admin@calengo.com',
+          '🚨 Többszörös sikertelen bejelentkezés',
+          `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
         );
+        loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+      }
+
+      logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
+      return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
+    }
+
+    // 🔽 Fiók zárolás ellenőrzés
+    if (user.lockout_until && new Date(user.lockout_until) > new Date()) {
+      const remainingMinutes = Math.ceil((new Date(user.lockout_until) - new Date()) / 60000);
+      return res.status(403).json({
+        error: `A fiók zárolva van. Próbálja újra ${remainingMinutes} perc múlva.`
+      });
+    }
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) {
+      // 🔽 Sikertelen próbálkozás – növeljük a számlálót
+      const attempts = (user.login_attempts || 0) + 1;
+      const lockoutUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+
+      db.run(
+        `UPDATE users SET login_attempts = ?, lockout_until = ? WHERE id = ?`,
+        [attempts, lockoutUntil ? lockoutUntil.toISOString() : null, user.id]
+      );
+
+      // IP-alapú számláló frissítése (admin értesítéshez)
+      const ip = req.ip;
+      if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+      loginAttempts[ip].count++;
+      loginAttempts[ip].lastAttempt = Date.now();
+
+      if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
+        sendMail(
+          'admin@calengo.com',
+          '🚨 Többszörös sikertelen bejelentkezés',
+          `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
+        );
+        loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+      }
+
+      // 🔽 Értesítés a felhasználónak a zárolásról
+      if (lockoutUntil) {
         sendMail(
           user.email,
-          "🔐 Kétfaktoros azonosítási kód",
-          `<h2>Kétfaktoros kód</h2>
-          <p>Kedves ${user.name}!</p>
-          <p>A bejelentkezéshez szükséges kódod:</p>
-          <h1 style="font-size: 32px; background: #f0f0f0; padding: 20px; text-align: center;">${code}</h1>
-          <p>A kód 10 percig érvényes.</p>
-          <p>Ha nem te próbálkoztál, hagyd figyelmen kívül ezt az üzenetet.</p>`
+          '🔒 Fiókja zárolva',
+          `<p>Kedves ${user.name}!</p>
+          <p>Többszöri sikertelen bejelentkezési kísérlet miatt a fiókja 15 percre zárolásra került.</p>
+          <p>Ha nem te próbálkoztál, kérjük, lépj kapcsolatba az ügyfélszolgálattal.</p>
+          <p>Üdvözlettel,<br>A CalenGo csapat</p>`
         );
-        return res.json({
-          requiresTwoFactor: true,
-          userId: user.id,
-          message: 'Kétfaktoros kód elküldve az email címedre.'
-        });
       }
 
-      // JWT token generálás (2FA nélkül)
-      const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-      
-      // 🔽 Refresh token generálás – ha rememberMe true, akkor 30 nap, különben 7 nap
-      const refreshToken = crypto.randomBytes(40).toString('hex');
-      const refreshExpiryDays = rememberMe === true ? 30 : 7;  // 🔽 EZ A LÉNYEG
-      const expiresRefresh = new Date(Date.now() + refreshExpiryDays * 24 * 60 * 60 * 1000);
-      db.run(
-        `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
-        [user.id, refreshToken, expiresRefresh.toISOString()]
-      );
-
-      logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
-              // Cookie-k beállítása
-        res.cookie('accessToken', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 60 * 60 * 1000 // 1 óra
-        });
-
-        res.cookie('refreshToken', refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: refreshExpiryDays * 24 * 60 * 60 * 1000 // 7 vagy 30 nap
-        });
-
-        // JSON válasz (tokenek nélkül)
-        res.json({
-          success: true,
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          rememberMe: rememberMe || false
-        });
+      logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
+      return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
     }
-  );
+
+    // 🔽 Sikeres bejelentkezés – nullázzuk a számlálót
+    db.run(
+      `UPDATE users SET login_attempts = 0, lockout_until = NULL WHERE id = ?`,
+      [user.id]
+    );
+
+    // Sikeres login – töröljük a számlálót
+    delete loginAttempts[req.ip];
+
+    // 2FA ellenőrzés
+    if (user.two_factor_enabled) {
+      const code = generateTwoFactorCode();
+      const expires = new Date(Date.now() + 10 * 60 * 1000);
+      db.run(
+        `UPDATE users SET two_factor_code = ?, two_factor_expires = ? WHERE id = ?`,
+        [code, expires.toISOString(), user.id]
+      );
+      sendMail(
+        user.email,
+        "🔐 Kétfaktoros azonosítási kód",
+        `<h2>Kétfaktoros kód</h2>
+        <p>Kedves ${user.name}!</p>
+        <p>A bejelentkezéshez szükséges kódod:</p>
+        <h1 style="font-size: 32px; background: #f0f0f0; padding: 20px; text-align: center;">${code}</h1>
+        <p>A kód 10 percig érvényes.</p>
+        <p>Ha nem te próbálkoztál, hagyd figyelmen kívül ezt az üzenetet.</p>`
+      );
+      return res.json({
+        requiresTwoFactor: true,
+        userId: user.id,
+        message: 'Kétfaktoros kód elküldve az email címedre.'
+      });
+    }
+
+    // JWT token generálás (2FA nélkül)
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    const refreshToken = crypto.randomBytes(40).toString('hex');
+    const refreshExpiryDays = rememberMe === true ? 30 : 7;
+    const expiresRefresh = new Date(Date.now() + refreshExpiryDays * 24 * 60 * 60 * 1000);
+    db.run(
+      `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
+      [user.id, refreshToken, expiresRefresh.toISOString()]
+    );
+
+    logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
+
+    res.cookie('accessToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 1000
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: refreshExpiryDays * 24 * 60 * 60 * 1000
+    });
+
+    res.json({
+      success: true,
+      id: user.id,
+      name: user.name,
+      role: user.role,
+      rememberMe: rememberMe || false
+    });
+  });
 });
 
 
