@@ -87,15 +87,24 @@ export class ApiService {
 
   verifyTwoFactor(userId: number, code: string) {
   return this.http.post(this.base + '/verify-2fa', { userId, code });
-}
+  }
 
-toggleTwoFactor(enabled: boolean) {
-  return this.http.post(this.base + '/toggle-2fa', { enabled }, { headers: this.getHeaders() });
-}
+  toggleTwoFactor(enabled: boolean) {
+    return this.http.post(this.base + '/toggle-2fa', { enabled }, { headers: this.getHeaders() });
+    }
 
-logout() {
-  return this.http.post(this.base + '/logout', {}, { headers: this.getHeaders() });
-}
+  logout() {
+    return this.http.post(this.base + '/logout', {}, { headers: this.getHeaders() });
+  }
+
+  getBaseUrl(): string {
+  return this.base;
+  }
+
+  getBackendUrl(): string {
+  // A base tartalmazza az '/api'-t
+  return this.base.replace(/\/api$/, '');
+  }
 }
 
 export interface SafeUser {
@@ -116,5 +125,7 @@ export interface SafeBooking {
   status: string;
   email?: string;
 }
+
+
 
 

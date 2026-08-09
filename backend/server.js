@@ -65,10 +65,9 @@ app.use(cors({
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-src https://www.google.com;");
-  next();
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   next();
-  });
+});
 
   // XSS védelem - bejövő adatok tisztítása
 function sanitizeInput(req, res, next) {
@@ -906,8 +905,8 @@ app.post('/api/logout', authenticateToken, (req, res) => {
   });
 });
   //GET MY PROFILE
-  app.get('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, apiLimiter, (req, res) => {
-  db.get(`SELECT id,name,email,avatar,specialty FROM users WHERE id=?`,
+app.get('/api/profile/:id', authenticateToken, authorizeSelfOrAdmin, apiLimiter, (req, res) => {
+  db.get(`SELECT id, name, email, avatar, specialty, two_factor_enabled FROM users WHERE id=?`,
     [req.params.id],
     (_, row) => res.json(row)
   );
@@ -961,6 +960,16 @@ app.get('/', (req, res) => {
 
 // 30 napnál régebbi naplók törlése indításkor
 db.run(`DELETE FROM audit_log WHERE createdAt < datetime('now', '-30 days')`);
+
+///1oranal regebbi loginattemptet torli memoriatakarekossag erdekeben
+setInterval(() => {
+  const now = Date.now();
+  for (const ip in loginAttempts) {
+    if (now - loginAttempts[ip].firstAttempt > 60 * 60 * 1000) {
+      delete loginAttempts[ip];
+    }
+  }
+}, 10 * 60 * 1000); // 10 percenként fut
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

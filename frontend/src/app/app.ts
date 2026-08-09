@@ -122,7 +122,7 @@ resendTwoFactorCode() {
   localStorage.removeItem('userRole');
   this.currentUserRole = null;
   this.currentUserId = null;
-  this.profile = { name:'', email:'', password:'', avatar:'' };
+  this.profile = { name:'', email:'', password:'', avatar:'', twoFactorEnabled: false};
   this.trainerBookings = [];
   this.bookings = [];
   this.adminUsers = [];
@@ -150,8 +150,8 @@ resendTwoFactorCode() {
       p.specialty && p.specialty.trim() !== ''
       ? p.specialty
       : 'Személyi edző';
-
-    this.cd.detectChanges();
+      this.profile.twoFactorEnabled = p.two_factor_enabled === 1;
+      this.cd.detectChanges();
   });
     ///a trainer profilon mutassa a bio-t
     if (this.currentUserRole === 'trainer') {
@@ -289,7 +289,7 @@ saveProfile() {
 }
     
   ///2FA új állapotok és metódusok
-  verifyTwoFactorCode() {
+verifyTwoFactorCode() {
   if (!this.twoFactorUserId || !this.twoFactorCode) {
     this.showToast('Kérem adja meg a kódot!', 'error');
     return;
@@ -307,8 +307,22 @@ saveProfile() {
       this.twoFactorCode = '';
       this.showToast('Sikeres bejelentkezés!', 'success');
 
-      // Irányítás a szerepkörnek megfelelő oldalra
-      // (a meglévő logika)
+      if (response.role === 'user') {
+        this.loadMyBookings();
+        this.showPage('trainers');
+      } else if (response.role === 'admin') {
+        this.loadAdminData();
+        this.showPage('admin');
+      } else if (response.role === 'trainer') {
+        this.loadProfile();
+        this.generateWeek();
+        this.generateTimeSlots();
+        this.loadTrainerBookingsView();
+        this.showPage('trainer');
+      } else {
+        // Ha ismeretlen szerepkör, menjünk a loginra
+        this.showPage('login');
+      }
     },
     error: (err) => {
       this.showToast(err.error?.error || 'Hibás kód!', 'error');
@@ -321,12 +335,16 @@ toggleTwoFactor(enabled: boolean) {
   this.api.toggleTwoFactor(enabled).subscribe({
     next: () => {
       this.showToast(`2FA ${enabled ? 'bekapcsolva' : 'kikapcsolva'}`, 'success');
+      
+      this.profile.twoFactorEnabled = enabled;
+      this.cd.detectChanges();
     },
     error: () => {
       this.showToast('Hiba a beállítás során', 'error');
     }
   });
 }
+
 
 // USER REGISZTARACIO
   registerLoading = false;
@@ -825,18 +843,19 @@ trainerprices = [
   name: '',
   email: '',
   password: '',
-  avatar: ''
+  avatar: '',
+  twoFactorEnabled: false
   };
 
   ///PROFILKÉP MŰKÖDÉSE
-  getAvatarUrl(path: string | null): string {
+getAvatarUrl(path: string | null): string {
   if (!path) return 'assets/default.png';
-  const base = path.startsWith('http')
-    ? path
-    : 'http://localhost:3000' + path;
-
-  return base + '?t=' + new Date().getTime();
+  if (path.startsWith('http')) {
+    return path + '?t=' + new Date().getTime();
   }
+  const backendUrl = this.api.getBackendUrl();
+  return backendUrl + path + '?t=' + new Date().getTime();
+}
 
   //FOGLALT NAPOK LETILTASA
   loadTrainerBookings(trainerId: number) {
@@ -1036,4 +1055,7 @@ resetSelection() {
   this.selectedTime = null;
   this.takenTimes = [];
 }
+
+
+
 }

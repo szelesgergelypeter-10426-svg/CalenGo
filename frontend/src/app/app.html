@@ -572,39 +572,53 @@
       </div>
     </div>
   </div>
-  <!-- FIÓKOK -->
-  <div *ngIf="currentPage==='account'" class="flex items-center justify-center mt-6 overflow-hidden fade-in">
-    <div class="w-full max-w-md p-8 text-white shadow-xl rounded-2xl bg-gray-800/80">
-      <h2 class="mb-6 text-2xl font-bold text-center">
-        Fiókom
-      </h2>
-      <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
-      <input [(ngModel)]="profile.name" placeholder="Név" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
-      <input [(ngModel)]="profile.email" placeholder="Email cím" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
-      <div class="relative">
-        <input [(ngModel)]="profile.password" [type]="showPassword ? 'text' : 'password'" placeholder="Új jelszó megadása" class="w-full p-3 pr-12 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
-      </div>
-      <!--edző bio, csak nála jelenik meg-->
-      <div *ngIf="currentUserRole === 'trainer'">
-        <textarea [(ngModel)]="trainerBio" placeholder="Írj magadról (kor, tapasztalat, stb...)" class="w-full h-32 p-3 mt-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
-        </textarea>
-      </div>
-      <!--edző szakterülete, csak nála jelenik meg-->
-      <div *ngIf="currentUserRole === 'trainer'" class="mt-4">
-        <label class="block mb-2 text-sm text-gray-300">
-          Edző szakterülete
-        </label>
-        <select [(ngModel)]="selectedSpecialty" class="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
-          <option *ngFor="let s of trainerSpecialties" [value]="s">
-            {{ s }}
-          </option>
-        </select>
-      </div>
-      <button type="button" (click)="saveProfile()" class="w-full py-3 mt-6 text-white font-semibold bg-purple-600 rounded-xl hover:bg-purple-500 hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-purple-500/30">
-        Mentés
-      </button>
+<!-- FIÓKOK -->
+<div *ngIf="currentPage==='account'" class="flex items-center justify-center mt-6 overflow-hidden fade-in">
+  <div class="w-full max-w-md p-8 text-white shadow-xl rounded-2xl bg-gray-800/80">
+    <h2 class="mb-6 text-2xl font-bold text-center">
+      Fiókom
+    </h2>
+    <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
+    <input [(ngModel)]="profile.name" placeholder="Név" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+    <input [(ngModel)]="profile.email" placeholder="Email cím" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+    <div class="relative">
+      <input [(ngModel)]="profile.password" [type]="showPassword ? 'text' : 'password'" placeholder="Új jelszó megadása" class="w-full p-3 pr-12 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
     </div>
+
+    <!-- 2FA kapcsoló -->
+    <div class="pt-4 mt-4 border-t border-gray-600">
+      <label class="flex items-center justify-between">
+        <span class="text-gray-300">Kétfaktoros hitelesítés</span>
+        <input
+          type="checkbox"
+          [checked]="profile.twoFactorEnabled"
+          (change)="toggleTwoFactor($event.target.checked)"
+          class="w-5 h-5 accent-purple-600"
+        />
+      </label>
+      <p class="mt-1 text-xs text-gray-500">
+        Ha bekapcsolod, minden bejelentkezéskor egy kódot küldünk az emailedre.
+      </p>
+    </div>
+
+    <!--edző bio, csak nála jelenik meg-->
+    <div *ngIf="currentUserRole === 'trainer'">
+      <textarea [(ngModel)]="trainerBio" placeholder="Írj magadról (kor, tapasztalat, stb...)" class="w-full h-32 p-3 mt-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+      </textarea>
+    </div>
+
+    <!--edző szakterülete, csak nála jelenik meg-->
+    <div *ngIf="currentUserRole === 'trainer'" class="mt-4">
+      
+    </div>
+
+    <button type="button" (click)="saveProfile()" class="w-full py-3 mt-6 font-semibold text-white bg-purple-600 rounded-xl">
+      Mentés
+    </button>
   </div>
+</div>
+
+
   <!--booking pop up full-->
   <div *ngIf="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center fade-in">
     <div class="w-full max-w-md p-6 text-white border-2 border-purple-600 bg-gray-900/95 rounded-xl ">
