@@ -24,7 +24,9 @@ export class AppComponent {
   toastType: 'success' | 'error' | '' = '';
   adminUsers: any[] = [];
   adminBookings: any[] = [];
-  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'admin-trainer-view' | 'trainer' | 'admin' | 'account' | 'booking-success' | '2fa-verify' = 'login';  currentUserId: number | null = null;
+  currentPage: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'admin-trainer-view' | 'trainer' | 'admin' | 'account' | 'booking-success' | '2fa-verify' = 'login';
+  currentUserId: number | null = null;
+  currentUserRole: string | null = null;
   takenTimes: string[] = [];
   trainerBookings: any[] = [];
   selectedTrainerId: number | null = null;
@@ -707,10 +709,6 @@ trainerprices = [
     this.showToast('Nem vagy bejelentkezve', 'error');
     return;
   }
-  if (!this.selectedDate || !this.selectedTime) {
-    this.showToast('Válassz dátumot és időt','error');
-    return;
-  }
 
   if (!this.selectedDate || !this.selectedTime) {this.showToast('Válassz dátumot és időt','error');
     return;}
@@ -955,7 +953,6 @@ trainerprices = [
 
 
   ///2FA
-  twoFactorRequired: boolean = false;
   twoFactorUserId: number | null = null;
   twoFactorCode: string = ''; 
 

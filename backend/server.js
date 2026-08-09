@@ -372,7 +372,7 @@ app.post('/api/refresh-token', (req, res) => {
     });
 
   ///BEJELENTKEZÉS
-  app.post('/api/login', authLimiter, async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Hiányzó adatok' });
@@ -382,14 +382,48 @@ app.post('/api/refresh-token', (req, res) => {
     [email],
     async (err, user) => {
       if (err || !user) {
-      logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
-      }
-      const ok = await bcrypt.compare(password, user.password);
-      if (!ok) {
+        // Sikertelen próbálkozás naplózása és számláló frissítése
+        const ip = req.ip;
+        if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+        loginAttempts[ip].count++;
+        loginAttempts[ip].lastAttempt = Date.now();
+
+        if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
+          sendMail(
+            'admin@calengo.com', // vagy a config-ból vedd
+            '🚨 Többszörös sikertelen bejelentkezés',
+            `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
+          );
+          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() }; // reset az újabb értesítés elkerülésére
+        }
+
         logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
         return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
       }
-      
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) {
+        // Sikertelen próbálkozás naplózása és számláló frissítése
+        const ip = req.ip;
+        if (!loginAttempts[ip]) loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+        loginAttempts[ip].count++;
+        loginAttempts[ip].lastAttempt = Date.now();
+
+        if (loginAttempts[ip].count >= 5 && (Date.now() - loginAttempts[ip].firstAttempt) < 15 * 60 * 1000) {
+          sendMail(
+            'admin@calengo.com',
+            '🚨 Többszörös sikertelen bejelentkezés',
+            `<p>IP cím: ${ip}</p><p>Email: ${email}</p><p>Próbálkozások száma: ${loginAttempts[ip].count}</p>`
+          );
+          loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
+        }
+
+        logAction(null, 'LOGIN_FAILED', `Email: ${email} IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
+        return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
+      }
+
+      // Sikeres login – töröljük a számlálót
+      delete loginAttempts[req.ip];
+
       // 2FA ellenőrzés
       if (user.two_factor_enabled) {
         const code = generateTwoFactorCode();
@@ -430,7 +464,7 @@ app.post('/api/refresh-token', (req, res) => {
         [user.id, refreshToken, expiresRefresh.toISOString()]
       );
 
-    logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);      
+      logAction(user.id, 'LOGIN_SUCCESS', `IP: ${req.ip}`, req.ip, req.headers['user-agent'], req.originalUrl);
       res.json({
         success: true,
         token: token,
