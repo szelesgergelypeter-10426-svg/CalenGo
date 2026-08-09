@@ -321,34 +321,75 @@ const criticalLimiter = rateLimit({
 
 
 app.post('/api/refresh-token', (req, res) => {
-  const refreshToken = req.cookies.refreshToken; // 🔽 COOKIE-BÓL
-  if (!refreshToken) return res.status(400).json({ error: 'Refresh token szükséges' });
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Refresh token szükséges' });
+  }
 
+  // 1. Ellenőrizzük a refresh tokent az adatbázisban
   db.get(`SELECT userId, expires FROM refresh_tokens WHERE token = ?`, [refreshToken], (err, row) => {
-    if (err || !row) return res.status(403).json({ error: 'Érvénytelen refresh token' });
+    if (err || !row) {
+      return res.status(403).json({ error: 'Érvénytelen refresh token' });
+    }
     if (new Date(row.expires) < new Date()) {
+      // Lejárt token – töröljük
       db.run(`DELETE FROM refresh_tokens WHERE token = ?`, [refreshToken]);
       return res.status(403).json({ error: 'Refresh token lejárt' });
     }
 
+    // 2. Lekérjük a felhasználó adatait
     db.get(`SELECT id, email, role FROM users WHERE id = ?`, [row.userId], (err, user) => {
-      if (err || !user) return res.status(404).json({ error: 'Felhasználó nem található' });
-      
-      const newToken = jwt.sign(
+      if (err || !user) {
+        return res.status(404).json({ error: 'Felhasználó nem található' });
+      }
+
+      // 3. Új access token generálása
+      const newAccessToken = jwt.sign(
         { id: user.id, email: user.email, role: user.role },
         JWT_SECRET,
         { expiresIn: '1h' }
       );
 
-      
-      res.cookie('accessToken', newToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 1000
-      });
+      // 4. Új refresh token generálása
+      const newRefreshToken = crypto.randomBytes(40).toString('hex');
+      const expiresRefresh = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 nap
 
-      res.json({ success: true });
+      // 5. A régi refresh token törlése, az új mentése
+      db.run(`DELETE FROM refresh_tokens WHERE token = ?`, [refreshToken], (err) => {
+        if (err) {
+          logAction(user.id, 'REFRESH_TOKEN_ERROR', err.message, req.ip);
+          return res.status(500).json({ error: 'Hiba a token frissítése során' });
+        }
+
+        db.run(
+          `INSERT INTO refresh_tokens (userId, token, expires) VALUES (?, ?, ?)`,
+          [user.id, newRefreshToken, expiresRefresh.toISOString()],
+          (err) => {
+            if (err) {
+              logAction(user.id, 'REFRESH_TOKEN_ERROR', err.message, req.ip);
+              return res.status(500).json({ error: 'Hiba az új token mentése során' });
+            }
+
+            // 6. Cookie-k beállítása (a régiek felülírva)
+            res.cookie('accessToken', newAccessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              maxAge: 60 * 60 * 1000
+            });
+
+            res.cookie('refreshToken', newRefreshToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+            logAction(user.id, 'REFRESH_TOKEN', 'Token frissítve', req.ip);
+            res.json({ success: true });
+          }
+        );
+      });
     });
   });
 });
