@@ -1055,7 +1055,4 @@ resetSelection() {
   this.selectedTime = null;
   this.takenTimes = [];
 }
-
-
-
 }

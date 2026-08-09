@@ -34,7 +34,7 @@ export class ApiService {
   }
 
   getTrainers() {
-    return this.http.get<any[]>(this.base + '/trainers', { headers: this.getHeaders() });
+    return this.http.get<any[]>(this.base + '/trainers');
   }
 
   createBooking(data: any) {

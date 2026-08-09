@@ -128,34 +128,39 @@ function authorizeAdmin(req, res, next) {
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, ///15MIN
     max: 20, ///MAX 20REQUESTS
-    message: { error: 'Túl sok próbálkozás, várj 15 percet' }
+    message: { error: 'Túl sok próbálkozás, várj 15 percet' },
+    validate: { trustProxy: false }
   });
 
   /// ÁLTALÁNOS API LIMITER (GET kérésekre)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, ///15 perc
   max: 100, ///MAX 100 kérés
-  message: { error: 'Túl sok kérés, várj 15 percet' }
+  message: { error: 'Túl sok kérés, várj 15 percet' },
+  validate: { trustProxy: false }
 });
 
 /// MÓDOSÍTÓ MŰVELETEK LIMITER (POST, PUT, DELETE)
 const writeLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, ///5 perc
   max: 30, ///MAX 30 kérés
-  message: { error: 'Túl sok módosítási kérés, várj 5 percet' }
+  message: { error: 'Túl sok módosítási kérés, várj 5 percet' },
+  validate: { trustProxy: false }
 });
 
 /// REGISZTRÁCIÓ LIMITER (erősebb korlát)
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, ///1 óra
   max: 5, ///MAX 5 regisztráció IP-nként
-  message: { error: 'Túl sok regisztrációs próbálkozás, várj 1 órát' }
+  message: { error: 'Túl sok regisztrációs próbálkozás, várj 1 órát' },
+  validate: { trustProxy: false }
 });
 
 const criticalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 perc
   max: 10, // max 10 kérés
-  message: { error: 'Túl sok kritikus művelet, várj 15 percet' }
+  message: { error: 'Túl sok kritikus művelet, várj 15 percet' },
+  validate: { trustProxy: false }
 });
 
   ///EMAIL KÜLDŐ SETUP
@@ -873,7 +878,7 @@ app.post('/api/logout', authenticateToken, (req, res) => {
 });
 
   ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
-  app.get('/api/trainers', authenticateToken, apiLimiter, (req, res) => {
+app.get('/api/trainers', apiLimiter, (req, res) => {
   db.all(`SELECT u.id, u.name, u.avatar, u.email, u.specialty, tb.bio
     FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
     WHERE u.role='trainer'`,
