@@ -349,6 +349,22 @@ toggleTwoFactor(enabled: boolean) {
   });
 }
 
+logoutAllDevices() {
+  if (!confirm('Biztosan ki szeretnél jelentkeztetni minden eszközről? (Minden más eszközön megszakad a munkamenet)')) {
+    return;
+  }
+
+  this.api.logoutAll().subscribe({
+    next: () => {
+      this.showToast('Minden eszközről kijelentkeztettünk!', 'success');
+      // Kijelentkeztetjük a jelenlegi felhasználót is
+      this.logout();
+    },
+    error: () => {
+      this.showToast('Hiba történt a kijelentkeztetés során.', 'error');
+    }
+  });
+}
 
 // USER REGISZTARACIO
   registerLoading = false;

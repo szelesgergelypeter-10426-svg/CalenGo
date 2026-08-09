@@ -578,6 +578,31 @@ app.post('/api/logout', authenticateToken, (req, res) => {
   });
 });
 
+/// Minden eszköz kijelentkeztetése
+app.post('/api/logout-all', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const token = req.headers['authorization'].split(' ')[1];
+
+  // 1. Az összes refresh token törlése a felhasználóhoz
+  db.run(`DELETE FROM refresh_tokens WHERE userId = ?`, [userId], function(err) {
+    if (err) {
+      logAction(userId, 'LOGOUT_ALL_ERROR', err.message, req.ip);
+      return res.status(500).json({ error: 'Hiba a kijelentkeztetés során' });
+    }
+
+    // 2. Az aktuális access token feketelistára helyezése
+    db.run(`INSERT INTO revoked_tokens (token) VALUES (?)`, [token], function(err) {
+      if (err) {
+        logAction(userId, 'LOGOUT_ALL_ERROR', err.message, req.ip);
+        return res.status(500).json({ error: 'Hiba a token visszavonásakor' });
+      }
+
+      logAction(userId, 'LOGOUT_ALL', 'Minden eszköz kijelentkeztetve', req.ip, req.headers['user-agent'], req.originalUrl);
+      res.json({ success: true, message: 'Minden eszközről kijelentkeztettünk.' });
+    });
+  });
+});
+
   /// IDŐPONT FOGLALÁS
   app.post('/api/book', authenticateToken, writeLimiter, (req, res) => {
   const { trainerId, date, time, email } = req.body;

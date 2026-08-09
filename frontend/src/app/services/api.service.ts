@@ -105,6 +105,10 @@ export class ApiService {
   // A base tartalmazza az '/api'-t
   return this.base.replace(/\/api$/, '');
   }
+
+  logoutAll() {
+    return this.http.post(this.base + '/logout-all', {}, { headers: this.getHeaders() });
+  }
 }
 
 export interface SafeUser {
