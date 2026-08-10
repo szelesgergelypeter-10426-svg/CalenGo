@@ -14,11 +14,56 @@
   const jwt = require('jsonwebtoken');
   const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
   const xss = require('xss');
+  const multer = require('multer');
+  const path = require('path');
+  const fs = require('fs');
   app.set('trust proxy', true);
   app.use(express.json());
   app.use(helmet());
+
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   const crypto = require('crypto');
   const loginAttempts = {};
+
+
+// Biztosítsuk, hogy az uploads/avatars mappa létezik
+const uploadDir = path.join(__dirname, 'uploads', 'avatars');
+console.log('Upload directory:', uploadDir);
+if (!fs.existsSync(uploadDir)) {
+  console.log('Mappa nem létezik, létrehozás...');
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer storage konfiguráció
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Véletlenszerű fájlnév + kiterjesztés
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, uniqueSuffix + ext);
+  }
+});
+
+// Fájl szűrő, csak képek
+const fileFilter = (req, file, cb) => {
+  const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Csak képfájlok tölthetők fel (JPEG, PNG, GIF, WEBP)'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5 MB
+  },
+  fileFilter: fileFilter
+});
 
   const cookieParser = require('cookie-parser');
   app.use(cookieParser());
@@ -100,7 +145,8 @@ function sanitizeInput(req, res, next) {
 
   // AUTHENTICATION MIDDLEWARE
 function authenticateToken(req, res, next) {
-  const token = req.cookies.accessToken; // 🔽 COOKIE-BÓL
+  const token = req.cookies.accessToken;
+  console.log('Token:', token ? 'van' : 'nincs');
   if (!token) return res.status(401).json({ error: 'Token szükséges' });
 
   isTokenRevoked(token, (revoked) => {
@@ -682,6 +728,57 @@ app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
       res.json({ success: true, enabled });
     }
   );
+});
+
+
+/// Profilkép feltöltés
+/// Profilkép feltöltés
+app.post('/api/upload-avatar', authenticateToken, (req, res) => {
+  console.log('Avatar feltöltés indítva, user:', req.user?.id);
+
+  upload.single('avatar')(req, res, function (err) {
+    console.log('📝 req.file:', req.file);
+    console.log('📝 req.body:', req.body);
+    console.log('📝 err:', err);
+
+    if (err instanceof multer.MulterError) {
+      console.error('MulterError:', err);
+      if (err.code === 'FILE_TOO_LARGE') {
+        return res.status(400).json({ error: 'A fájl túl nagy (max 5 MB)' });
+      }
+      return res.status(400).json({ error: 'Feltöltési hiba: ' + err.message });
+    } else if (err) {
+      console.error('Egyéb hiba:', err);
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (!req.file) {
+      console.error('Nincs fájl a kérésben!');
+      return res.status(400).json({ error: 'Nem sikerült feltölteni a fájlt' });
+    }
+
+    const userId = req.user.id;
+    const avatarPath = '/uploads/avatars/' + req.file.filename;
+
+    console.log('Fájl mentve:', avatarPath);
+
+    db.run(`UPDATE users SET avatar = ? WHERE id = ?`, [avatarPath, userId], function (err) {
+      if (err) {
+        console.error('Adatbázis hiba:', err);
+        fs.unlink(req.file.path, () => {});
+        logAction(userId, 'AVATAR_UPLOAD_ERROR', err.message, req.ip);
+        return res.status(500).json({ error: 'Adatbázis hiba' });
+      }
+
+      console.log('Adatbázis frissítve:', userId, avatarPath);
+      logAction(userId, 'AVATAR_UPLOAD', `Új avatar: ${avatarPath}`, req.ip, req.headers['user-agent'], req.originalUrl);
+      res.json({
+        success: true,
+        avatarPath: avatarPath,
+        message: 'Profilkép sikeresen frissítve'
+      });
+    });
+  });
 });
 
 

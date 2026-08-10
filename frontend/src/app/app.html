@@ -589,7 +589,22 @@
     <h2 class="mb-6 text-2xl font-bold text-center">
       Fiókom
     </h2>
-    <img [src]="getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
+        <!-- Profilkép megjelenítése -->
+    <div class="relative w-32 h-32 mx-auto">
+      <img [src]="avatarPreview || getAvatarUrl(profile.avatar)" class="object-cover w-32 h-32 mx-auto mb-4 border-4 border-purple-600 rounded-full">
+      <label for="avatarInput" class="absolute bottom-0 right-0 p-1 bg-purple-600 rounded-full cursor-pointer hover:bg-purple-500">
+        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+      </label>
+      <input id="avatarInput" type="file" accept="image/*" (change)="onAvatarSelected($event)" class="hidden" />
+    </div>
+    <!-- Feltöltés gomb -->
+    <button *ngIf="avatarFile" (click)="uploadAvatar()" class="w-full py-2 mt-2 text-white transition bg-green-600 rounded-lg hover:bg-green-500">
+      Kép mentése
+    </button>
+
+    
     <input [(ngModel)]="profile.name" placeholder="Név" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
     <input [(ngModel)]="profile.email" placeholder="Email cím" class="w-full p-3 mb-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
     <div class="relative">

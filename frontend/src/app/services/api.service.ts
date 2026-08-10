@@ -100,6 +100,12 @@ export class ApiService {
   getBackendUrl(): string {
     return this.base.replace(/\/api$/, '');
   }
+
+  uploadAvatar(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http.post(this.base + '/upload-avatar', formData).toPromise();
+  }
 }
 
 export interface SafeUser {

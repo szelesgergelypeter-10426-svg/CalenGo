@@ -102,6 +102,9 @@ showPage(page: 'login' | 'register' | 'trainers' | 'bookings' | 'booking' | 'tra
   if (page === 'trainers') {
     this.loadTrainers();
   }
+  if (page === 'account') {
+    this.loadProfile();
+  }
 }
 
 resendTwoFactorCode() {
@@ -335,6 +338,67 @@ toggleTwoFactor(enabled: boolean) {
       this.showToast('Hiba a beállítás során', 'error');
     }
   });
+}
+
+avatarFile: File | null = null;
+avatarPreview: string | null = null;
+
+onAvatarSelected(event: any) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Ellenőrizzük, hogy kép-e
+  if (!file.type.startsWith('image/')) {
+    this.showToast('Csak képfájlokat tölthetsz fel!', 'error');
+    return;
+  }
+
+  // Méret ellenőrzés (5 MB)
+  if (file.size > 5 * 1024 * 1024) {
+    this.showToast('A fájl mérete nem haladhatja meg az 5 MB-ot!', 'error');
+    return;
+  }
+
+  this.avatarFile = file;
+  // Előnézet megjelenítése
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    this.avatarPreview = e.target?.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
+uploadAvatar() {
+  if (!this.avatarFile) {
+    this.showToast('Válassz ki egy képet!', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('avatar', this.avatarFile);
+
+  this.api.uploadAvatar(this.avatarFile)
+    .then((response: any) => {
+      console.log('Feltöltés válasz:', response);
+      if (response.success) {
+        this.showToast('Profilkép sikeresen frissítve!', 'success');
+        this.loadProfile();
+        this.avatarFile = null;
+        this.avatarPreview = null;
+        this.cd.detectChanges();
+      } else {
+        this.showToast(response.error || 'Hiba a feltöltés során', 'error');
+      }
+    })
+    .catch((err) => {
+      console.error('Feltöltési hiba:', err);
+      // Ha a backend JSON hibát ad vissza, próbáljuk meg kiolvasni
+      if (err.error && err.error.error) {
+        this.showToast(err.error.error, 'error');
+      } else {
+        this.showToast('Hiba a feltöltés során', 'error');
+      }
+    });
 }
 
 logoutAllDevices() {
