@@ -63,12 +63,18 @@ app.use(cors({
 }));
 
 
-  app.use((req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://maps.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; frame-src https://www.google.com;");
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+
   next();
 });
 
