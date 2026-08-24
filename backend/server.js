@@ -21,7 +21,11 @@
   app.use(express.json());
   app.use(helmet());
 
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+  app.use('/uploads', (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+  }, express.static(path.join(__dirname, 'uploads')));
+
   const crypto = require('crypto');
   const loginAttempts = {};
 
@@ -1115,7 +1119,6 @@ app.post('/api/logout-all', authenticateToken, (req, res) => {
           console.log("Nincs email ehhez a bookinghoz");
         }
         
-        // EZ VOLT A HIÁNYZÓ ZÁRÓ KAPCSOS ZÁRÓJEL!
         db.run(`UPDATE bookings SET status = ? WHERE id = ?`,
           [status, req.params.id],
           () => {

@@ -901,11 +901,12 @@ trainerprices = [
   ///PROFILKÉP MŰKÖDÉSE
 getAvatarUrl(path: string | null): string {
   if (!path) return 'assets/default.png';
+  const random = Math.random().toString(36).substring(2, 8);
   if (path.startsWith('http')) {
-    return path + '?t=' + new Date().getTime();
+    return path + '?t=' + new Date().getTime() + '&r=' + random;
   }
   const backendUrl = this.api.getBackendUrl();
-  return backendUrl + path + '?t=' + new Date().getTime();
+  return backendUrl + path + '?t=' + new Date().getTime() + '&r=' + random;
 }
 
   //FOGLALT NAPOK LETILTASA
@@ -1038,15 +1039,15 @@ getAvatarUrl(path: string | null): string {
       return slotHour <= currentHour;
     }
 
-  loadTrainers() {
-    this.api.getTrainers().subscribe({
-      next: (list: any[]) => {
-        this.trainers = list;
-        this.cd.detectChanges(); 
-      },
-      error: (err) => {console.error('Hiba a tréner lista betöltésénél', err);}
-    });
-  }
+loadTrainers() {
+  this.api.getTrainers().subscribe({
+    next: (list: any[]) => {
+      this.trainers = list;
+      this.cd.detectChanges(); 
+    },
+    error: (err) => { console.error('Hiba a tréner lista betöltésénél', err); }
+  });
+}
 
   onDateSelected() {
   if (this.selectedTrainerId !== null) {this.loadTrainerBookings(this.selectedTrainerId);}
