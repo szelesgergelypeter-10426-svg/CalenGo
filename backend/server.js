@@ -12,11 +12,18 @@
   const { body, validationResult } = require('express-validator');
   const nodemailer = require('nodemailer');
   const jwt = require('jsonwebtoken');
-  const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+  if (!process.env.JWT_SECRET) {
+    console.error('HIBA: JWT_SECRET nincs beállítva a .env fájlban!');
+    console.error('Kérlek add hozzá a .env fájlhoz, például:');
+    console.error('JWT_SECRET=egy-nagyon-hosszu-random-karakterlanc');
+    process.exit(1);
+  }
+  const JWT_SECRET = process.env.JWT_SECRET;
   const xss = require('xss');
   const multer = require('multer');
   const path = require('path');
   const fs = require('fs');
+  const FileType = require('file-type');
   app.set('trust proxy', true);
   app.use(express.json());
   app.use(helmet());
@@ -732,15 +739,24 @@ app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
   );
 });
 
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 óra
+  max: 10, // max 10 feltöltés óránként
+  message: { error: 'Túl sok feltöltés, várj 1 órát' },
+  validate: { trustProxy: false }
+});
+
 
 /// Profilkép feltöltés
-app.post('/api/upload-avatar', authenticateToken, (req, res) => {
+app.post('/api/upload-avatar', authenticateToken, uploadLimiter, (req, res) => {
   console.log('Avatar feltöltés indítva, user:', req.user?.id);
 
   upload.single('avatar')(req, res, function (err) {
-    console.log('📝 req.file:', req.file);
-    console.log('📝 req.body:', req.body);
-    console.log('📝 err:', err);
+    console.log('req.file:', req.file);
+    console.log('req.body:', req.body);
+    console.log('err:', err);
+
+    
 
     if (err instanceof multer.MulterError) {
       console.error('MulterError:', err);
@@ -777,6 +793,8 @@ app.post('/api/upload-avatar', authenticateToken, (req, res) => {
         logAction(userId, 'AVATAR_UPLOAD', `Új avatar: ${avatarPath}`, req.ip, req.headers['user-agent'], req.originalUrl);
         res.json({ success: true, avatarPath, message: 'Profilkép sikeresen frissítve' });
       });
+
+      
     });
   });
 });
@@ -1132,7 +1150,10 @@ app.get('/api/trainers', apiLimiter, (req, res) => {
     FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
     WHERE u.role='trainer'`,
     (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+      }
       res.json(rows);
     }
   );
