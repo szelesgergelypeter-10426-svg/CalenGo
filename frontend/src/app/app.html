@@ -635,7 +635,10 @@
 
     <!--edző szakterülete, csak nála jelenik meg-->
     <div *ngIf="currentUserRole === 'trainer'" class="mt-4">
-      
+      <label class="block mb-2 text-sm text-gray-300">Edző szakterülete</label>
+      <select [(ngModel)]="selectedSpecialty" class="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded-lg">
+        <option *ngFor="let s of trainerSpecialties" [value]="s">{{ s }}</option>
+      </select>
     </div>
 
     <button type="button" (click)="saveProfile()" class="w-full py-3 mt-6 font-semibold text-white bg-purple-600 rounded-xl">

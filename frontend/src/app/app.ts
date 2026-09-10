@@ -374,15 +374,13 @@ uploadAvatar() {
     return;
   }
 
-  const formData = new FormData();
-  formData.append('avatar', this.avatarFile);
-
   this.api.uploadAvatar(this.avatarFile)
     .then((response: any) => {
-      console.log('Feltöltés válasz:', response);
       if (response.success) {
         this.showToast('Profilkép sikeresen frissítve!', 'success');
+        this.avatarCache = {};
         this.loadProfile();
+        this.loadTrainers();
         this.avatarFile = null;
         this.avatarPreview = null;
         this.cd.detectChanges();
@@ -392,7 +390,6 @@ uploadAvatar() {
     })
     .catch((err) => {
       console.error('Feltöltési hiba:', err);
-      // Ha a backend JSON hibát ad vissza, próbáljuk meg kiolvasni
       if (err.error && err.error.error) {
         this.showToast(err.error.error, 'error');
       } else {
@@ -898,15 +895,23 @@ trainerprices = [
   twoFactorEnabled: false
   };
 
+
+private avatarCache: { [key: string]: string } = {};
+
   ///PROFILKÉP MŰKÖDÉSE
 getAvatarUrl(path: string | null): string {
   if (!path) return 'assets/default.png';
+  if (this.avatarCache[path]) return this.avatarCache[path];
+
   const random = Math.random().toString(36).substring(2, 8);
+  let url: string;
   if (path.startsWith('http')) {
-    return path + '?t=' + new Date().getTime() + '&r=' + random;
+    url = path + '?t=' + new Date().getTime() + '&r=' + random;
+  } else {
+    url = this.api.getBackendUrl() + path + '?t=' + new Date().getTime() + '&r=' + random;
   }
-  const backendUrl = this.api.getBackendUrl();
-  return backendUrl + path + '?t=' + new Date().getTime() + '&r=' + random;
+  this.avatarCache[path] = url;
+  return url;
 }
 
   //FOGLALT NAPOK LETILTASA

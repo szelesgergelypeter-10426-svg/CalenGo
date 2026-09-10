@@ -488,8 +488,6 @@ app.post('/api/refresh-token', (req, res) => {
     });
 
   ///BEJELENTKEZÉS
-///BEJELENTKEZÉS
-///BEJELENTKEZÉS
 app.post('/api/login', authLimiter, async (req, res) => {
   const { email, password, rememberMe } = req.body;
   if (!email || !password) {
@@ -517,7 +515,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
     }
 
-    // 🔽 Fiók zárolás ellenőrzés
+    
     if (user.lockout_until && new Date(user.lockout_until) > new Date()) {
       const remainingMinutes = Math.ceil((new Date(user.lockout_until) - new Date()) / 60000);
       return res.status(403).json({
@@ -527,7 +525,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
-      // 🔽 Sikertelen próbálkozás – növeljük a számlálót
+     
       const attempts = (user.login_attempts || 0) + 1;
       const lockoutUntil = attempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
 
@@ -551,7 +549,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
         loginAttempts[ip] = { count: 0, firstAttempt: Date.now() };
       }
 
-      // 🔽 Értesítés a felhasználónak a zárolásról
+      
       if (lockoutUntil) {
         sendMail(
           user.email,
@@ -567,7 +565,7 @@ app.post('/api/login', authLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Érvénytelen bejelentkezés' });
     }
 
-    // 🔽 Sikeres bejelentkezés – nullázzuk a számlálót
+   
     db.run(
       `UPDATE users SET login_attempts = 0, lockout_until = NULL WHERE id = ?`,
       [user.id]
@@ -736,7 +734,6 @@ app.post('/api/toggle-2fa', authenticateToken, (req, res) => {
 
 
 /// Profilkép feltöltés
-/// Profilkép feltöltés
 app.post('/api/upload-avatar', authenticateToken, (req, res) => {
   console.log('Avatar feltöltés indítva, user:', req.user?.id);
 
@@ -762,24 +759,23 @@ app.post('/api/upload-avatar', authenticateToken, (req, res) => {
     }
 
     const userId = req.user.id;
-    const avatarPath = '/uploads/avatars/' + req.file.filename;
 
-    console.log('Fájl mentve:', avatarPath);
-
-    db.run(`UPDATE users SET avatar = ? WHERE id = ?`, [avatarPath, userId], function (err) {
-      if (err) {
-        console.error('Adatbázis hiba:', err);
-        fs.unlink(req.file.path, () => {});
-        logAction(userId, 'AVATAR_UPLOAD_ERROR', err.message, req.ip);
-        return res.status(500).json({ error: 'Adatbázis hiba' });
+    db.get(`SELECT avatar FROM users WHERE id = ?`, [userId], (err, oldUser) => {
+      if (oldUser && oldUser.avatar) {
+        const oldPath = path.join(__dirname, oldUser.avatar);
+        fs.unlink(oldPath, (err) => {
+          if (err) console.log('Régi avatar törlése sikertelen:', err.message);
+        });
       }
 
-      console.log('Adatbázis frissítve:', userId, avatarPath);
-      logAction(userId, 'AVATAR_UPLOAD', `Új avatar: ${avatarPath}`, req.ip, req.headers['user-agent'], req.originalUrl);
-      res.json({
-        success: true,
-        avatarPath: avatarPath,
-        message: 'Profilkép sikeresen frissítve'
+      const avatarPath = '/uploads/avatars/' + req.file.filename;
+      db.run(`UPDATE users SET avatar = ? WHERE id = ?`, [avatarPath, userId], function (err) {
+        if (err) {
+          fs.unlink(req.file.path, () => {});
+          return res.status(500).json({ error: 'Adatbázis hiba' });
+        }
+        logAction(userId, 'AVATAR_UPLOAD', `Új avatar: ${avatarPath}`, req.ip, req.headers['user-agent'], req.originalUrl);
+        res.json({ success: true, avatarPath, message: 'Profilkép sikeresen frissítve' });
       });
     });
   });
@@ -788,7 +784,7 @@ app.post('/api/upload-avatar', authenticateToken, (req, res) => {
 
 ///logout
 app.post('/api/logout', authenticateToken, (req, res) => {
-  const token = req.cookies.accessToken; // 🔽 COOKIE-BÓL
+  const token = req.cookies.accessToken; 
   db.run(`INSERT INTO revoked_tokens (token) VALUES (?)`, [token], (err) => {
     if (err) {
       logAction(req.user.id, 'LOGOUT_ERROR', err.message, req.ip);
@@ -796,7 +792,7 @@ app.post('/api/logout', authenticateToken, (req, res) => {
     }
     db.run(`DELETE FROM refresh_tokens WHERE userId = ?`, [req.user.id]);
     
-    // 🔽 COOKIE-K TÖRLÉSE
+   
     res.clearCookie('accessToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
     res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
 
@@ -1106,7 +1102,6 @@ app.post('/api/logout-all', authenticateToken, (req, res) => {
                       <tr> <td><b>Státusz:</b> </td> <td>${translateStatus(status)}</td></tr>
                       <tr><td><b>Dátum:</b></td><td>${row.date}</td></tr>
                       <tr><td><b>Idő:</b></td><td>${row.time}</td></tr>
-                    追赶
                     <p>Várunk szeretettel!</p>
                   </td>
                 </tr>
@@ -1133,18 +1128,17 @@ app.post('/api/logout-all', authenticateToken, (req, res) => {
 
   ///ADMIN->TRAINER PROMOTE->BEKERUL A TRAINER LISTABA
 app.get('/api/trainers', apiLimiter, (req, res) => {
-  db.all(`SELECT u.id, u.name, u.avatar, u.email, u.specialty, tb.bio
+  db.all(`SELECT u.id, u.name, u.avatar, u.specialty, tb.bio
     FROM users u LEFT JOIN trainer_bio tb ON tb.trainerId = u.id
     WHERE u.role='trainer'`,
     (err, rows) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: err.message });
-      }
+      if (err) return res.status(500).json({ error: err.message });
       res.json(rows);
     }
   );
 });
+
+
   //ADMIN USER TÖRLÉSE + HOZZÁ TARTOZÓ BOOKINGOK TÖRLÉSE
   app.delete('/api/users/:id', authenticateToken, authorizeAdmin, writeLimiter, criticalLimiter, (req, res) => {
   const id = req.params.id;
